@@ -1,12 +1,63 @@
 ﻿<Window x:Class="SteelProgress.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SteelProgress.App"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="SteelProgress - Ejercicios" Height="500" Width="900">
 
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Gestión de ejercicios"
+                   FontSize="26"
+                   FontWeight="Bold"
+                   Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,20">
+            <TextBlock Text="Nombre"/>
+            <TextBox x:Name="TxtName" Margin="0,5,0,10"/>
+
+            <TextBlock Text="Grupo muscular"/>
+            <TextBox x:Name="TxtMuscleGroup" Margin="0,5,0,10"/>
+
+            <TextBlock Text="Notas"/>
+            <TextBox x:Name="TxtNotes" Margin="0,5,0,10" Height="60" TextWrapping="Wrap"/>
+
+            <Button x:Name="BtnAddExercise"
+                    Content="Añadir ejercicio"
+                    Width="150"
+                    Height="35"
+                    Click="BtnAddExercise_Click"/>
+            
+            <Button x:Name="BtnDeleteExercise"
+                    Content="Eliminar ejercicio seleccionado"
+                    Width="220"
+                    Height="35"
+                    Margin="0,10,0,0"
+                    Click="BtnDeleteExercise_Click"/>
+
+            <Button x:Name="BtnUpdateExercise"
+                    Content="Actualizar ejercicio seleccionado"
+                    Width="220"
+                    Height="35"
+                    Margin="0,10,0,0"
+                    Click="BtnUpdateExercise_Click"/>
+        </StackPanel>
+
+        <DataGrid x:Name="DgExercises"
+          Grid.Row="2"
+          AutoGenerateColumns="False"
+          IsReadOnly="True"
+          SelectionChanged="DgExercises_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
+                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="200"/>
+                <DataGridTextColumn Header="Grupo muscular" Binding="{Binding MuscleGroup}" Width="200"/>
+                <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
+   
