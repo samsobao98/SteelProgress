@@ -71,4 +71,63 @@ También se configuró **SQLite** como motor de base de datos y se creó la clas
 
 Por último, se generó la migración inicial (`InitialCreate`) y se creó la base de datos `steelprogress.db`, incluyendo la tabla `Exercises`.
 
+## 16/03/2026 — Implementación del CRUD de ejercicios
 
+Durante esta sesión se conectó la aplicación WPF con la base de datos y se implementó la gestión completa de ejercicios.
+
+### Conexión de la aplicación con la base de datos
+
+Se configuró el `AppDbContext` en el archivo `App.xaml.cs`, permitiendo que la aplicación utilice **Entity Framework Core** con **SQLite** al iniciarse.
+
+Se añadió la llamada a `Database.Migrate()` para asegurar que la base de datos
+y sus tablas se crean automáticamente al arrancar la aplicacion.
+
+---
+
+### Pruebas iniciales de acceso a datos
+
+Se realizaron pruebas desde `MainWindow` para verificar:
+
+- Inserción de datos en la base de datos
+- Lectura de registros
+- Persistencia de la información entre ejecuciones
+
+Esto permitió confirmar que la conexión con SQLite funciona correctamente.
+
+---
+
+### Implementación de la interfaz de gestión de ejercicios
+
+Se diseñó una primera interfaz en `MainWindow` que permite:
+
+- Introducir datos de un ejercicio (nombre, grupo muscular y notas)
+- Visualizar los ejercicios almacenados en un `DataGrid`
+
+---
+
+### Funcionalidad CRUD de ejercicios
+
+Se implementaron las operaciones básicas:
+
+- **Create** → añadir nuevos ejercicios mediante formulario
+- **Read** → mostrar los ejercicios en una tabla
+- **Update** → modificar ejercicios seleccionados
+- **Delete** → eliminar ejercicios con confirmación
+
+Además, se añadieron validaciones:
+
+- Campos obligatorios (nombre y grupo muscular)
+- Control de duplicados por nombre
+
+---
+
+### Resultado
+
+Al finalizar la sesión se dispone de un sistema completo de gestión de ejercicios con:
+
+- Persistencia en base de datos SQLite
+- Interfaz funcional en WPF
+- Operaciones CRUD completas
+- Validación de datos
+
+Este módulo constituye la base sobre la que se desarrollarán el resto de funcionalidades del proyecto.
