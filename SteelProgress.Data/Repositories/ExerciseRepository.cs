@@ -30,4 +30,28 @@ public class ExerciseRepository //Se encarga de trabajar con la tabla Exercise
         await _context.Exercises.AddAsync(exercise);
         await _context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Exercise exercise)
+    {
+        _context.Exercises.Remove(exercise);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Exercise exercise)
+    {
+        _context.Exercises.Update(exercise);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> ExistsByNameAsync(string name)
+    {
+        return await _context.Exercises
+            .AnyAsync(e => e.Name == name);
+    }
+
+    public async Task<bool> ExistsByNameExceptIdAsync(string name, int id)
+    {
+        return await _context.Exercises
+            .AnyAsync(e => e.Name == name && e.Id != id);
+    }
 }

@@ -1,5 +1,8 @@
 ﻿using System.Windows;
+using SteelProgress.App.ViewModels;
+using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
+
 
 namespace SteelProgress.App;
 
@@ -7,20 +10,23 @@ public partial class MainWindow : Window
 {
 
     private Exercise? _selectedExercise;
+    private readonly ExerciseRepository _repository;
+    private readonly ExerciseViewModel _viewModel;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        _repository = new ExerciseRepository(App.DbContext);
+        _viewModel = new ExerciseViewModel(_repository);
+
         LoadExercises();
     }
 
     private void LoadExercises()
     {
-        var exercises = App.DbContext.Exercises
-            .OrderBy(e => e.Name)
-            .ToList();
-
-        DgExercises.ItemsSource = exercises;
+        _viewModel.LoadExercises();
+        DgExercises.ItemsSource = _viewModel.Exercises;
     }
 
     private void DgExercises_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -28,16 +34,17 @@ public partial class MainWindow : Window
         if (DgExercises.SelectedItem is not Exercise selectedExercise)
             return;
 
-        _selectedExercise = selectedExercise;
+        _viewModel.SelectedExercise = selectedExercise;
+        _viewModel.LoadSelectedExerciseIntoForm();
 
-        TxtName.Text = selectedExercise.Name;
-        TxtMuscleGroup.Text = selectedExercise.MuscleGroup;
-        TxtNotes.Text = selectedExercise.Notes ?? string.Empty;
+        TxtName.Text = _viewModel.Name;
+        TxtMuscleGroup.Text = _viewModel.MuscleGroup;
+        TxtNotes.Text = _viewModel.Notes;
     }
 
     private void BtnUpdateExercise_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedExercise is null)
+        if (_viewModel.SelectedExercise is null)
         {
             MessageBox.Show("Selecciona un ejercicio para actualizar.",
                 "Información",
@@ -68,8 +75,9 @@ public partial class MainWindow : Window
             return;
         }
 
-        bool duplicateExists = App.DbContext.Exercises
-            .Any(e => e.Name == name && e.Id != _selectedExercise.Id);
+        bool duplicateExists = _repository
+     .ExistsByNameExceptIdAsync(name, _viewModel.SelectedExercise.Id)
+        .Result;
 
         if (duplicateExists)
         {
@@ -80,15 +88,15 @@ public partial class MainWindow : Window
             return;
         }
 
-        _selectedExercise.Name = name;
-        _selectedExercise.MuscleGroup = muscleGroup;
-        _selectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
+        _viewModel.SelectedExercise.Name = name;
+        _viewModel.SelectedExercise.MuscleGroup = muscleGroup;
+        _viewModel.SelectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
 
-        App.DbContext.SaveChanges();
+        _repository.UpdateAsync(_viewModel.SelectedExercise).Wait();
 
         LoadExercises();
         ClearForm();
-        _selectedExercise = null;
+        _viewModel.SelectedExercise = null;
 
         MessageBox.Show("Ejercicio actualizado correctamente.",
             "Información",
@@ -116,7 +124,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        bool exists = App.DbContext.Exercises.Any(e => e.Name == name);
+        bool exists = _repository.ExistsByNameAsync(name).Result;
 
         if (exists)
         {
@@ -132,8 +140,7 @@ public partial class MainWindow : Window
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes
         };
 
-        App.DbContext.Exercises.Add(exercise);
-        App.DbContext.SaveChanges();
+        _repository.AddAsync(exercise).Wait();
 
         ClearForm();
         LoadExercises();
@@ -162,16 +169,17 @@ public partial class MainWindow : Window
         if (result != MessageBoxResult.Yes)
             return;
 
-        App.DbContext.Exercises.Remove(selectedExercise);
-        App.DbContext.SaveChanges();
+        _repository.DeleteAsync(selectedExercise).Wait();
 
         LoadExercises();
     }
     private void ClearForm()
     {
-        TxtName.Text = string.Empty;
-        TxtMuscleGroup.Text = string.Empty;
-        TxtNotes.Text = string.Empty;
+        _viewModel.ClearForm();
+
+        TxtName.Text = _viewModel.Name;
+        TxtMuscleGroup.Text = _viewModel.MuscleGroup;
+        TxtNotes.Text = _viewModel.Notes;
         DgExercises.SelectedItem = null;
     }
 }
