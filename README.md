@@ -131,3 +131,68 @@ Al finalizar la sesión se dispone de un sistema completo de gestión de ejercic
 - Validación de datos
 
 Este módulo constituye la base sobre la que se desarrollarán el resto de funcionalidades del proyecto.
+
+## 18/03/2026 — Mejora de arquitectura y primer paso hacia MVVM
+
+Durante esta sesión se continuó el desarrollo del módulo de ejercicios, mejorando la arquitectura del proyecto y separando responsabilidades entre capas.
+
+### Uso de Repository
+
+Se integró el `ExerciseRepository` en la aplicación, eliminando el acceso directo al `DbContext` desde la interfaz (`MainWindow`).
+
+Se añadieron métodos en el repositorio para gestionar:
+
+- Obtención de ejercicios
+- Inserción de nuevos registros
+- Actualización de ejercicios
+- Eliminación de ejercicios
+- Validación de duplicados
+
+Esto permite desacoplar la lógica de acceso a datos de la interfaz de usuario, mejorando la mantenibilidad del código.
+
+---
+
+### Refactorización del CRUD
+
+Se modificaron los métodos de la interfaz para utilizar el repositorio en lugar de acceder directamente a la base de datos.
+
+Con esto se consigue una arquitectura más limpia:
+
+UI → Repository → DbContext → SQLite
+
+---
+
+### Implementación del patrón MVVM (inicio)
+
+Se dio el primer paso hacia el patrón **MVVM (Model-View-ViewModel)**.
+
+Se creó:
+
+- `BaseViewModel`, implementando `INotifyPropertyChanged`
+- `ExerciseViewModel`, encargado de gestionar el estado y la lógica de los ejercicios
+
+El ViewModel incluye:
+
+- Colección observable de ejercicios (`ObservableCollection`)
+- Propiedades para el formulario (Name, MuscleGroup, Notes)
+- Gestión del elemento seleccionado
+- Métodos para cargar datos y limpiar el formulario
+
+---
+
+### Integración ViewModel - Vista
+
+Se conectó parcialmente el `ExerciseViewModel` con la vista (`MainWindow`), trasladando parte de la lógica desde la interfaz hacia el ViewModel.
+
+---
+
+### Resultado
+
+Al finalizar la sesión, el proyecto cuenta con:
+
+- Arquitectura en capas consolidada
+- Uso del patrón Repository
+- Separación parcial de lógica mediante MVVM
+- Código más modular y mantenible
+
+Este paso supone una mejora importante en la calidad del proyecto y facilita su escalabilidad para futuras funcionalidades.
