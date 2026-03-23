@@ -196,3 +196,86 @@ Al finalizar la sesión, el proyecto cuenta con:
 - Código más modular y mantenible
 
 Este paso supone una mejora importante en la calidad del proyecto y facilita su escalabilidad para futuras funcionalidades.
+
+## 23/03/2026 — MVVM completo e inicio del módulo de rutinas
+
+Durante esta sesión se mejoró la arquitectura de la aplicación implementando MVVM de forma más completa y se inició el desarrollo del módulo de rutinas.
+
+### Implementación de binding en XAML
+
+Se sustituyó el acceso directo a los controles desde el code-behind por **data binding**, conectando la interfaz con el `ExerciseViewModel`.
+
+Se enlazaron:
+
+- TextBox → propiedades del ViewModel (`Name`, `MuscleGroup`, `Notes`)
+- DataGrid → colección de ejercicios (`Exercises`)
+- SelectedItem → ejercicio seleccionado (`SelectedExercise`)
+
+Esto permite que la interfaz se actualice automáticamente sin manipular los controles desde código.
+
+---
+
+### Uso de Commands (ICommand)
+
+Se eliminaron los eventos `Click` de los botones y se implementaron **Commands** mediante la clase `RelayCommand`.
+
+Se añadieron:
+
+- `AddExerciseCommand`
+- `UpdateExerciseCommand`
+- `DeleteExerciseCommand`
+
+Toda la lógica de las acciones se pasó al `ExerciseViewModel`, eliminando dependencia del code-behind.
+
+---
+
+### Eliminación de lógica en la vista
+
+Se eliminaron elementos del `MainWindow.xaml.cs`:
+
+- Métodos de eventos de botones
+- Método `ClearForm`
+- Evento `SelectionChanged` del DataGrid
+
+La selección de elementos ahora se gestiona mediante binding, utilizando la propiedad `SelectedExercise` del ViewModel.
+
+---
+
+### Mejora del patrón MVVM
+
+Se consolidó el uso del patrón MVVM con:
+
+- `BaseViewModel` (`INotifyPropertyChanged`)
+- `ExerciseViewModel` como gestor de estado y lógica
+- Separación clara entre interfaz y lógica de negocio
+
+El flujo actual queda:
+
+View → ViewModel → Repository → DbContext → SQLite
+
+---
+
+### Inicio del módulo de rutinas
+
+Se comenzó el desarrollo de la funcionalidad de rutinas creando las siguientes entidades:
+
+- `Routine`
+- `RoutineDay`
+- `RoutineDayExercise`
+
+Estas permiten estructurar rutinas con múltiples días y ejercicios asociados.
+
+Se añadieron los correspondientes `DbSet` en el `AppDbContext` y se generó una nueva migración para crear las tablas en la base de datos.
+
+---
+
+### Resultado
+
+Al finalizar la sesión, el proyecto cuenta con:
+
+- Implementación de MVVM con binding y commands
+- Eliminación casi total de lógica en la vista
+- Arquitectura más limpia y mantenible
+- Base estructural para el módulo de rutinas
+
+Este avance supone un salto importante en la calidad del código y en la escalabilidad de la aplicación.
