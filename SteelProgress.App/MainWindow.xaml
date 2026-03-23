@@ -17,40 +17,41 @@
 
         <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,20">
             <TextBlock Text="Nombre"/>
-            <TextBox x:Name="TxtName" Margin="0,5,0,10"/>
+            <TextBox Text="{Binding Name, Mode=TwoWay}" />
 
             <TextBlock Text="Grupo muscular"/>
-            <TextBox x:Name="TxtMuscleGroup" Margin="0,5,0,10"/>
+            <TextBox Text="{Binding MuscleGroup, Mode=TwoWay}" />
 
             <TextBlock Text="Notas"/>
-            <TextBox x:Name="TxtNotes" Margin="0,5,0,10" Height="60" TextWrapping="Wrap"/>
+            <TextBox Text="{Binding Notes, Mode=TwoWay}" />
 
             <Button x:Name="BtnAddExercise"
                     Content="Añadir ejercicio"
                     Width="150"
                     Height="35"
-                    Click="BtnAddExercise_Click"/>
+                    Command="{Binding AddExerciseCommand}"/>
             
             <Button x:Name="BtnDeleteExercise"
                     Content="Eliminar ejercicio seleccionado"
                     Width="220"
                     Height="35"
                     Margin="0,10,0,0"
-                    Click="BtnDeleteExercise_Click"/>
+                    Command="{Binding DeleteExerciseCommand}"/>
 
             <Button x:Name="BtnUpdateExercise"
                     Content="Actualizar ejercicio seleccionado"
                     Width="220"
                     Height="35"
                     Margin="0,10,0,0"
-                    Click="BtnUpdateExercise_Click"/>
+                    Command="{Binding UpdateExerciseCommand}"/>
         </StackPanel>
 
         <DataGrid x:Name="DgExercises"
           Grid.Row="2"
           AutoGenerateColumns="False"
           IsReadOnly="True"
-          SelectionChanged="DgExercises_SelectionChanged">
+          ItemsSource="{Binding Exercises}"
+          SelectedItem="{Binding SelectedExercise, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
                 <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="200"/>

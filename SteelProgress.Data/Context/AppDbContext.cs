@@ -12,6 +12,9 @@ namespace SteelProgress.Data.Context
     public class AppDbContext : DbContext 
     {
         public DbSet<Exercise> Exercises { get; set; }
+        public DbSet<Routine> Routines { get; set; }
+        public DbSet<RoutineDay> RoutineDays { get; set; }
+        public DbSet<RoutineDayExercise> RoutineDayExercises { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
