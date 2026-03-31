@@ -1,0 +1,38 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using SteelProgress.Data.Context;
+using SteelProgress.Domain.Entities;
+
+
+namespace SteelProgress.Data.Repositories;
+
+public class RoutineRepository
+{
+    private readonly AppDbContext _context;
+
+    public RoutineRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<Routine>> GetAllAsync()
+    {
+        return await _context.Routines.OrderBy(r=>r.Name).ToListAsync();
+    }
+
+    public async Task AddAsync(Routine routine)
+    {
+        await _context.Routines.AddAsync(routine);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Routine routine)
+    {
+        _context.Routines.Remove(routine);
+        await _context.SaveChangesAsync();
+    }
+}
