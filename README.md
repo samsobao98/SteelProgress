@@ -1,6 +1,7 @@
 # SteelProgress
 
-**SteelProgress** es una aplicación de escritorio diseñada para registrar y analizar entrenamientos de fuerza.  
+**SteelProgress** es una aplicación de escritorio diseñada para registrar y analizar entrenamientos de fuerza.
+Será realizada por Samuel Rodríguez González, y utilizará ChatGPT como herramienta para realizar dicho proyecto.
 Permitirá al usuario:
 
 - Crear rutinas de entrenamiento
@@ -16,6 +17,7 @@ En este README se irán documentando los **avances diarios del proyecto**.
 
 ## 11/03/2026 — Creación del proyecto
 
+Mediante distintos prompts, se solicita guía a la IA para establecer las bases del proyecto.
 Se crea una **solución en blanco** en Visual Studio para organizar el proyecto en distintas capas.
 
 Dentro de la solución se crean los siguientes proyectos:
@@ -279,3 +281,83 @@ Al finalizar la sesión, el proyecto cuenta con:
 - Base estructural para el módulo de rutinas
 
 Este avance supone un salto importante en la calidad del código y en la escalabilidad de la aplicación.
+
+## 01/04/2026 — Implementación inicial de la gestión de rutinas
+
+Durante esta sesión se comenzó la implementación funcional del módulo de rutinas, partiendo de la creación del acceso a datos y desarrollando una primera interfaz de usuario.
+
+### Implementación del acceso a datos
+
+Se creó la clase `RoutineRepository` en el proyecto `SteelProgress.Data`, siguiendo el patrón Repository ya utilizado en el módulo de ejercicios.
+
+Este repositorio permite:
+
+- Obtener todas las rutinas almacenadas
+- Añadir nuevas rutinas
+- Eliminar rutinas existentes
+
+Con esto se mantiene la separación entre la lógica de acceso a datos y la interfaz de usuario.
+
+---
+
+### Creación del ViewModel de rutinas
+
+Se implementó `RoutineViewModel`, encargado de gestionar la lógica de la interfaz y el estado de las rutinas.
+
+Incluye:
+
+- `ObservableCollection<Routine>` para la lista de rutinas
+- Propiedades del formulario (`Name`, `Notes`)
+- Propiedad `SelectedRoutine` para gestionar la selección
+- Métodos para cargar datos y limpiar el formulario
+
+Además, se implementaron comandos (`ICommand`) mediante `RelayCommand`:
+
+- `AddRoutineCommand`
+- `DeleteRoutineCommand`
+
+Esto permite ejecutar acciones desde la interfaz sin utilizar eventos en el code-behind.
+
+---
+
+### Desarrollo de la interfaz de rutinas
+
+Se creó una nueva ventana `RoutineWindow`, que actúa como pantalla independiente para la gestión de rutinas.
+
+La interfaz permite:
+
+- Introducir el nombre y notas de una rutina
+- Añadir nuevas rutinas
+- Eliminar rutinas seleccionadas
+- Visualizar las rutinas en un `DataGrid`
+
+Se utilizó **data binding** para conectar la vista con el `RoutineViewModel`.
+
+---
+
+### Integración con MVVM
+
+Se aplicó el patrón MVVM en esta nueva funcionalidad:
+
+- La vista (`RoutineWindow`) contiene únicamente la interfaz
+- El `RoutineViewModel` gestiona la lógica y el estado
+- El repositorio gestiona el acceso a la base de datos
+
+El flujo queda:
+
+View → ViewModel → Repository → DbContext → SQLite
+
+---
+
+### Resultado
+
+Al finalizar la sesión se dispone de:
+
+- Gestión básica de rutinas (crear y eliminar)
+- Interfaz funcional independiente
+- Integración completa con MVVM (binding + commands)
+- Uso del patrón Repository
+
+Este módulo amplía la funcionalidad del sistema y sienta las bases para añadir en futuras sesiones los días de rutina y la asignación de ejercicios.
+
+
