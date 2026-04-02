@@ -35,4 +35,19 @@ public class RoutineRepository
         _context.Routines.Remove(routine);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<RoutineDay>> GetDaysByRoutineIdAsync(int routineId)
+    {
+        return await _context.RoutineDays.Where(d=>d.RoutineId == routineId).ToListAsync();
+    }
+    public async Task AddDayAsync(RoutineDay routineDay)
+    {
+        await _context.RoutineDays.AddAsync(routineDay);
+        await _context.SaveChangesAsync();
+    }
+    public async Task DeleteDayAsync(RoutineDay routineDay)
+    {
+        _context.RoutineDays.Remove(routineDay);
+        await _context.SaveChangesAsync();
+    }
 }

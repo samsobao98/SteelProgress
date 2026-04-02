@@ -23,6 +23,9 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
 
         LoadExercises();
+
+        //PARA PROBAR VENTANA RUTINAS
+        new RoutineWindow().Show();
     }
 
     private void LoadExercises()
