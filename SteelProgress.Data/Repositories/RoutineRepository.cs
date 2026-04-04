@@ -50,4 +50,25 @@ public class RoutineRepository
         _context.RoutineDays.Remove(routineDay);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<RoutineDayExercise>> GetExercisesByDayIdAsync(int routineDayId)
+    {
+        return await _context.RoutineDayExercises
+            .Include(rde => rde.Exercise)
+            .Where(rde => rde.RoutineDayId == routineDayId)
+            .OrderBy(rde => rde.Order)
+            .ToListAsync();
+    }
+
+    public async Task AddExerciseToDayAsync(RoutineDayExercise rde)
+    {
+        await _context.RoutineDayExercises.AddAsync(rde);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteExerciseFromDayAsync(RoutineDayExercise rde)
+    {
+        _context.RoutineDayExercises.Remove(rde);
+        await _context.SaveChangesAsync();
+    }
 }

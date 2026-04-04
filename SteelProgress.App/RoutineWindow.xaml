@@ -6,83 +6,120 @@
         xmlns:local="clr-namespace:SteelProgress.App"
         mc:Ignorable="d"
         Title="Rutinas" Height="700" Width="900">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="200" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="200" />
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="200" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="200" />
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="Gestión de Rutinas"
+            <TextBlock Text="Gestión de Rutinas"
                    FontSize="24"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <TextBlock Text="Nombre de la rutina"/>
-            <TextBox Text="{Binding Name, Mode=TwoWay}" Margin="0,5,0,10"/>
+            <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                <TextBlock Text="Nombre de la rutina"/>
+                <TextBox Text="{Binding Name, Mode=TwoWay}" Margin="0,5,0,10"/>
 
-            <TextBlock Text="Notas"/>
-            <TextBox Text="{Binding Notes, Mode=TwoWay}" Margin="0,5,0,10"/>
+                <TextBlock Text="Notas"/>
+                <TextBox Text="{Binding Notes, Mode=TwoWay}" Margin="0,5,0,10"/>
 
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Añadir rutina"
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Añadir rutina"
                 Width="140"
                 Command="{Binding AddRoutineCommand}" 
                 Margin="0,0,10,0"/>
 
-                <Button Content="Eliminar rutina"
+                    <Button Content="Eliminar rutina"
                 Width="140"
                 Command="{Binding DeleteRoutineCommand}"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
 
-        <DataGrid Grid.Row="2"
+            <DataGrid Grid.Row="2"
                   Margin="0,0,0,20"
                   AutoGenerateColumns="false"
                   CanUserAddRows="false"
                   ItemsSource="{Binding Routines}"
                   SelectedItem="{Binding SelectedRoutine, Mode=TwoWay}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="60"/>
-                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
-                <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="60"/>
+                    <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
+                    <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
-        <TextBlock Grid.Row="3" 
+            <TextBlock Grid.Row="3" 
                    Text="Días de la rutina seleccionada"
                    FontSize="20"
                    FontWeight="Bold"
                    Margin="0,0,0,10"/>
 
-        <StackPanel Grid.Row="4" Margin="0,0,0,20">
-            <TextBlock Text="Nombre del día"/>
-            <TextBox Text="{Binding DayName, Mode=TwoWay}" Margin="0,5,0,10"/>
+            <StackPanel Grid.Row="4" Margin="0,0,0,20">
+                <TextBlock Text="Nombre del día"/>
+                <TextBox Text="{Binding DayName, Mode=TwoWay}" Margin="0,5,0,10"/>
 
-            <StackPanel>
-                <Button Content="Añadir día"
+                <StackPanel>
+                    <Button Content="Añadir día"
                         Width="140"
                         Margin="0,0,10,0"
                         Command="{Binding AddDayCommand}"/>
 
-                <Button Content="Eliminar día"
+                    <Button Content="Eliminar día"
                         Width="140"
                         Command="{Binding DeleteDayCommand}"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
 
-        <DataGrid Grid.Row="5"
+            <DataGrid Grid.Row="5"
                   AutoGenerateColumns="false"
                   ItemsSource="{Binding RoutineDays}"
                   SelectedItem="{Binding SelectedRoutineDay, Mode=TwoWay}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="80"/>
-                <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="80"/>
+                    <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Grid.Row="6"
+           Text="Ejercicios del día"
+           FontSize="20"
+           FontWeight="Bold"
+           Margin="0,10,0,10"/>
+
+            <StackPanel Grid.Row="7" Margin="0,0,0,20">
+                <ComboBox ItemsSource="{Binding AllExercises}"
+              SelectedItem="{Binding SelectedExerciseToAdd}"
+              DisplayMemberPath="Name"
+              Margin="0,5"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Añadir ejercicio"
+                Width="150"
+                Margin="0,0,10,0"
+                Command="{Binding AddExerciseToDayCommand}"/>
+
+                    <Button Content="Eliminar ejercicio"
+                Width="150"
+                Command="{Binding DeleteExerciseFromDayCommand}"/>
+                </StackPanel>
+            </StackPanel>
+            <DataGrid Grid.Row="8"
+          AutoGenerateColumns="False"
+          ItemsSource="{Binding DayExercises}"
+          SelectedItem="{Binding SelectedDayExercise, Mode=TwoWay}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="80"/>
+                    <DataGridTextColumn Header="Ejercicio" Binding="{Binding Exercise.Name}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </ScrollViewer>
 </Window>

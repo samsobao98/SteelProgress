@@ -36,6 +36,7 @@ public class RoutineViewModel : BaseViewModel
         {
             _selectedRoutineDay = value;
             OnPropertyChanged();
+            LoadDayExercises();
         }
     }
 
@@ -72,7 +73,27 @@ public class RoutineViewModel : BaseViewModel
         }
 
     }
+    public ObservableCollection<RoutineDayExercise> DayExercises { get; set; }
 
+    public ObservableCollection<Exercise> AllExercises { get; set; }
+
+    private Exercise? _selectedExerciseToAdd;
+    public Exercise? SelectedExerciseToAdd
+    {
+        get => _selectedExerciseToAdd;
+        set { _selectedExerciseToAdd = value; OnPropertyChanged(); }
+    }
+
+    private RoutineDayExercise? _selectedDayExercise;
+    public RoutineDayExercise? SelectedDayExercise
+    {
+        get => _selectedDayExercise;
+        set { _selectedDayExercise = value; OnPropertyChanged(); }
+    }
+
+
+    public ICommand AddExerciseToDayCommand { get; }
+    public ICommand DeleteExerciseFromDayCommand { get; }
     public ICommand AddRoutineCommand { get; }
     public ICommand DeleteRoutineCommand { get; }
 
@@ -90,7 +111,75 @@ public class RoutineViewModel : BaseViewModel
         AddDayCommand = new RelayCommand(AddDay);
         DeleteDayCommand = new RelayCommand(DeleteDay);
 
+        DayExercises = new ObservableCollection<RoutineDayExercise>();
+        AllExercises = new ObservableCollection<Exercise>();
+
+        AddExerciseToDayCommand = new RelayCommand(AddExerciseToDay);
+        DeleteExerciseFromDayCommand = new RelayCommand(DeleteExerciseFromDay);
+
+        LoadAllExercises();
+
         LoadRoutines();
+    }
+
+    public void LoadDayExercises()
+    {
+        DayExercises.Clear();
+
+        if (SelectedRoutineDay is null)
+            return;
+
+        var list = _repository
+            .GetExercisesByDayIdAsync(SelectedRoutineDay.Id)
+            .Result;
+
+        foreach (var item in list)
+            DayExercises.Add(item);
+    }
+
+    private void AddExerciseToDay()
+    {
+        if (SelectedRoutineDay is null || SelectedExerciseToAdd is null)
+        {
+            MessageBox.Show("Selecciona un día y un ejercicio.");
+            return;
+        }
+
+        int order = DayExercises.Count + 1;
+
+        var rde = new RoutineDayExercise
+        {
+            RoutineDayId = SelectedRoutineDay.Id,
+            ExerciseId = SelectedExerciseToAdd.Id,
+            Order = order
+        };
+
+        _repository.AddExerciseToDayAsync(rde).Wait();
+
+        LoadDayExercises();
+    }
+
+    private void DeleteExerciseFromDay()
+    {
+        if (SelectedDayExercise is null)
+        {
+            MessageBox.Show("Selecciona un ejercicio.");
+            return;
+        }
+
+        _repository.DeleteExerciseFromDayAsync(SelectedDayExercise).Wait();
+
+        LoadDayExercises();
+    }
+
+    private void LoadAllExercises()
+    {
+        var exercises = App.DbContext.Exercises.ToList();
+
+        AllExercises.Clear();
+
+        foreach (var ex in exercises)
+            AllExercises.Add(ex);
     }
 
     public void LoadRoutineDays()
