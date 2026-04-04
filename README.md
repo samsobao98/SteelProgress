@@ -17,347 +17,90 @@ En este README se irán documentando los **avances diarios del proyecto**.
 
 ## 11/03/2026 — Creación del proyecto
 
-Mediante distintos prompts, se solicita guía a la IA para establecer las bases del proyecto.
-Se crea una **solución en blanco** en Visual Studio para organizar el proyecto en distintas capas.
+Se crea la solución en Visual Studio con arquitectura por capas:
 
-Dentro de la solución se crean los siguientes proyectos:
+- `SteelProgress.App` (WPF)
+- `SteelProgress.Domain` (modelo)
+- `SteelProgress.Data` (acceso a datos)
+- `SteelProgress.Tests` (pruebas)
 
-### `SteelProgress.App`
-Proyecto **WPF** encargado de ejecutar la aplicación y gestionar la interfaz gráfica.
-
-Depende de:
-- `SteelProgress.Domain`
-- `SteelProgress.Data`
+Se establece la base estructural del proyecto.
 
 ---
-
-### `SteelProgress.Domain`
-Contiene:
-
-- Entidades del dominio
-- Enums
-- Lógica del modelo de datos
-
-Aquí se definen las estructuras principales del sistema.
-
----
-
-### `SteelProgress.Data`
-Encargado del **acceso a datos**.
-
-Este proyecto gestionará:
-
-- Entity Framework Core
-- La conexión con la base de datos **SQLite**
-- Configuración del `DbContext`
-
-Depende de:
-- `SteelProgress.Domain`
-
----
-
-### `SteelProgress.Tests`
-Proyecto destinado a **pruebas unitarias** del sistema.
-
-Permitirá comprobar el correcto funcionamiento de la lógica del dominio y de los servicios de datos.
 
 ## 12/03/2026 — Modelo de datos y base de datos
 
-Durante esta sesión se comenzó a preparar la estructura de datos del proyecto.
+Se define la entidad `Exercise` y se configura **Entity Framework Core con SQLite**.
 
-Se creó la carpeta `Entities` en `SteelProgress.Domain` y dentro de ella la entidad `Exercise`, que representará los ejercicios registrados en la aplicación. Esta entidad incluye los campos `Id`, `Name`, `MuscleGroup` y `Notes`.
-
-En `SteelProgress.Data` se creó la carpeta `Context` y la clase `AppDbContext`, que será la encargada de conectar el modelo de datos con la base de datos mediante **Entity Framework Core**.
-
-También se configuró **SQLite** como motor de base de datos y se creó la clase `AppDbContextFactory`, necesaria para poder generar migraciones.
-
-Por último, se generó la migración inicial (`InitialCreate`) y se creó la base de datos `steelprogress.db`, incluyendo la tabla `Exercises`.
-
-## 16/03/2026 — Implementación del CRUD de ejercicios
-
-Durante esta sesión se conectó la aplicación WPF con la base de datos y se implementó la gestión completa de ejercicios.
-
-### Conexión de la aplicación con la base de datos
-
-Se configuró el `AppDbContext` en el archivo `App.xaml.cs`, permitiendo que la aplicación utilice **Entity Framework Core** con **SQLite** al iniciarse.
-
-Se añadió la llamada a `Database.Migrate()` para asegurar que la base de datos
-y sus tablas se crean automáticamente al arrancar la aplicacion.
+Se crea `AppDbContext`, se genera la migración inicial y la base de datos con la tabla `Exercises`.
 
 ---
 
-### Pruebas iniciales de acceso a datos
+## 16/03/2026 — CRUD de ejercicios
 
-Se realizaron pruebas desde `MainWindow` para verificar:
+Se implementa la gestión completa de ejercicios:
 
-- Inserción de datos en la base de datos
-- Lectura de registros
-- Persistencia de la información entre ejecuciones
+- Crear, leer, actualizar y eliminar
+- Validaciones básicas
 
-Esto permitió confirmar que la conexión con SQLite funciona correctamente.
-
----
-
-### Implementación de la interfaz de gestión de ejercicios
-
-Se diseñó una primera interfaz en `MainWindow` que permite:
-
-- Introducir datos de un ejercicio (nombre, grupo muscular y notas)
-- Visualizar los ejercicios almacenados en un `DataGrid`
+Se conecta WPF con la base de datos mediante EF Core.
 
 ---
 
-### Funcionalidad CRUD de ejercicios
+## 18/03/2026 — Mejora de arquitectura
 
-Se implementaron las operaciones básicas:
+Se introduce el patrón **Repository** (`ExerciseRepository`) y se inicia MVVM:
 
-- **Create** → añadir nuevos ejercicios mediante formulario
-- **Read** → mostrar los ejercicios en una tabla
-- **Update** → modificar ejercicios seleccionados
-- **Delete** → eliminar ejercicios con confirmación
+- `BaseViewModel`
+- `ExerciseViewModel`
 
-Además, se añadieron validaciones:
-
-- Campos obligatorios (nombre y grupo muscular)
-- Control de duplicados por nombre
+Se separa la lógica de la interfaz.
 
 ---
 
-### Resultado
+## 23/03/2026 — MVVM completo
 
-Al finalizar la sesión se dispone de un sistema completo de gestión de ejercicios con:
+Se implementa MVVM completo:
 
-- Persistencia en base de datos SQLite
-- Interfaz funcional en WPF
-- Operaciones CRUD completas
-- Validación de datos
+- Binding en XAML
+- Commands (`ICommand`)
+- Eliminación de lógica en code-behind
 
-Este módulo constituye la base sobre la que se desarrollarán el resto de funcionalidades del proyecto.
-
-## 18/03/2026 — Mejora de arquitectura y primer paso hacia MVVM
-
-Durante esta sesión se continuó el desarrollo del módulo de ejercicios, mejorando la arquitectura del proyecto y separando responsabilidades entre capas.
-
-### Uso de Repository
-
-Se integró el `ExerciseRepository` en la aplicación, eliminando el acceso directo al `DbContext` desde la interfaz (`MainWindow`).
-
-Se añadieron métodos en el repositorio para gestionar:
-
-- Obtención de ejercicios
-- Inserción de nuevos registros
-- Actualización de ejercicios
-- Eliminación de ejercicios
-- Validación de duplicados
-
-Esto permite desacoplar la lógica de acceso a datos de la interfaz de usuario, mejorando la mantenibilidad del código.
-
----
-
-### Refactorización del CRUD
-
-Se modificaron los métodos de la interfaz para utilizar el repositorio en lugar de acceder directamente a la base de datos.
-
-Con esto se consigue una arquitectura más limpia:
-
-UI → Repository → DbContext → SQLite
-
----
-
-### Implementación del patrón MVVM (inicio)
-
-Se dio el primer paso hacia el patrón **MVVM (Model-View-ViewModel)**.
-
-Se creó:
-
-- `BaseViewModel`, implementando `INotifyPropertyChanged`
-- `ExerciseViewModel`, encargado de gestionar el estado y la lógica de los ejercicios
-
-El ViewModel incluye:
-
-- Colección observable de ejercicios (`ObservableCollection`)
-- Propiedades para el formulario (Name, MuscleGroup, Notes)
-- Gestión del elemento seleccionado
-- Métodos para cargar datos y limpiar el formulario
-
----
-
-### Integración ViewModel - Vista
-
-Se conectó parcialmente el `ExerciseViewModel` con la vista (`MainWindow`), trasladando parte de la lógica desde la interfaz hacia el ViewModel.
-
----
-
-### Resultado
-
-Al finalizar la sesión, el proyecto cuenta con:
-
-- Arquitectura en capas consolidada
-- Uso del patrón Repository
-- Separación parcial de lógica mediante MVVM
-- Código más modular y mantenible
-
-Este paso supone una mejora importante en la calidad del proyecto y facilita su escalabilidad para futuras funcionalidades.
-
-## 23/03/2026 — MVVM completo e inicio del módulo de rutinas
-
-Durante esta sesión se mejoró la arquitectura de la aplicación implementando MVVM de forma más completa y se inició el desarrollo del módulo de rutinas.
-
-### Implementación de binding en XAML
-
-Se sustituyó el acceso directo a los controles desde el code-behind por **data binding**, conectando la interfaz con el `ExerciseViewModel`.
-
-Se enlazaron:
-
-- TextBox → propiedades del ViewModel (`Name`, `MuscleGroup`, `Notes`)
-- DataGrid → colección de ejercicios (`Exercises`)
-- SelectedItem → ejercicio seleccionado (`SelectedExercise`)
-
-Esto permite que la interfaz se actualice automáticamente sin manipular los controles desde código.
-
----
-
-### Uso de Commands (ICommand)
-
-Se eliminaron los eventos `Click` de los botones y se implementaron **Commands** mediante la clase `RelayCommand`.
-
-Se añadieron:
-
-- `AddExerciseCommand`
-- `UpdateExerciseCommand`
-- `DeleteExerciseCommand`
-
-Toda la lógica de las acciones se pasó al `ExerciseViewModel`, eliminando dependencia del code-behind.
-
----
-
-### Eliminación de lógica en la vista
-
-Se eliminaron elementos del `MainWindow.xaml.cs`:
-
-- Métodos de eventos de botones
-- Método `ClearForm`
-- Evento `SelectionChanged` del DataGrid
-
-La selección de elementos ahora se gestiona mediante binding, utilizando la propiedad `SelectedExercise` del ViewModel.
-
----
-
-### Mejora del patrón MVVM
-
-Se consolidó el uso del patrón MVVM con:
-
-- `BaseViewModel` (`INotifyPropertyChanged`)
-- `ExerciseViewModel` como gestor de estado y lógica
-- Separación clara entre interfaz y lógica de negocio
-
-El flujo actual queda:
-
-View → ViewModel → Repository → DbContext → SQLite
-
----
-
-### Inicio del módulo de rutinas
-
-Se comenzó el desarrollo de la funcionalidad de rutinas creando las siguientes entidades:
+Se inicia el módulo de rutinas con nuevas entidades:
 
 - `Routine`
 - `RoutineDay`
 - `RoutineDayExercise`
 
-Estas permiten estructurar rutinas con múltiples días y ejercicios asociados.
+---
 
-Se añadieron los correspondientes `DbSet` en el `AppDbContext` y se generó una nueva migración para crear las tablas en la base de datos.
+## 01/04/2026 — Gestión básica de rutinas
+
+Se implementa la funcionalidad inicial de rutinas:
+
+- `RoutineRepository`
+- `RoutineViewModel`
+- Ventana `RoutineWindow`
+
+Permite crear, listar y eliminar rutinas.
 
 ---
 
-### Resultado
+## 02/04/2026 — Días de rutina
 
-Al finalizar la sesión, el proyecto cuenta con:
+Se comprime la información proporcionada de cada día trabajado en este readme con la
+ayuda de la IA.
 
-- Implementación de MVVM con binding y commands
-- Eliminación casi total de lógica en la vista
-- Arquitectura más limpia y mantenible
-- Base estructural para el módulo de rutinas
+Se amplía el sistema para gestionar días dentro de cada rutina:
 
-Este avance supone un salto importante en la calidad del código y en la escalabilidad de la aplicación.
+- Añadir y eliminar `RoutineDay`
+- Carga dinámica de días al seleccionar una rutina
+- Segunda tabla en la interfaz
 
-## 01/04/2026 — Implementación inicial de la gestión de rutinas
+Se corrigen problemas de UI y actualización de datos.
 
-Durante esta sesión se comenzó la implementación funcional del módulo de rutinas, partiendo de la creación del acceso a datos y desarrollando una primera interfaz de usuario.
+Resultado:
 
-### Implementación del acceso a datos
-
-Se creó la clase `RoutineRepository` en el proyecto `SteelProgress.Data`, siguiendo el patrón Repository ya utilizado en el módulo de ejercicios.
-
-Este repositorio permite:
-
-- Obtener todas las rutinas almacenadas
-- Añadir nuevas rutinas
-- Eliminar rutinas existentes
-
-Con esto se mantiene la separación entre la lógica de acceso a datos y la interfaz de usuario.
-
----
-
-### Creación del ViewModel de rutinas
-
-Se implementó `RoutineViewModel`, encargado de gestionar la lógica de la interfaz y el estado de las rutinas.
-
-Incluye:
-
-- `ObservableCollection<Routine>` para la lista de rutinas
-- Propiedades del formulario (`Name`, `Notes`)
-- Propiedad `SelectedRoutine` para gestionar la selección
-- Métodos para cargar datos y limpiar el formulario
-
-Además, se implementaron comandos (`ICommand`) mediante `RelayCommand`:
-
-- `AddRoutineCommand`
-- `DeleteRoutineCommand`
-
-Esto permite ejecutar acciones desde la interfaz sin utilizar eventos en el code-behind.
-
----
-
-### Desarrollo de la interfaz de rutinas
-
-Se creó una nueva ventana `RoutineWindow`, que actúa como pantalla independiente para la gestión de rutinas.
-
-La interfaz permite:
-
-- Introducir el nombre y notas de una rutina
-- Añadir nuevas rutinas
-- Eliminar rutinas seleccionadas
-- Visualizar las rutinas en un `DataGrid`
-
-Se utilizó **data binding** para conectar la vista con el `RoutineViewModel`.
-
----
-
-### Integración con MVVM
-
-Se aplicó el patrón MVVM en esta nueva funcionalidad:
-
-- La vista (`RoutineWindow`) contiene únicamente la interfaz
-- El `RoutineViewModel` gestiona la lógica y el estado
-- El repositorio gestiona el acceso a la base de datos
-
-El flujo queda:
-
-View → ViewModel → Repository → DbContext → SQLite
-
----
-
-### Resultado
-
-Al finalizar la sesión se dispone de:
-
-- Gestión básica de rutinas (crear y eliminar)
-- Interfaz funcional independiente
-- Integración completa con MVVM (binding + commands)
-- Uso del patrón Repository
-
-Este módulo amplía la funcionalidad del sistema y sienta las bases para añadir en futuras sesiones los días de rutina y la asignación de ejercicios.
+- Estructura completa: Rutina → Días
 
 
