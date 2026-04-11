@@ -103,4 +103,31 @@ Resultado:
 
 - Estructura completa: Rutina → Días
 
+  ## 04/04/2026 — Sistema de entrenamiento
+
+Con la ayuda de la IA, Se completó la estructura de entrenamiento:
+
+- Añadir y gestionar ejercicios dentro de cada día (`RoutineDayExercise`)
+- Visualización de ejercicios por día
+
+Se implementó el sistema de sesiones:
+
+- `WorkoutSession`
+- `WorkoutExercise`
+- `WorkoutSet`
+
+Se desarrolló `WorkoutRepository` para:
+
+- Crear sesiones a partir de un día de rutina
+- Copiar automáticamente los ejercicios
+- Registrar sets (peso y repeticiones)
+
+Resultado:
+
+- Flujo completo implementado:
+  Rutina → Día → Ejercicios → Sesión → Sets
+- Backend principal del sistema finalizado
+
+  
+
 
