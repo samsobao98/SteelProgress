@@ -85,4 +85,10 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         _context.WorkoutSets.Remove(workoutSet);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<WorkoutSession>> GettAllSessionASync()
+    {
+        return await _context.WorkoutSessions.Include(ws=>ws.RoutineDay).OrderByDescending(ws=>ws.Date).ToListAsync();
+    }
+
 }
