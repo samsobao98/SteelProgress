@@ -86,7 +86,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<WorkoutSession>> GettAllSessionASync()
+    public async Task<List<WorkoutSession>> GetAllSessionsAsync()
     {
         return await _context.WorkoutSessions.Include(ws=>ws.RoutineDay).OrderByDescending(ws=>ws.Date).ToListAsync();
     }

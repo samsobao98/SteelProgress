@@ -24,10 +24,32 @@ public partial class MainWindow : Window
 
 
         LoadExercises();
+    }
 
-        //PARA PROBAR VENTANA RUTINAS
+    private void OpenHistoryWindow_Click(object sender, RoutedEventArgs e)
+    {
+        new HistoryWindow().Show();
+    }
+
+    private void OpenWorkoutWindow_Click(object sender, RoutedEventArgs e)
+    {
+        var sessionId = App.DbContext.WorkoutSessions
+            .OrderByDescending(ws => ws.Id)
+            .Select(ws => ws.Id)
+            .FirstOrDefault();
+
+        if (sessionId == 0)
+        {
+            MessageBox.Show("No hay sesiones de entrenamiento creadas.");
+            return;
+        }
+
+        new WorkoutWindow(sessionId).Show();
+    }
+
+    private void OpenRoutineWindow_Click(object sender, RoutedEventArgs e)
+    {
         new RoutineWindow().Show();
-        new WorkoutWindow(1).Show();
     }
 
     private void LoadExercises()
@@ -35,4 +57,8 @@ public partial class MainWindow : Window
         _viewModel.LoadExercises();
         DgExercises.ItemsSource = _viewModel.Exercises;
     }
+
+   
+
+
 }

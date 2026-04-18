@@ -8,6 +8,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -15,6 +16,24 @@
                    FontSize="26"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="295,0,0,10">
+
+            <Button Content="Rutinas"
+                    Width="120"
+                    Height="35"
+                    Click="OpenRoutineWindow_Click"/>
+
+            <Button Content="Entrenamiento"
+                    Width="150"
+                    Height="35"
+                    Margin="10,0,0,0"
+                    Click="OpenWorkoutWindow_Click"/>
+            <Button Content="Historial"
+                    Width="120"
+                    Height="35"
+                    Margin="10,0,0,0"
+                    Click="OpenHistoryWindow_Click"/>
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,20">
             <TextBlock Text="Nombre"/>
