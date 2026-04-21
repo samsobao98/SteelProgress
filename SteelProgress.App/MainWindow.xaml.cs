@@ -58,7 +58,10 @@ public partial class MainWindow : Window
         DgExercises.ItemsSource = _viewModel.Exercises;
     }
 
-   
+    private void OpenProgressWindow_Click(object sender, RoutedEventArgs e)
+    {
+        new ProgressWindow().Show();
+    }
 
 
 }

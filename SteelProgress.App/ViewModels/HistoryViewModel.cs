@@ -11,6 +11,8 @@ public class HistoryViewModel : BaseViewModel
     public ObservableCollection<WorkoutSession> Sessions { get; set; }
     public ObservableCollection<WorkoutExercise> SessionExercises { get; set; }
 
+    public ObservableCollection<WorkoutSet> SelectedExerciseSets { get; set; }
+
     private WorkoutSession? _selectedSession;
     public WorkoutSession? SelectedSession
     {
@@ -28,8 +30,32 @@ public class HistoryViewModel : BaseViewModel
         _repository = repository;
         Sessions = new ObservableCollection<WorkoutSession>();
         SessionExercises = new ObservableCollection<WorkoutExercise>();
+        SelectedExerciseSets = new ObservableCollection<WorkoutSet>();
 
         LoadSessions();
+    }
+
+    private WorkoutExercise? _selectedExercise;
+    public WorkoutExercise? SelectedExercise
+    {
+        get => _selectedExercise;
+        set
+        {
+            _selectedExercise = value;
+            OnPropertyChanged();
+            LoadSelectedExerciseSets();
+        }
+    }
+
+    private void LoadSelectedExerciseSets()
+    {
+        SelectedExerciseSets.Clear();
+
+        if (SelectedExercise is null)
+            return;
+
+        foreach (var set in SelectedExercise.Sets.OrderBy(s => s.Id))
+            SelectedExerciseSets.Add(set);
     }
 
     public void LoadSessions()

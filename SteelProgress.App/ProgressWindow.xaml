@@ -1,0 +1,79 @@
+﻿<Window x:Class="SteelProgress.App.ProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        Title="Progreso"
+        Height="750"
+        Width="1100"
+        Background="{StaticResource BgMain}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- CABECERA -->
+        <Border Grid.Row="0"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20"
+                Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Progreso"
+                           FontSize="30"
+                           FontWeight="Bold"/>
+                <TextBlock Text="Visualiza la evolución de tus ejercicios"
+                           Foreground="{StaticResource TextSecondary}"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- SELECTOR -->
+        <Border Grid.Row="1"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20"
+                Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Selecciona un ejercicio"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="0,0,0,10"/>
+                <ComboBox ItemsSource="{Binding Exercises}"
+                          SelectedItem="{Binding SelectedExercise}"
+                          DisplayMemberPath="Name"
+                          Height="36"/>
+            </StackPanel>
+        </Border>
+
+        <!-- GRÁFICA -->
+        <Border Grid.Row="2"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Peso máximo por sesión"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Margin="0,0,0,15"/>
+
+                <lvc:CartesianChart Grid.Row="1"
+                                    Series="{Binding Series}"
+                                    XAxes="{Binding XAxes}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
