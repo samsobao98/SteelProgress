@@ -152,4 +152,68 @@ Resultado:
 - Visualización básica del historial de entrenamientos
 - Integración completa con el backend existente
 
+## 21/04/2026 — Gráfica de progreso y rediseño visual
+
+Se implementó la visualización del progreso de entrenamiento mediante una gráfica.
+
+Con la ayuda de la IA, se integró la librería **LiveCharts2** en el proyecto WPF para permitir la representación visual de datos.
+
+Se desarrolló `ProgressViewModel`, encargado de:
+
+- Cargar los ejercicios disponibles
+- Gestionar la selección de ejercicio
+- Calcular el peso máximo por sesión
+- Generar los datos necesarios para la gráfica
+
+Se creó la ventana `ProgressWindow`, que permite:
+
+- Seleccionar un ejercicio
+- Visualizar su evolución a lo largo del tiempo mediante una gráfica
+
+---
+
+Con la ayuda de la IA, se realizó un primer rediseño visual completo de la aplicación aplicando un tema oscuro estilo “gym”.
+
+Se definieron recursos globales en `App.xaml`:
+
+- Paleta de colores (fondo, texto, acentos)
+- Estilos globales para Button, TextBlock, TextBox, ComboBox y DataGrid
+
+---
+
+Se rediseñaron todas las ventanas principales:
+
+- `MainWindow`
+- `WorkoutWindow`
+- `HistoryWindow`
+- `RoutineWindow`
+- `ProgressWindow`
+
+Aplicando:
+
+- Estructura basada en bloques tipo “card” (`Border`)
+- Cabeceras claras con títulos y subtítulos
+- Mejor distribución del espacio
+- Formularios más compactos
+- Tablas integradas en el diseño
+
+---
+
+Se mejoró la experiencia visual:
+
+- Implementación de fondo oscuro en toda la aplicación
+- Mejora de contraste y legibilidad
+- Estilizado de ComboBox y elementos desplegables
+- Consistencia visual global
+
+---
+
+Resultado:
+
+- Visualización del progreso mediante gráfica funcional
+- Interfaz moderna y coherente
+- Integración completa entre funcionalidad y diseño
+- Base sólida para pulido final y presentación
+
+
 
