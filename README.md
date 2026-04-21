@@ -128,6 +128,28 @@ Resultado:
   Rutina → Día → Ejercicios → Sesión → Sets
 - Backend principal del sistema finalizado
 
-  
+  ## 19/04/2026 — Historial de entrenamientos
+
+Se implementó la visualización del historial de sesiones de entrenamiento.
+
+Se desarrolló `HistoryViewModel` para:
+
+- Obtener todas las sesiones registradas
+- Gestionar la selección de una sesión
+- Cargar el detalle de ejercicios asociados
+
+Se creó la ventana `HistoryWindow`, que permite:
+
+- Visualizar la lista de sesiones (fecha y día de rutina)
+- Seleccionar una sesión
+- Mostrar los ejercicios realizados y su número de series
+
+Se integró el acceso desde la ventana principal mediante un botón de navegación.
+
+Resultado:
+
+- Consulta de sesiones implementada en UI
+- Visualización básica del historial de entrenamientos
+- Integración completa con el backend existente
 
 
