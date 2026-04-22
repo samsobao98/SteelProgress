@@ -215,5 +215,79 @@ Resultado:
 - Integración completa entre funcionalidad y diseño
 - Base sólida para pulido final y presentación
 
+## 22/04/2026 — Navegación unificada y dashboard inicial
 
+Se barajó con la IA posibles mejoras de diseño que ayuden a mejorar la experiencia del usuario. Primero, se rediseñó la arquitectura de la interfaz para eliminar el uso de múltiples ventanas independientes.
+
+---
+
+### Unificación de navegación
+
+Se refactorizó la aplicación para trabajar con una única ventana principal (`MainWindow`), que ahora actúa como contenedor de vistas dinámicas.
+
+Se implementó el uso de `UserControl` para cada módulo:
+
+- `RoutineView`
+- `WorkoutView`
+- `HistoryView`
+- `ProgressView`
+
+Estas vistas se cargan dinámicamente en un `ContentControl`, evitando la apertura de nuevas ventanas.
+
+---
+
+### Eliminación de ventanas independientes
+
+Se dejó de utilizar el sistema anterior basado en múltiples `Window`, sustituyéndolo por navegación interna dentro de la aplicación.
+
+Esto mejora:
+
+- Fluidez de navegación
+- Experiencia de usuario
+- Sensación de aplicación profesional
+
+---
+
+### Implementación de menú lateral
+
+Con ayuda de la IA, se diseñó e implementó un menú lateral (sidebar) con navegación entre secciones:
+
+- Inicio
+- Rutinas
+- Entrenamiento
+- Historial
+- Progreso
+
+El menú incluye funcionalidad colapsable:
+
+- Modo expandido (icono + texto)
+- Modo compacto (solo iconos)
+
+---
+
+### Creación de pantalla inicial (HomeView)
+
+Se añadió una pantalla principal tipo dashboard (`HomeView`) que se muestra al iniciar la aplicación.
+
+Incluye:
+
+- Mensaje de bienvenida
+- Accesos rápidos a módulos
+- Estadísticas generales:
+  - Número de ejercicios
+  - Número de rutinas
+  - Número de sesiones
+  - Último entrenamiento
+- Actividad reciente (últimas sesiones)
+
+Se implementó `HomeViewModel` para gestionar los datos mostrados.
+
+---
+
+### Resultado
+
+- Navegación unificada en una sola ventana
+- Mejora significativa de la experiencia de usuario
+- Interfaz más profesional y moderna
+- Base sólida para mejoras de UX y visualización avanzada
 
