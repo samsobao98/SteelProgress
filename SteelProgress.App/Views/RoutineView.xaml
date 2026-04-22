@@ -1,10 +1,7 @@
-﻿<Window x:Class="SteelProgress.App.RoutineWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Rutinas"
-        Height="950"
-        Width="1100"
-        Background="{StaticResource BgMain}">
+﻿<UserControl x:Class="SteelProgress.App.Views.RoutineView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource BgMain}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="20">
@@ -20,7 +17,6 @@
                 <RowDefinition Height="220"/>
             </Grid.RowDefinitions>
 
-            <!-- CABECERA -->
             <Border Grid.Row="0"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -38,7 +34,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- FORMULARIO RUTINA -->
             <Border Grid.Row="1"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -80,7 +75,6 @@
                 </Grid>
             </Border>
 
-            <!-- TABLA RUTINAS -->
             <Border Grid.Row="2"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -113,14 +107,12 @@
                 </Grid>
             </Border>
 
-            <!-- TÍTULO DÍAS -->
             <TextBlock Grid.Row="3"
                        Text="Días de la rutina seleccionada"
                        FontSize="22"
                        FontWeight="Bold"
                        Margin="0,0,0,15"/>
 
-            <!-- FORMULARIO DÍA -->
             <Border Grid.Row="4"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -156,7 +148,6 @@
                 </Grid>
             </Border>
 
-            <!-- TABLA DÍAS -->
             <Border Grid.Row="5"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -175,14 +166,12 @@
                 </DataGrid>
             </Border>
 
-            <!-- TÍTULO EJERCICIOS -->
             <TextBlock Grid.Row="6"
                        Text="Ejercicios del día seleccionado"
                        FontSize="22"
                        FontWeight="Bold"
                        Margin="0,0,0,15"/>
 
-            <!-- FORMULARIO EJERCICIOS -->
             <Border Grid.Row="7"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -221,7 +210,6 @@
                 </Grid>
             </Border>
 
-            <!-- TABLA EJERCICIOS -->
             <Border Grid.Row="8"
                     Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderColor}"
@@ -239,4 +227,4 @@
             </Border>
         </Grid>
     </ScrollViewer>
-</Window>
+</UserControl>

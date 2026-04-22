@@ -1,67 +1,72 @@
 ﻿using System.Windows;
-using SteelProgress.App.ViewModels;
-using SteelProgress.Data.Repositories;
-using SteelProgress.Domain.Entities;
-
+using SteelProgress.App.Views;
 
 namespace SteelProgress.App;
 
 public partial class MainWindow : Window
 {
-
-    private Exercise? _selectedExercise;
-    private readonly ExerciseRepository _repository;
-    private readonly ExerciseViewModel _viewModel;
+    private bool _isSidebarCollapsed = false;
 
     public MainWindow()
     {
         InitializeComponent();
-
-        _repository = new ExerciseRepository(App.DbContext);
-        _viewModel = new ExerciseViewModel(_repository);
-
-        DataContext = _viewModel;
-
-
-        LoadExercises();
+        MainContent.Content = new HomeView();
     }
 
-    private void OpenHistoryWindow_Click(object sender, RoutedEventArgs e)
+    private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
     {
-        new HistoryWindow().Show();
-    }
+        _isSidebarCollapsed = !_isSidebarCollapsed;
 
-    private void OpenWorkoutWindow_Click(object sender, RoutedEventArgs e)
-    {
-        var sessionId = App.DbContext.WorkoutSessions
-            .OrderByDescending(ws => ws.Id)
-            .Select(ws => ws.Id)
-            .FirstOrDefault();
-
-        if (sessionId == 0)
+        if (_isSidebarCollapsed)
         {
-            MessageBox.Show("No hay sesiones de entrenamiento creadas.");
-            return;
-        }
+            SidebarColumn.Width = new GridLength(70);
 
-        new WorkoutWindow(sessionId).Show();
+            SidebarTitle.Visibility = Visibility.Collapsed;
+            SidebarSubtitle.Visibility = Visibility.Collapsed;
+
+            BtnInicioText.Visibility = Visibility.Collapsed;
+            BtnRutinasText.Visibility = Visibility.Collapsed;
+            BtnEntrenamientoText.Visibility = Visibility.Collapsed;
+            BtnHistorialText.Visibility = Visibility.Collapsed;
+            BtnProgresoText.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            SidebarColumn.Width = new GridLength(220);
+
+            SidebarTitle.Visibility = Visibility.Visible;
+            SidebarSubtitle.Visibility = Visibility.Visible;
+
+            BtnInicioText.Visibility = Visibility.Visible;
+            BtnRutinasText.Visibility = Visibility.Visible;
+            BtnEntrenamientoText.Visibility = Visibility.Visible;
+            BtnHistorialText.Visibility = Visibility.Visible;
+            BtnProgresoText.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void OpenHomeView_Click(object sender, RoutedEventArgs e)
+    {
+        MainContent.Content = new HomeView();
     }
 
     private void OpenRoutineWindow_Click(object sender, RoutedEventArgs e)
     {
-        new RoutineWindow().Show();
+        MainContent.Content = new RoutineView();
     }
 
-    private void LoadExercises()
+    private void OpenWorkoutWindow_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.LoadExercises();
-        DgExercises.ItemsSource = _viewModel.Exercises;
+        MainContent.Content = new WorkoutView();
+    }
+
+    private void OpenHistoryWindow_Click(object sender, RoutedEventArgs e)
+    {
+        MainContent.Content = new HistoryView();
     }
 
     private void OpenProgressWindow_Click(object sender, RoutedEventArgs e)
     {
-        new ProgressWindow().Show();
+        MainContent.Content = new ProgressView();
     }
-
-
 }

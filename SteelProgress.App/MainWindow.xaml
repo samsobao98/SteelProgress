@@ -2,159 +2,113 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SteelProgress"
-        Height="700"
-        Width="1100"
+        Height="750"
+        Width="1250"
         Background="{StaticResource BgMain}">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- CABECERA -->
-        <Border Grid.Row="0"
+        <!-- SIDEBAR -->
+        <Border Grid.Column="0"
                 Background="{StaticResource BgSecondary}"
                 BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="20"
-                Margin="0,0,0,20">
-            <DockPanel LastChildFill="False">
-                <StackPanel DockPanel.Dock="Left">
-                    <TextBlock Text="SteelProgress"
-                               FontSize="30"
-                               FontWeight="Bold"/>
-                    <TextBlock Text="Gestión de ejercicios y entrenamiento"
-                               Foreground="{StaticResource TextSecondary}"
-                               Margin="0,5,0,0"/>
-                </StackPanel>
-
-                <StackPanel DockPanel.Dock="Right"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-                    <Button Content="Rutinas"
-                            Width="120"
-                            Height="38"
-                            Margin="0,0,10,0"
-                            Click="OpenRoutineWindow_Click"/>
-
-                    <Button Content="Entrenamiento"
-                            Width="140"
-                            Height="38"
-                            Margin="0,0,10,0"
-                            Click="OpenWorkoutWindow_Click"/>
-
-                    <Button Content="Historial"
-                            Width="120"
-                            Height="38"
-                            Margin="0,0,10,0"
-                            Click="OpenHistoryWindow_Click"/>
-
-                    <Button Content="Progreso"
-                            Width="120"
-                            Height="38"
-                            Click="OpenProgressWindow_Click"/>
-                </StackPanel>
-            </DockPanel>
-        </Border>
-
-        <!-- FORMULARIO -->
-        <Border Grid.Row="1"
-                Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="20"
-                Margin="0,0,0,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                    <TextBlock Text="Nombre del ejercicio" Margin="0,0,0,6"/>
-                    <TextBox x:Name="TxtName"
-                             Text="{Binding Name, Mode=TwoWay}"
-                             Height="36"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                    <TextBlock Text="Grupo muscular" Margin="0,0,0,6"/>
-                    <TextBox x:Name="TxtMuscleGroup"
-                             Text="{Binding MuscleGroup, Mode=TwoWay}"
-                             Height="36"/>
-                </StackPanel>
-
-                <StackPanel Grid.Column="2" Margin="0,0,15,0">
-                    <TextBlock Text="Notas" Margin="0,0,0,6"/>
-                    <TextBox x:Name="TxtNotes"
-                             Text="{Binding Notes, Mode=TwoWay}"
-                             Height="36"/>
-                </StackPanel>
-
-                <Button Grid.Column="3"
-                        Content="Añadir"
-                        Width="110"
-                        Height="36"
-                        Margin="0,24,10,0"
-                        Command="{Binding AddExerciseCommand}"/>
-
-                <Button Grid.Column="4"
-                        Content="Actualizar"
-                        Width="110"
-                        Height="36"
-                        Margin="0,24,0,0"
-                        Command="{Binding UpdateExerciseCommand}"/>
-            </Grid>
-        </Border>
-
-        <!-- TABLA -->
-        <Border Grid.Row="2"
-                Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="20">
-            <Grid>
+                BorderThickness="0,0,1,0">
+            <Grid Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Ejercicios registrados"
-                           FontSize="22"
-                           FontWeight="Bold"
-                           Margin="0,0,0,15"/>
+                <!-- BOTÓN TOGGLE -->
+                <Button x:Name="ToggleSidebarButton"
+                        Grid.Row="0"
+                        Content="☰"
+                        Width="45"
+                        Height="45"
+                        HorizontalAlignment="Left"
+                        Click="ToggleSidebar_Click"/>
 
-                <DataGrid x:Name="DgExercises"
-                          Grid.Row="1"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          ItemsSource="{Binding Exercises}"
-                          SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
-                          Margin="0,0,0,15">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
-                        <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
-                        <DataGridTextColumn Header="Grupo muscular" Binding="{Binding MuscleGroup}" Width="220"/>
-                        <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <!-- LOGO / TÍTULO -->
+                <StackPanel Grid.Row="1" Margin="0,20,0,20">
+                    <TextBlock x:Name="SidebarTitle"
+                               Text="SteelProgress"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Margin="10,0,0,5"/>
+                    <TextBlock x:Name="SidebarSubtitle"
+                               Text="Training Tracker"
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="10,0,0,0"/>
+                </StackPanel>
 
-                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                    <Button Content="Eliminar ejercicio seleccionado"
-                            Width="220"
-                            Height="36"
-                            Command="{Binding DeleteExerciseCommand}"/>
+                <!-- MENÚ -->
+                <StackPanel Grid.Row="2">
+                    <Button x:Name="BtnInicio"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenHomeView_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🏠" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnInicioText" Text="Inicio"/>
+                        </StackPanel>
+                    </Button>
+                   
+                    <Button x:Name="BtnRutinas"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenRoutineWindow_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📋" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnRutinasText" Text="Rutinas"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnEntrenamiento"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenWorkoutWindow_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🏋" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnEntrenamientoText" Text="Entrenamiento"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnHistorial"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenHistoryWindow_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🕘" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnHistorialText" Text="Historial"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnProgreso"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenProgressWindow_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📈" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnProgresoText" Text="Progreso"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
+
+        <!-- CONTENIDO -->
+        <Grid Grid.Column="1">
+            <ContentControl x:Name="MainContent"/>
+        </Grid>
     </Grid>
 </Window>

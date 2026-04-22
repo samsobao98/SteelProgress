@@ -1,12 +1,12 @@
-﻿using System.Windows;
+﻿using System.Windows.Controls;
 using SteelProgress.App.ViewModels;
 using SteelProgress.Data.Repositories;
 
-namespace SteelProgress.App;
+namespace SteelProgress.App.Views;
 
-public partial class HistoryWindow : Window
+public partial class HistoryView : UserControl
 {
-    public HistoryWindow()
+    public HistoryView()
     {
         InitializeComponent();
 

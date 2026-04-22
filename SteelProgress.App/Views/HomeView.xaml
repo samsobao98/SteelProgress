@@ -1,0 +1,196 @@
+﻿<UserControl x:Class="SteelProgress.App.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource BgMain}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- CABECERA -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="25"
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Bienvenido a SteelProgress"
+                               FontSize="32"
+                               FontWeight="Bold"/>
+                    <TextBlock Text="Gestiona tus rutinas, registra entrenamientos y revisa tu progreso."
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,8,0,0"
+                               FontSize="16"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ACCESOS RÁPIDOS -->
+            <UniformGrid Grid.Row="1"
+                         Columns="4"
+                         Margin="0,0,0,20">
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="📋" FontSize="28" Margin="0,0,0,10"/>
+                        <TextBlock Text="Rutinas" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="Organiza días y ejercicios"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="🏋" FontSize="28" Margin="0,0,0,10"/>
+                        <TextBlock Text="Entrenamiento" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="Registra sets y reps"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="🕘" FontSize="28" Margin="0,0,0,10"/>
+                        <TextBlock Text="Historial" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="Consulta sesiones pasadas"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="📈" FontSize="28" Margin="0,0,0,10"/>
+                        <TextBlock Text="Progreso" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock Text="Visualiza tu evolución"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- ESTADÍSTICAS -->
+            <UniformGrid Grid.Row="2"
+                         Columns="4"
+                         Margin="0,0,0,20">
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="Ejercicios"
+                                   Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding ExerciseCount}"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="Rutinas"
+                                   Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding RoutineCount}"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20"
+                        Margin="0,0,15,0">
+                    <StackPanel>
+                        <TextBlock Text="Sesiones"
+                                   Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding SessionCount}"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Background="{StaticResource BgSecondary}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="Último entrenamiento"
+                                   Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding LastWorkoutDay}"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- ACTIVIDAD RECIENTE -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Actividad reciente"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Margin="0,0,0,15"/>
+
+                    <DataGrid Grid.Row="1"
+                              AutoGenerateColumns="False"
+                              ItemsSource="{Binding RecentSessions}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="220"/>
+                            <DataGridTextColumn Header="Día" Binding="{Binding RoutineDay.Name}" Width="220"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
