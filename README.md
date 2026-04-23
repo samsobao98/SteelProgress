@@ -291,3 +291,76 @@ Se implementó `HomeViewModel` para gestionar los datos mostrados.
 - Interfaz más profesional y moderna
 - Base sólida para mejoras de UX y visualización avanzada
 
+## 23/04/2026 — Mejora de usabilidad y organización visual
+
+Durante esta sesión se realizaron mejoras centradas en la experiencia de usuario y en la claridad visual de la aplicación.
+
+---
+
+### Reorganización del módulo de rutinas
+
+Se rediseñó `RoutineView` para evitar la sobrecarga de información en una única pantalla.
+
+Se sustituyó la estructura anterior por un sistema basado en `TabControl`, dividiendo la funcionalidad en tres pestañas:
+
+- Rutinas
+- Días
+- Ejercicios
+
+Esto permite:
+
+- Separar responsabilidades dentro de la interfaz
+- Mejorar la claridad del flujo de uso
+- Reducir la sensación de pantalla saturada
+
+---
+
+### Mejora visual del sistema de pestañas
+
+Se personalizó el estilo de `TabControl` y `TabItem`:
+
+- Adaptación al tema oscuro
+- Uso de colores de acento en pestañas activas
+- Mejora del feedback visual (hover y selección)
+- Integración estética con el resto de la aplicación
+
+Además, se implementaron encabezados personalizados con iconos para cada pestaña, mejorando la identificación visual de cada sección.
+
+---
+
+### Mejora de la visualización de datos
+
+Se ajustó el estilo global de los `DataGrid` utilizados en la aplicación:
+
+- Mejora de tipografía y espaciado
+- Aumento de la altura de filas
+- Alternancia de colores en filas
+- Resaltado de fila seleccionada
+- Mejora del comportamiento en hover
+
+Esto proporciona una visualización más clara y profesional de:
+
+- Rutinas
+- Días
+- Ejercicios
+- Historial
+
+---
+
+### Revisión y ajuste de estilos globales
+
+Se revisó la configuración de `App.xaml`, asegurando:
+
+- Consistencia visual en todos los controles
+- Compatibilidad con el arranque de la aplicación (`StartupUri`)
+- Integración de estilos sin afectar al comportamiento existente
+
+---
+
+### Resultado
+
+- Interfaz más clara y estructurada
+- Mejora significativa en la usabilidad del módulo de rutinas
+- Consistencia visual en todos los componentes
+- Sensación más cercana a una aplicación profesional
+
