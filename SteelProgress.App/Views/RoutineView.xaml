@@ -3,228 +3,244 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource BgMain}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="220"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="220"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="220"/>
-            </Grid.RowDefinitions>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <Border Grid.Row="0"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="Rutinas"
-                               FontSize="30"
-                               FontWeight="Bold"/>
-                    <TextBlock Text="Organiza tus rutinas, días y ejercicios"
-                               Foreground="{StaticResource TextSecondary}"
-                               Margin="0,5,0,0"/>
-                </StackPanel>
-            </Border>
+        <!-- CABECERA -->
+        <Border Grid.Row="0"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20"
+                Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Rutinas"
+                           FontSize="30"
+                           FontWeight="Bold"/>
+                <TextBlock Text="Organiza tus rutinas, días y ejercicios"
+                           Foreground="{StaticResource TextSecondary}"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
 
-            <Border Grid.Row="1"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <!-- TABS -->
+        <Border Grid.Row="1"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20">
+            <TabControl Margin="5">
 
-                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock Text="Nombre de la rutina" Margin="0,0,0,6"/>
-                        <TextBox Text="{Binding Name, Mode=TwoWay}" Height="36"/>
-                    </StackPanel>
+                <!-- TAB RUTINAS -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📋" FontSize="16" Margin="0,0,6,0"/>
+                            <TextBlock Text="Rutinas"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
 
-                    <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                        <TextBlock Text="Notas" Margin="0,0,0,6"/>
-                        <TextBox Text="{Binding Notes, Mode=TwoWay}" Height="36"/>
-                    </StackPanel>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <Button Grid.Column="2"
-                            Content="Añadir rutina"
-                            Width="140"
-                            Height="36"
-                            Margin="0,24,10,0"
-                            Command="{Binding AddRoutineCommand}"/>
+                        <Border Background="{StaticResource BgMain}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="3"
-                            Content="Eliminar rutina"
-                            Width="140"
-                            Height="36"
-                            Margin="0,24,0,0"
-                            Command="{Binding DeleteRoutineCommand}"/>
-                </Grid>
-            </Border>
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <TextBlock Text="Nombre de la rutina" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding Name, Mode=TwoWay}" Height="36"/>
+                                </StackPanel>
 
-            <Border Grid.Row="2"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+                                <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                                    <TextBlock Text="Notas" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding Notes, Mode=TwoWay}" Height="36"/>
+                                </StackPanel>
 
-                    <TextBlock Text="Rutinas registradas"
-                               FontSize="22"
-                               FontWeight="Bold"
-                               Margin="0,0,0,15"/>
+                                <Button Grid.Column="2"
+                                        Content="Añadir rutina"
+                                        Width="140"
+                                        Height="36"
+                                        Margin="0,24,10,0"
+                                        Command="{Binding AddRoutineCommand}"/>
 
-                    <DataGrid Grid.Row="1"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              ItemsSource="{Binding Routines}"
-                              SelectedItem="{Binding SelectedRoutine, Mode=TwoWay}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
-                            <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
-                            <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
+                                <Button Grid.Column="3"
+                                        Content="Eliminar rutina"
+                                        Width="140"
+                                        Height="36"
+                                        Margin="0,24,0,0"
+                                        Command="{Binding DeleteRoutineCommand}"/>
+                            </Grid>
+                        </Border>
 
-            <TextBlock Grid.Row="3"
-                       Text="Días de la rutina seleccionada"
-                       FontSize="22"
-                       FontWeight="Bold"
-                       Margin="0,0,0,15"/>
+                        <DataGrid Grid.Row="1"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  ItemsSource="{Binding Routines}"
+                                  SelectedItem="{Binding SelectedRoutine, Mode=TwoWay}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
+                                <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
 
-            <Border Grid.Row="4"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- TAB DIAS -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📅" FontSize="16" Margin="0,0,6,0"/>
+                            <TextBlock Text="Días"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
 
-                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock Text="Nombre del día" Margin="0,0,0,6"/>
-                        <TextBox Text="{Binding DayName, Mode=TwoWay}" Height="36"/>
-                    </StackPanel>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <Button Grid.Column="1"
-                            Content="Añadir día"
-                            Width="140"
-                            Height="36"
-                            Margin="0,24,10,0"
-                            Command="{Binding AddDayCommand}"/>
+                        <Border Background="{StaticResource BgMain}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="2"
-                            Content="Eliminar día"
-                            Width="140"
-                            Height="36"
-                            Margin="0,24,0,0"
-                            Command="{Binding DeleteDayCommand}"/>
-                </Grid>
-            </Border>
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <TextBlock Text="Nombre del día" Margin="0,0,0,6"/>
+                                    <TextBox Text="{Binding DayName, Mode=TwoWay}" Height="36"/>
+                                </StackPanel>
 
-            <Border Grid.Row="5"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <DataGrid AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          ItemsSource="{Binding RoutineDays}"
-                          SelectedItem="{Binding SelectedRoutineDay, Mode=TwoWay}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
-                        <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
+                                <Button Grid.Column="1"
+                                        Content="Añadir día"
+                                        Width="140"
+                                        Height="36"
+                                        Margin="0,24,10,0"
+                                        Command="{Binding AddDayCommand}"/>
 
-            <TextBlock Grid.Row="6"
-                       Text="Ejercicios del día seleccionado"
-                       FontSize="22"
-                       FontWeight="Bold"
-                       Margin="0,0,0,15"/>
+                                <Button Grid.Column="2"
+                                        Content="Eliminar día"
+                                        Width="140"
+                                        Height="36"
+                                        Margin="0,24,0,0"
+                                        Command="{Binding DeleteDayCommand}"/>
+                            </Grid>
+                        </Border>
 
-            <Border Grid.Row="7"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                        <DataGrid Grid.Row="1"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  ItemsSource="{Binding RoutineDays}"
+                                  SelectedItem="{Binding SelectedRoutineDay, Mode=TwoWay}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
+                                <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
 
-                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock Text="Selecciona un ejercicio" Margin="0,0,0,6"/>
-                        <ComboBox ItemsSource="{Binding AllExercises}"
-                                  SelectedItem="{Binding SelectedExerciseToAdd}"
-                                  DisplayMemberPath="Name"
-                                  Height="36"/>
-                    </StackPanel>
+                <!-- TAB EJERCICIOS -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🏋" FontSize="16" Margin="0,0,6,0"/>
+                            <TextBlock Text="Ejercicios"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
 
-                    <Button Grid.Column="1"
-                            Content="Añadir ejercicio"
-                            Width="150"
-                            Height="36"
-                            Margin="0,24,10,0"
-                            Command="{Binding AddExerciseToDayCommand}"/>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                    <Button Grid.Column="2"
-                            Content="Eliminar ejercicio"
-                            Width="150"
-                            Height="36"
-                            Margin="0,24,0,0"
-                            Command="{Binding DeleteExerciseFromDayCommand}"/>
-                </Grid>
-            </Border>
+                        <Border Background="{StaticResource BgMain}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-            <Border Grid.Row="8"
-                    Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="20">
-                <DataGrid AutoGenerateColumns="False"
-                          ItemsSource="{Binding DayExercises}"
-                          SelectedItem="{Binding SelectedDayExercise, Mode=TwoWay}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
-                        <DataGridTextColumn Header="Ejercicio" Binding="{Binding Exercise.Name}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-        </Grid>
-    </ScrollViewer>
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <TextBlock Text="Selecciona un ejercicio" Margin="0,0,0,6"/>
+                                    <ComboBox ItemsSource="{Binding AllExercises}"
+                                              SelectedItem="{Binding SelectedExerciseToAdd}"
+                                              DisplayMemberPath="Name"
+                                              Height="36"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Content="Añadir ejercicio"
+                                        Width="150"
+                                        Height="36"
+                                        Margin="0,24,10,0"
+                                        Command="{Binding AddExerciseToDayCommand}"/>
+
+                                <Button Grid.Column="2"
+                                        Content="Eliminar ejercicio"
+                                        Width="150"
+                                        Height="36"
+                                        Margin="0,24,0,0"
+                                        Command="{Binding DeleteExerciseFromDayCommand}"/>
+                            </Grid>
+                        </Border>
+
+                        <DataGrid Grid.Row="1"
+                                  AutoGenerateColumns="False"
+                                  ItemsSource="{Binding DayExercises}"
+                                  SelectedItem="{Binding SelectedDayExercise, Mode=TwoWay}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
+                                <DataGridTextColumn Header="Ejercicio" Binding="{Binding Exercise.Name}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+            </TabControl>
+        </Border>
+    </Grid>
 </UserControl>
