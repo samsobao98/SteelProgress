@@ -53,9 +53,11 @@
                           ItemsSource="{Binding Sessions}"
                           SelectedItem="{Binding SelectedSession, Mode=TwoWay}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
-                        <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="220"/>
-                        <DataGridTextColumn Header="Día" Binding="{Binding RoutineDay.Name}" Width="220"/>
+                        <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="220"
+                                             ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                        
+                        <DataGridTextColumn Header="Día" Binding="{Binding RoutineDay.Name}" Width="220"
+                                             ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -80,10 +82,12 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Ejercicio"
                                         Binding="{Binding Exercise.Name}"
-                                        Width="250"/>
+                                        Width="250"
+                                         ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                     <DataGridTextColumn Header="Series"
                                         Binding="{Binding Sets.Count}"
-                                        Width="100"/>
+                                        Width="100"
+                                         ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
@@ -105,10 +109,12 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Peso"
                                         Binding="{Binding Weight}"
-                                        Width="150"/>
+                                        Width="150"
+                                        ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                     <DataGridTextColumn Header="Reps"
                                         Binding="{Binding Reps}"
-                                        Width="150"/>
+                                        Width="150"
+                                        ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

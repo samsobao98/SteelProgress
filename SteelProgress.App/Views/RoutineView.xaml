@@ -100,9 +100,10 @@
                                   ItemsSource="{Binding Routines}"
                                   SelectedItem="{Binding SelectedRoutine, Mode=TwoWay}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80"/>
-                                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"/>
-                                <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"/>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" Width="220"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                                <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
@@ -166,8 +167,10 @@
                                   ItemsSource="{Binding RoutineDays}"
                                   SelectedItem="{Binding SelectedRoutineDay, Mode=TwoWay}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
-                                <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                                <DataGridTextColumn Header="Nombre del día" Binding="{Binding Name}" Width="*"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
@@ -233,8 +236,10 @@
                                   ItemsSource="{Binding DayExercises}"
                                   SelectedItem="{Binding SelectedDayExercise, Mode=TwoWay}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"/>
-                                <DataGridTextColumn Header="Ejercicio" Binding="{Binding Exercise.Name}" Width="*"/>
+                                <DataGridTextColumn Header="Orden" Binding="{Binding Order}" Width="100"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                                <DataGridTextColumn Header="Ejercicio" Binding="{Binding Exercise.Name}" Width="*"
+                                                    ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

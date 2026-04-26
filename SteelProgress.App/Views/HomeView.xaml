@@ -185,8 +185,10 @@
                               AutoGenerateColumns="False"
                               ItemsSource="{Binding RecentSessions}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="220"/>
-                            <DataGridTextColumn Header="Día" Binding="{Binding RoutineDay.Name}" Width="220"/>
+                            <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="220"
+                                                ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                            <DataGridTextColumn Header="Día" Binding="{Binding RoutineDay.Name}" Width="220"
+                                                ElementStyle="{StaticResource DataGridTextCellStyle}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
