@@ -364,3 +364,64 @@ Se revisó la configuración de `App.xaml`, asegurando:
 - Consistencia visual en todos los componentes
 - Sensación más cercana a una aplicación profesional
 
+## 26/04/2026 — Pulido visual y mejoras de interfaz
+
+Durante esta sesión se continuó con la mejora estética de la aplicación, centrando el trabajo en la coherencia visual y la calidad de la experiencia de usuario.
+
+---
+
+### Eliminación de elementos innecesarios
+
+Se eliminaron los identificadores internos (`Id`) de las tablas mostradas en la interfaz:
+
+- Rutinas
+- Días
+- Ejercicios
+- Historial
+
+---
+
+### Mejora del espaciado en tablas
+
+Se ajustó el espaciado interno de los `DataGrid`:
+
+- Añadido padding en celdas y cabeceras
+- Corrección del alineado del contenido en la primera columna
+- Mejora general del “aire” entre elementos
+  
+---
+
+### Personalización avanzada de DataGrid
+
+Se reforzó el estilo global de las tablas:
+
+- Mejora en tipografía
+- Ajuste de altura de filas
+- Colores alternos en filas
+- Resaltado de fila seleccionada
+- Feedback visual en hover
+
+---
+
+### Introducción a animaciones en interfaz
+
+Se comenzó la mejora de interacciones mediante animaciones:
+
+- Implementación de transición suave en hover de botones
+- Uso de `Storyboard` para animar cambios de color
+- Aplicación de animación sobre elementos `Border` en lugar de controles directamente
+
+Esto permite:
+
+- Evitar cambios bruscos de color
+- Mejorar la sensación de fluidez
+- Aumentar la calidad percibida de la interfaz
+
+---
+
+### Resultado
+
+- Interfaz más limpia y profesional
+- Mejora notable en la legibilidad de tablas
+- Interacciones más suaves y agradables
+- Base preparada para animaciones más avanzadas
