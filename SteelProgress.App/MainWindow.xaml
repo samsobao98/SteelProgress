@@ -58,7 +58,18 @@
                             <TextBlock x:Name="BtnInicioText" Text="Inicio"/>
                         </StackPanel>
                     </Button>
-                   
+
+                    <Button x:Name="BtnEjercicios"
+                            Height="45"
+                            Margin="0,0,0,10"
+                            HorizontalContentAlignment="Left"
+                            Click="OpenExerciseView_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💪" FontSize="16" Margin="0,0,10,0"/>
+                            <TextBlock x:Name="BtnEjerciciosText" Text="Ejercicios"/>
+                        </StackPanel>
+                    </Button>
+
                     <Button x:Name="BtnRutinas"
                             Height="45"
                             Margin="0,0,0,10"
@@ -92,16 +103,6 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="BtnProgreso"
-                            Height="45"
-                            Margin="0,0,0,10"
-                            HorizontalContentAlignment="Left"
-                            Click="OpenProgressWindow_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📈" FontSize="16" Margin="0,0,10,0"/>
-                            <TextBlock x:Name="BtnProgresoText" Text="Progreso"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

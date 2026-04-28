@@ -1,0 +1,126 @@
+﻿<UserControl x:Class="SteelProgress.App.Views.ExerciseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource BgMain}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="22"
+                Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Ejercicios"
+                           FontSize="30"
+                           FontWeight="Bold"/>
+                <TextBlock Text="Crea y gestiona los ejercicios disponibles para tus rutinas"
+                           Foreground="{StaticResource TextSecondary}"
+                           FontSize="15"
+                           Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20"
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                    <TextBlock Text="Nombre" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding Name, Mode=TwoWay}" Height="36"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                    <TextBlock Text="Grupo muscular" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding MuscleGroup, Mode=TwoWay}" Height="36"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                    <TextBlock Text="Notas" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding Notes, Mode=TwoWay}" Height="36"/>
+                </StackPanel>
+
+                <Button Grid.Column="3"
+                        Content="Añadir"
+                        Width="110"
+                        Height="36"
+                        Margin="0,24,10,0"
+                        Command="{Binding AddExerciseCommand}"/>
+
+                <Button Grid.Column="4"
+                        Content="Actualizar"
+                        Width="110"
+                        Height="36"
+                        Margin="0,24,0,0"
+                        Command="{Binding UpdateExerciseCommand}"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Ejercicios registrados"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Margin="0,0,0,15"/>
+
+                <DataGrid Grid.Row="1"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          ItemsSource="{Binding Exercises}"
+                          SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
+                          Margin="0,0,0,15">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nombre"
+                                            Binding="{Binding Name}"
+                                            Width="220"
+                                            ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                        <DataGridTextColumn Header="Grupo muscular"
+                                            Binding="{Binding MuscleGroup}"
+                                            Width="220"
+                                            ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                        <DataGridTextColumn Header="Notas"
+                                            Binding="{Binding Notes}"
+                                            Width="*"
+                                            ElementStyle="{StaticResource DataGridTextCellStyle}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Button Grid.Row="2"
+                        Content="Eliminar ejercicio seleccionado"
+                        Width="230"
+                        Height="38"
+                        Command="{Binding DeleteExerciseCommand}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

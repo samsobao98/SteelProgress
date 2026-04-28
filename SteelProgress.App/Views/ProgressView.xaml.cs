@@ -5,9 +5,9 @@ namespace SteelProgress.App.Views;
 
 public partial class ProgressView : UserControl
 {
-    public ProgressView()
+    public ProgressView(int? exerciseId = null)
     {
         InitializeComponent();
-        DataContext = new ProgressViewModel();
+        DataContext = new ProgressViewModel(exerciseId);
     }
 }

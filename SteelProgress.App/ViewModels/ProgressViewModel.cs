@@ -26,9 +26,15 @@ public class ProgressViewModel : BaseViewModel
     public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
     public Axis[] XAxes { get; set; } = Array.Empty<Axis>();
 
-    public ProgressViewModel()
+    public ProgressViewModel(int? selectedExerciseId = null)
     {
         LoadExercises();
+
+        if (selectedExerciseId.HasValue)
+        {
+            SelectedExercise = Exercises
+                .FirstOrDefault(e => e.Id == selectedExerciseId.Value);
+        }
     }
 
     private void LoadExercises()

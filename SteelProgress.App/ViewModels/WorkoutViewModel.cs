@@ -9,10 +9,48 @@ namespace SteelProgress.App.ViewModels;
 
 public class WorkoutViewModel : BaseViewModel
 {
-    private readonly WorkoutRepository _repository;
+    private readonly WorkoutRepository _workoutRepository;
+    private readonly RoutineRepository _routineRepository;
 
-    public ObservableCollection<WorkoutExercise> Exercises { get; set; }
-    public ObservableCollection<WorkoutSet> SelectedExerciseSets { get; set; }
+    public ICommand FinishWorkoutCommand { get; }
+    public ObservableCollection<Routine> Routines { get; set; } = new();
+    public ObservableCollection<RoutineDay> RoutineDays { get; set; } = new();
+    public ObservableCollection<WorkoutExercise> Exercises { get; set; } = new();
+    public ObservableCollection<WorkoutSet> SelectedExerciseSets { get; set; } = new();
+
+    private Routine? _selectedRoutine;
+    public Routine? SelectedRoutine
+    {
+        get => _selectedRoutine;
+        set
+        {
+            _selectedRoutine = value;
+            OnPropertyChanged();
+            LoadRoutineDays();
+        }
+    }
+
+    private RoutineDay? _selectedRoutineDay;
+    public RoutineDay? SelectedRoutineDay
+    {
+        get => _selectedRoutineDay;
+        set
+        {
+            _selectedRoutineDay = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool _isSessionActive;
+    public bool IsSessionActive
+    {
+        get => _isSessionActive;
+        set
+        {
+            _isSessionActive = value;
+            OnPropertyChanged();
+        }
+    }
 
     private WorkoutSession? _currentSession;
     public WorkoutSession? CurrentSession
@@ -70,22 +108,90 @@ public class WorkoutViewModel : BaseViewModel
         }
     }
 
+    public ICommand StartWorkoutCommand { get; }
     public ICommand AddSetCommand { get; }
     public ICommand DeleteSetCommand { get; }
 
-    public WorkoutViewModel(WorkoutRepository repository)
+    public WorkoutViewModel(WorkoutRepository workoutRepository, RoutineRepository routineRepository)
     {
-        _repository = repository;
-        Exercises = new ObservableCollection<WorkoutExercise>();
-        SelectedExerciseSets = new ObservableCollection<WorkoutSet>();
+        _workoutRepository = workoutRepository;
+        _routineRepository = routineRepository;
 
+        StartWorkoutCommand = new RelayCommand(StartWorkout);
         AddSetCommand = new RelayCommand(AddSet);
         DeleteSetCommand = new RelayCommand(DeleteSet);
+        FinishWorkoutCommand = new RelayCommand(FinishWorkout);
+
+        LoadRoutines();
+    }
+
+    private void FinishWorkout()
+    {
+        var result = MessageBox.Show(
+            "¿Quieres finalizar el entrenamiento?",
+            "Finalizar entrenamiento",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes)
+            return;
+
+        CurrentSession = null;
+        SelectedWorkoutExercise = null;
+        SelectedWorkoutSet = null;
+
+        Exercises.Clear();
+        SelectedExerciseSets.Clear();
+
+        Reps = 0;
+        Weight = 0;
+
+        IsSessionActive = false;
+    }
+
+    private void LoadRoutines()
+    {
+        var routines = _routineRepository.GetAllAsync().Result;
+
+        Routines.Clear();
+
+        foreach (var routine in routines)
+            Routines.Add(routine);
+    }
+
+    private void LoadRoutineDays()
+    {
+        RoutineDays.Clear();
+        SelectedRoutineDay = null;
+
+        if (SelectedRoutine is null)
+            return;
+
+        var days = _routineRepository.GetDaysByRoutineIdAsync(SelectedRoutine.Id).Result;
+
+        foreach (var day in days)
+            RoutineDays.Add(day);
+    }
+
+    private void StartWorkout()
+    {
+        if (SelectedRoutineDay is null)
+        {
+            MessageBox.Show("Selecciona una rutina y un día antes de iniciar el entrenamiento.");
+            return;
+        }
+
+        var session = _workoutRepository
+            .CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id)
+            .Result;
+
+        LoadSession(session.Id);
+        IsSessionActive = true;
     }
 
     public void LoadSession(int sessionId)
     {
-        var session = _repository.GetSessionByIdAsync(sessionId).Result;
+        var session = _workoutRepository.GetSessionByIdAsync(sessionId).Result;
 
         if (session is null)
             return;
@@ -98,6 +204,7 @@ public class WorkoutViewModel : BaseViewModel
             Exercises.Add(ex);
 
         SelectedExerciseSets.Clear();
+        SelectedWorkoutExercise = Exercises.FirstOrDefault();
     }
 
     private void LoadSelectedExerciseSets()
@@ -138,9 +245,10 @@ public class WorkoutViewModel : BaseViewModel
             Weight = Weight
         };
 
-        _repository.AddSetAsync(workoutSet).Wait();
+        _workoutRepository.AddSetAsync(workoutSet).Wait();
 
         ReloadCurrentSession();
+
         Reps = 0;
         Weight = 0;
     }
@@ -153,7 +261,7 @@ public class WorkoutViewModel : BaseViewModel
             return;
         }
 
-        _repository.DeleteSetAsync(SelectedWorkoutSet).Wait();
+        _workoutRepository.DeleteSetAsync(SelectedWorkoutSet).Wait();
 
         ReloadCurrentSession();
     }
@@ -169,8 +277,6 @@ public class WorkoutViewModel : BaseViewModel
         LoadSession(currentSessionId);
 
         if (selectedExerciseId.HasValue)
-        {
             SelectedWorkoutExercise = Exercises.FirstOrDefault(e => e.Id == selectedExerciseId.Value);
-        }
     }
 }

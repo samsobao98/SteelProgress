@@ -28,7 +28,7 @@ public partial class MainWindow : Window
             BtnRutinasText.Visibility = Visibility.Collapsed;
             BtnEntrenamientoText.Visibility = Visibility.Collapsed;
             BtnHistorialText.Visibility = Visibility.Collapsed;
-            BtnProgresoText.Visibility = Visibility.Collapsed;
+            BtnEjerciciosText.Visibility = Visibility.Collapsed;      
         }
         else
         {
@@ -41,8 +41,18 @@ public partial class MainWindow : Window
             BtnRutinasText.Visibility = Visibility.Visible;
             BtnEntrenamientoText.Visibility = Visibility.Visible;
             BtnHistorialText.Visibility = Visibility.Visible;
-            BtnProgresoText.Visibility = Visibility.Visible;
+            BtnEjerciciosText.Visibility = Visibility.Visible;
         }
+    }
+
+    public void NavigateToProgress(int exerciseId)
+    {
+        MainContent.Content = new ProgressView(exerciseId);
+    }
+
+    private void OpenExerciseView_Click(object sender, RoutedEventArgs e)
+    {
+        MainContent.Content = new ExerciseView();
     }
 
     private void OpenHomeView_Click(object sender, RoutedEventArgs e)
@@ -65,8 +75,4 @@ public partial class MainWindow : Window
         MainContent.Content = new HistoryView();
     }
 
-    private void OpenProgressWindow_Click(object sender, RoutedEventArgs e)
-    {
-        MainContent.Content = new ProgressView();
-    }
 }

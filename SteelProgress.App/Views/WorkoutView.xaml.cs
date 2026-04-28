@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using SteelProgress.App.ViewModels;
 using SteelProgress.Data.Repositories;
 
@@ -11,18 +10,9 @@ public partial class WorkoutView : UserControl
     {
         InitializeComponent();
 
-        var sessionId = App.DbContext.WorkoutSessions
-            .OrderByDescending(ws => ws.Id)
-            .Select(ws => ws.Id)
-            .FirstOrDefault();
+        var workoutRepository = new WorkoutRepository(App.DbContext);
+        var routineRepository = new RoutineRepository(App.DbContext);
 
-        if (sessionId == 0)
-            return;
-
-        var repo = new WorkoutRepository(App.DbContext);
-        var vm = new WorkoutViewModel(repo);
-
-        DataContext = vm;
-        vm.LoadSession(sessionId);
+        DataContext = new WorkoutViewModel(workoutRepository, routineRepository);
     }
 }
