@@ -425,3 +425,91 @@ Esto permite:
 - Mejora notable en la legibilidad de tablas
 - Interacciones más suaves y agradables
 - Base preparada para animaciones más avanzadas
+
+
+## 28/04/2026 — Flujo de entrenamiento y rediseño del historial
+
+Con la ayuda de la IA se continuo haciendo ajustes y mejoras en el diseño e interfaz de la APP
+
+---
+
+### Estados en entrenamiento
+
+Se rediseñó `WorkoutView` con dos estados:
+
+- Preparación: selección de rutina y día
+- Entrenamiento activo: registro de series
+
+Se añadió `IsSessionActive` para controlar el cambio entre vistas.
+
+---
+
+### Creación de sesiones
+
+Se implementó la creación de `WorkoutSession` desde un `RoutineDay`, copiando automáticamente sus ejercicios.
+
+Flujo final:
+Rutina → Día → Sesión → Entrenamiento
+
+---
+
+### Persistencia y finalización
+
+Las series se guardan directamente al registrarlas.
+
+Se añadió botón de **Finalizar entrenamiento** para cerrar la sesión y mejorar la UX.
+
+---
+
+### Rediseño del historial
+
+Se rehizo `HistoryView` centrado en una sesión seleccionada (por defecto la más reciente), mostrando:
+
+- Ejercicios realizados
+- Series registradas
+
+---
+
+### Comparación de rendimiento
+
+Se añadió comparación automática con la sesión anterior del mismo día:
+
+- Mejora de peso
+- Mejora de reps
+- Igual / inferior rendimiento
+
+---
+
+### Integración con progreso
+
+Se añadió acceso a gráfica desde historial:
+
+- Botón “Ver progreso del ejercicio”
+- `ProgressView` ahora recibe `exerciseId`
+
+---
+
+### Simplificación de navegación
+
+Se eliminó la sección “Progreso” del sidebar.
+
+Acceso a gráficas ahora es contextual desde historial.
+
+---
+
+### Converters
+
+Se añadieron:
+
+- `BoolToVisibilityConverter`
+- `InverseBoolToVisibilityConverter`
+
+para gestionar los estados de la vista.
+
+---
+
+### Resultado
+
+- Flujo de entrenamiento completo
+- Historial centrado en progreso real
+- Navegación más limpia y coherente
