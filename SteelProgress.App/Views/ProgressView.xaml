@@ -7,7 +7,6 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -16,15 +15,17 @@
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="1"
                 CornerRadius="10"
-                Padding="20"
+                Padding="22"
                 Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="Progreso"
+                <TextBlock Text="Progreso del ejercicio"
                            FontSize="30"
                            FontWeight="Bold"/>
-                <TextBlock Text="Visualiza la evolución de tus ejercicios"
+
+                <TextBlock Text="{Binding SelectedExercise.Name, TargetNullValue=Evolución del peso máximo por sesión}"
                            Foreground="{StaticResource TextSecondary}"
-                           Margin="0,5,0,0"/>
+                           FontSize="16"
+                           Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 
@@ -33,26 +34,7 @@
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="1"
                 CornerRadius="10"
-                Padding="20"
-                Margin="0,0,0,20">
-            <StackPanel>
-                <TextBlock Text="Selecciona un ejercicio"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Margin="0,0,0,10"/>
-                <ComboBox ItemsSource="{Binding Exercises}"
-                          SelectedItem="{Binding SelectedExercise}"
-                          DisplayMemberPath="Name"
-                          Height="36"/>
-            </StackPanel>
-        </Border>
-
-        <Border Grid.Row="2"
-                Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="20">
+                Padding="24">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -66,7 +48,11 @@
 
                 <lvc:CartesianChart Grid.Row="1"
                                     Series="{Binding Series}"
-                                    XAxes="{Binding XAxes}"/>
+                                    XAxes="{Binding XAxes}"
+                                    YAxes="{Binding YAxes}"
+                                    Background="Transparent"
+                                    LegendPosition="Hidden"
+                                    AnimationsSpeed="0:0:0.5"/>
             </Grid>
         </Border>
     </Grid>

@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SteelProgress"
-        Height="750"
-        Width="1250"
+        Height="700"
+        Width="1100"
         Background="{StaticResource BgMain}">
 
     <Grid>
@@ -13,48 +13,35 @@
         </Grid.ColumnDefinitions>
 
         <!-- SIDEBAR -->
-        <Border Grid.Column="0"
-                Background="{StaticResource BgSecondary}"
+        <Border Background="{StaticResource BgSecondary}"
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="0,0,1,0">
+
             <Grid Margin="10">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- BOTÓN TOGGLE -->
-                <Button x:Name="ToggleSidebarButton"
-                        Grid.Row="0"
+                <!-- BOTÓN COLAPSAR -->
+                <Button Grid.Row="0"
                         Content="☰"
-                        Width="45"
-                        Height="45"
+                        Width="40"
+                        Height="40"
                         HorizontalAlignment="Left"
+                        Margin="0,0,0,20"
                         Click="ToggleSidebar_Click"/>
 
-                <!-- LOGO / TÍTULO -->
-                <StackPanel Grid.Row="1" Margin="0,20,0,20">
-                    <TextBlock x:Name="SidebarTitle"
-                               Text="SteelProgress"
-                               FontSize="24"
-                               FontWeight="Bold"
-                               Margin="10,0,0,5"/>
-                    <TextBlock x:Name="SidebarSubtitle"
-                               Text="Training Tracker"
-                               Foreground="{StaticResource TextSecondary}"
-                               Margin="10,0,0,0"/>
-                </StackPanel>
-
                 <!-- MENÚ -->
-                <StackPanel Grid.Row="2">
+                <StackPanel Grid.Row="1" Margin="0,20,0,0">
+
                     <Button x:Name="BtnInicio"
                             Height="45"
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"
                             Click="OpenHomeView_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🏠" FontSize="16" Margin="0,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <TextBlock Text="🏠" Margin="0,0,10,0"/>
                             <TextBlock x:Name="BtnInicioText" Text="Inicio"/>
                         </StackPanel>
                     </Button>
@@ -64,8 +51,8 @@
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"
                             Click="OpenExerciseView_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="💪" FontSize="16" Margin="0,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <TextBlock Text="💪" Margin="0,0,10,0"/>
                             <TextBlock x:Name="BtnEjerciciosText" Text="Ejercicios"/>
                         </StackPanel>
                     </Button>
@@ -75,8 +62,8 @@
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"
                             Click="OpenRoutineWindow_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📋" FontSize="16" Margin="0,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <TextBlock Text="📋" Margin="0,0,10,0"/>
                             <TextBlock x:Name="BtnRutinasText" Text="Rutinas"/>
                         </StackPanel>
                     </Button>
@@ -86,8 +73,8 @@
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"
                             Click="OpenWorkoutWindow_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🏋" FontSize="16" Margin="0,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <TextBlock Text="🏋" Margin="0,0,10,0"/>
                             <TextBlock x:Name="BtnEntrenamientoText" Text="Entrenamiento"/>
                         </StackPanel>
                     </Button>
@@ -97,8 +84,8 @@
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"
                             Click="OpenHistoryWindow_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🕘" FontSize="16" Margin="0,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                            <TextBlock Text="🕘" Margin="0,0,10,0"/>
                             <TextBlock x:Name="BtnHistorialText" Text="Historial"/>
                         </StackPanel>
                     </Button>
@@ -108,8 +95,8 @@
         </Border>
 
         <!-- CONTENIDO -->
-        <Grid Grid.Column="1">
-            <ContentControl x:Name="MainContent"/>
-        </Grid>
+        <ContentControl x:Name="MainContent"
+                Grid.Column="1"
+                Opacity="1"/>
     </Grid>
 </Window>

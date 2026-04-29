@@ -1,9 +1,12 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.EntityFrameworkCore;
+using SkiaSharp;
 using SteelProgress.Domain.Entities;
 using System.Collections.ObjectModel;
+
 
 namespace SteelProgress.App.ViewModels;
 
@@ -23,6 +26,7 @@ public class ProgressViewModel : BaseViewModel
         }
     }
 
+    public Axis[] YAxes { get; set; } = Array.Empty<Axis>();
     public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
     public Axis[] XAxes { get; set; } = Array.Empty<Axis>();
 
@@ -86,19 +90,39 @@ public class ProgressViewModel : BaseViewModel
 
         Series = new ISeries[]
         {
-        new LineSeries<ObservablePoint>
-        {
-            Values = values
-        }
+            new LineSeries<ObservablePoint>
+            {
+                Values = values,
+                Stroke = new SolidColorPaint(SKColor.Parse("#00FF88")) { StrokeThickness = 3 },
+                GeometryStroke = new SolidColorPaint(SKColor.Parse("#00FF88")) { StrokeThickness = 2 },
+                GeometryFill = new SolidColorPaint(SKColor.Parse("#121212")),
+                GeometrySize = 9,
+                Fill = null
+            }
         };
 
         XAxes = new Axis[]
         {
-        new Axis
-        {
-            Labeler = value => new DateTime((long)value).ToString("dd/MM")
-        }
+            new Axis
+            {
+                Labeler = value => new DateTime((long)value).ToString("dd/MM"),
+                LabelsPaint = new SolidColorPaint(SKColor.Parse("#B3B3B3")),
+                SeparatorsPaint = null
+            }
         };
+
+        YAxes = new Axis[]
+        {
+            new Axis
+            {
+                LabelsPaint = new SolidColorPaint(SKColor.Parse("#B3B3B3")),
+                SeparatorsPaint = null
+            }
+        };
+
+        OnPropertyChanged(nameof(Series));
+        OnPropertyChanged(nameof(XAxes));
+        OnPropertyChanged(nameof(YAxes));
 
         OnPropertyChanged(nameof(Series));
         OnPropertyChanged(nameof(XAxes));
