@@ -513,3 +513,52 @@ para gestionar los estados de la vista.
 - Flujo de entrenamiento completo
 - Historial centrado en progreso real
 - Navegación más limpia y coherente
+
+
+## 29/04/2026 — Mejoras visuales, navegación y progreso
+
+Se continúan buscando mejoras en la visualización y el manejo de la interfaz para lograr conseguir una app lo más
+agradable y cómoda posible para el usuario.
+
+---
+
+### Sidebar y navegación
+
+- Implementación de botón activo mediante borde lateral
+- Mejora de la navegación entre vistas con transición fade (entrada/salida)
+
+---
+
+### Animaciones y experiencia de usuario
+
+- Mejora del comportamiento visual en `ListBoxItem` (hover + selección estable)
+- Intento de animación en tabs, finalmente se prioriza estabilidad sobre animación
+
+---
+
+### Mejora de ComboBox
+
+- Corrección de colores en texto y fondo
+- Ajuste del ancho del desplegable para que coincida con el control
+- Integración visual con el tema oscuro de la app
+
+---
+
+### Rediseño de la vista de progreso
+
+- Eliminación del selector de ejercicio (ahora se accede desde historial)
+- Conversión a vista contextual (progreso del ejercicio seleccionado)
+- Mejora estética del gráfico:
+  - Línea verde (color de acento)
+  - Eliminación de ruido visual (sin separadores)
+  - Puntos visibles en cada sesión
+  - Animación de carga
+
+---
+
+### Resultado
+
+- Navegación más fluida y clara
+- Interfaz más limpia y coherente
+- Gráfica de progreso integrada y visualmente atractiva
+- Mejora notable en la experiencia de usuario
