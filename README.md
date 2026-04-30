@@ -562,3 +562,62 @@ agradable y cómoda posible para el usuario.
 - Interfaz más limpia y coherente
 - Gráfica de progreso integrada y visualmente atractiva
 - Mejora notable en la experiencia de usuario
+
+
+## 30/04/2026 — Sistema de notificaciones, modal y pantalla de bienvenida
+
+---
+
+### Sistema de notificaciones (Toast)
+
+- Creación de `NotificationService` global
+- Implementación de notificaciones tipo toast en `MainWindow`
+- Sustitución de `MessageBox.Show` en avisos no críticos
+- Tipos de notificación:
+  - Info
+  - Success
+  - Error
+- Animación de entrada/salida (fade)
+
+---
+
+### Modal de confirmación personalizado
+
+- Creación de `ConfirmDialogService`
+- Implementación de modal integrado en `MainWindow`
+- Sustitución de `MessageBox` en acciones críticas:
+  - Finalizar entrenamiento
+  - Eliminar rutinas
+  - Eliminar ejercicios
+- Uso de `async/await` para evitar bloqueo de UI
+
+---
+
+### Pantalla de bienvenida (WelcomeView)
+
+- Creación de `WelcomeView` como pantalla inicial
+- Ocultación del sidebar al inicio
+- Navegación a `HomeView` mediante botón "Empezar"
+- Compuesta de:
+  - Card central
+  - Mensaje de valor
+  - Iconos representativos
+  - Fondo decorativo con acento
+
+---
+
+### Animaciones en bienvenida
+
+- Animación de entrada de la card principal:
+  - Fade in
+  - Desplazamiento vertical (TranslateTransform)
+- Mejora de percepción visual y fluidez
+
+---
+
+### Resultado
+
+- Eliminación de ventanas externas (MessageBox)
+- UI más consistente y moderna
+- Flujo inicial de la app más profesional
+- Experiencia de usuario notablemente mejorada
