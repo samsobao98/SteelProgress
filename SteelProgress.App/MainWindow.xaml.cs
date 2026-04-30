@@ -2,6 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using SteelProgress.App.Services;
+using System.Windows.Threading;
 using System.Windows.Media.Animation;
 
 namespace SteelProgress.App;
@@ -9,12 +11,55 @@ namespace SteelProgress.App;
 public partial class MainWindow : Window
 {
     private bool _isSidebarCollapsed = false;
+    private readonly DispatcherTimer _toastTimer = new();
+    private TaskCompletionSource<bool>? _confirmTcs;
 
     public MainWindow()
     {
         InitializeComponent();
+        MainContent.Content = new WelcomeView();
+        HideSidebar();
+        ConfirmDialogService.OnConfirmationRequested += ShowConfirmDialogAsync;
+    }
+
+    public void GoToHome()
+    {
         MainContent.Content = new HomeView();
         SetActiveButton(BtnInicio);
+        ShowSidebar();
+    }
+
+    private void HideSidebar()
+    {
+        SidebarColumn.Width = new GridLength(0);
+    }
+
+    private void ShowSidebar()
+    {
+        SidebarColumn.Width = new GridLength(220);
+    }
+
+    private Task<bool> ShowConfirmDialogAsync(string title, string message)
+    {
+        ConfirmTitle.Text = title;
+        ConfirmMessage.Text = message;
+
+        ConfirmOverlay.Visibility = Visibility.Visible;
+
+        _confirmTcs = new TaskCompletionSource<bool>();
+        return _confirmTcs.Task;
+    }
+
+    private void AcceptConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        ConfirmOverlay.Visibility = Visibility.Collapsed;
+        _confirmTcs?.SetResult(true);
+    }
+
+    private void CancelConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        ConfirmOverlay.Visibility = Visibility.Collapsed;
+        _confirmTcs?.SetResult(false);
     }
 
     private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
@@ -70,9 +115,73 @@ public partial class MainWindow : Window
         MainContent.BeginAnimation(OpacityProperty, fadeOut);
     }
 
+    private void ShowToast(string message, NotificationType type)
+    {
+        ToastMessage.Text = message;
+
+        switch (type)
+        {
+            case NotificationType.Success:
+                ToastTitle.Text = "Correcto";
+                ToastBorder.BorderBrush = (Brush)FindResource("Accent");
+                break;
+
+            case NotificationType.Error:
+                ToastTitle.Text = "Error";
+                ToastBorder.BorderBrush = Brushes.IndianRed;
+                break;
+
+            default:
+                ToastTitle.Text = "Aviso";
+                ToastBorder.BorderBrush = (Brush)FindResource("BorderColor");
+                break;
+        }
+
+        ToastBorder.Visibility = Visibility.Visible;
+
+        var fadeIn = new DoubleAnimation
+        {
+            From = 0,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(180)
+        };
+
+        ToastBorder.BeginAnimation(OpacityProperty, fadeIn);
+
+        _toastTimer.Stop();
+        _toastTimer.Start();
+    }
+
+    private void HideToast()
+    {
+        var fadeOut = new DoubleAnimation
+        {
+            From = 1,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(180)
+        };
+
+        fadeOut.Completed += (_, _) =>
+        {
+            ToastBorder.Visibility = Visibility.Collapsed;
+        };
+
+        ToastBorder.BeginAnimation(OpacityProperty, fadeOut);
+    }
+
     private void SetActiveButton(Button activeButton)
     {
         ResetButton(BtnInicio);
+
+        NotificationService.OnNotificationRequested += ShowToast;
+
+        _toastTimer.Interval = TimeSpan.FromSeconds(3);
+        _toastTimer.Tick += (_, _) =>
+        {
+            _toastTimer.Stop();
+            HideToast();
+        };
+
         ResetButton(BtnEjercicios);
         ResetButton(BtnRutinas);
         ResetButton(BtnEntrenamiento);

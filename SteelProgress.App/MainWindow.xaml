@@ -98,5 +98,76 @@
         <ContentControl x:Name="MainContent"
                 Grid.Column="1"
                 Opacity="1"/>
+
+
+        <Border x:Name="ToastBorder"
+        Grid.Column="1"
+        HorizontalAlignment="Right"
+        VerticalAlignment="Top"
+        Width="320"
+        Background="{StaticResource BgSecondary}"
+        BorderBrush="{StaticResource BorderColor}"
+        BorderThickness="1"
+        CornerRadius="10"
+        Padding="16"
+        Margin="0,20,20,0"
+        Visibility="Collapsed"
+        Opacity="0">
+
+            <StackPanel>
+                <TextBlock x:Name="ToastTitle"
+                   Text="Aviso"
+                   FontSize="16"
+                   FontWeight="Bold"/>
+
+                <TextBlock x:Name="ToastMessage"
+                   TextWrapping="Wrap"
+                   Foreground="{StaticResource TextSecondary}"
+                   Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+        <Grid x:Name="ConfirmOverlay"
+      Grid.Column="1"
+      Background="#99000000"
+      Visibility="Collapsed">
+
+            <Border Width="420"
+            Background="{StaticResource BgSecondary}"
+            BorderBrush="{StaticResource BorderColor}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="24"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+                <StackPanel>
+                    <TextBlock x:Name="ConfirmTitle"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+
+                    <TextBlock x:Name="ConfirmMessage"
+                       Foreground="{StaticResource TextSecondary}"
+                       TextWrapping="Wrap"
+                       FontSize="15"
+                       Margin="0,0,0,24"/>
+
+                    <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                        <Button Content="Cancelar"
+                        Width="110"
+                        Height="36"
+                        Margin="0,0,10,0"
+                        Click="CancelConfirm_Click"/>
+
+                        <Button Content="Confirmar"
+                        Width="110"
+                        Height="36"
+                        Click="AcceptConfirm_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
+    
 </Window>

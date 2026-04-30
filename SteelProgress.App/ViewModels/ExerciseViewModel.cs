@@ -4,6 +4,7 @@ using SteelProgress.Domain.Entities;
 using System.Windows;
 using System.Windows.Input;
 using SteelProgress.App.Commands;
+using SteelProgress.App.Services;
 
 namespace SteelProgress.App.ViewModels;
 //Carga los ejercicios, los guarda en una ObservableCollection para enlazarla en una interfaz posteriormente
@@ -112,15 +113,13 @@ public class ExerciseViewModel : BaseViewModel
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            MessageBox.Show("El nombre del ejercicio es obligatorio.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("El nombre del ejercicio es obligatorio.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(muscleGroup))
         {
-            MessageBox.Show("El grupo muscular es obligatorio.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("El grupo muscular es obligatorio.");
             return;
         }
 
@@ -128,8 +127,7 @@ public class ExerciseViewModel : BaseViewModel
 
         if (exists)
         {
-            MessageBox.Show("Ya existe un ejercicio con ese nombre.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("Ya existe un ejercicio con ese nombre.");
             return;
         }
 
@@ -144,16 +142,14 @@ public class ExerciseViewModel : BaseViewModel
         LoadExercises();
         ClearForm();
 
-        MessageBox.Show("Ejercicio añadido correctamente.", "Información",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+       NotificationService.Success("Ejercicio añadido correctamente.");
     }
 
     private void UpdateExercise()
     {
         if (SelectedExercise is null)
         {
-            MessageBox.Show("Selecciona un ejercicio para actualizar.", "Información",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            NotificationService.Info("Selecciona un ejercicio para actualizar.");
             return;
         }
 
@@ -163,15 +159,13 @@ public class ExerciseViewModel : BaseViewModel
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            MessageBox.Show("El nombre del ejercicio es obligatorio.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("El nombre del ejercicio es obligatorio.");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(muscleGroup))
         {
-            MessageBox.Show("El grupo muscular es obligatorio.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("El grupo muscular es obligatorio.");
             return;
         }
 
@@ -181,8 +175,7 @@ public class ExerciseViewModel : BaseViewModel
 
         if (duplicateExists)
         {
-            MessageBox.Show("Ya existe otro ejercicio con ese nombre.", "Validación",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            NotificationService.Error("Ya existe otro ejercicio con ese nombre.");
             return;
         }
 
@@ -194,28 +187,21 @@ public class ExerciseViewModel : BaseViewModel
         LoadExercises();
         ClearForm();
 
-        MessageBox.Show("Ejercicio actualizado correctamente.", "Información",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        NotificationService.Success("Ejercicio actualizado correctamente.");
     }
 
-    private void DeleteExercise()
+    private async void DeleteExercise()
     {
         if (SelectedExercise is null)
         {
-            MessageBox.Show("Selecciona un ejercicio para eliminar.",
-                "Información",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            NotificationService.Info("Selecciona un ejercicio para eliminar.");
             return;
         }
 
-        var result = MessageBox.Show(
-            $"¿Seguro que quieres eliminar '{SelectedExercise.Name}'?",
-            "Confirmar eliminación",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
+        var confirmed = await ConfirmDialogService
+    .ConfirmAsync("Eliminar Ejercicio", $"¿Seguro que quieres eliminar '{SelectedExercise.Name}'?");
 
-        if (result != MessageBoxResult.Yes)
+        if (!confirmed)
             return;
 
         _repository.DeleteAsync(SelectedExercise).Wait();

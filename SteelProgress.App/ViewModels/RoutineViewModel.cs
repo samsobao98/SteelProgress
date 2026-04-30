@@ -9,6 +9,7 @@ using System.Windows.Input;
 using SteelProgress.App.Commands;
 using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
+using SteelProgress.App.Services;
 
 
 namespace SteelProgress.App.ViewModels;
@@ -141,7 +142,7 @@ public class RoutineViewModel : BaseViewModel
     {
         if (SelectedRoutineDay is null || SelectedExerciseToAdd is null)
         {
-            MessageBox.Show("Selecciona un día y un ejercicio.");
+            NotificationService.Error("Selecciona un día y un ejercicio.");
             return;
         }
 
@@ -159,13 +160,19 @@ public class RoutineViewModel : BaseViewModel
         LoadDayExercises();
     }
 
-    private void DeleteExerciseFromDay()
+    private async void DeleteExerciseFromDay()
     {
         if (SelectedDayExercise is null)
         {
-            MessageBox.Show("Selecciona un ejercicio.");
+            NotificationService.Error("Selecciona un ejercicio.");
             return;
         }
+
+        var confirmed = await ConfirmDialogService
+      .ConfirmAsync("Eliminar ejercicio", $"¿Seguro que quieres eliminar este ejercicio?");
+
+        if (!confirmed)
+            return;
 
         _repository.DeleteExerciseFromDayAsync(SelectedDayExercise).Wait();
 
@@ -203,13 +210,13 @@ public class RoutineViewModel : BaseViewModel
     {
         if (SelectedRoutine is null)
         {
-            MessageBox.Show("Selecciona una rutina antes de añadir un día");
+            NotificationService.Error("Selecciona una rutina antes de añadir un día");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(DayName))
         {
-            MessageBox.Show("El nombre del día es obligatorio");
+            NotificationService.Error("El nombre del día es obligatorio");
             return;
         }
 
@@ -227,20 +234,19 @@ public class RoutineViewModel : BaseViewModel
         DayName = string.Empty;
     }
 
-    private void DeleteDay()
+    private async void DeleteDay()
     {
         if (SelectedRoutineDay is null)
         {
-            MessageBox.Show("Selecciona un día para eliminar.");
+            NotificationService.Error("Selecciona un día para eliminar.");
             return;
         }
 
-        var result = MessageBox.Show($"¿Seguro que quieres eliminar el día {SelectedRoutineDay.Name}?", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var confirmed = await ConfirmDialogService
+        .ConfirmAsync("Eliminar día", $"¿Seguro que quieres eliminar el día {SelectedRoutineDay.Name}?");
 
-        if (result != MessageBoxResult.Yes)
-        {
-            return;
-        }
+            if (!confirmed)
+                return;
 
         _repository.DeleteDayAsync(SelectedRoutineDay).Wait();
 
@@ -264,7 +270,7 @@ public class RoutineViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(Name))
         {
-            MessageBox.Show("El nombre es obligatorio");
+            NotificationService.Error("El nombre es obligatorio");
             return;
         }
 
@@ -280,13 +286,19 @@ public class RoutineViewModel : BaseViewModel
         ClearForm();
     }
 
-    private void DeleteRoutine()
+    private async void DeleteRoutine()
     {
         if (SelectedRoutine is null)
         {
-            MessageBox.Show("Selecciona una rutina");
+            NotificationService.Error("Selecciona una rutina");
             return;
         }
+
+        var confirmed = await ConfirmDialogService
+      .ConfirmAsync("Eliminar rutina", $"¿Seguro que quieres eliminar la rutina {SelectedRoutine.Name}?");
+
+        if (!confirmed)
+            return;
 
         _repository.DeleteAsync(SelectedRoutine).Wait();
 

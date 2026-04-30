@@ -4,6 +4,7 @@ using System.Windows.Input;
 using SteelProgress.App.Commands;
 using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
+using SteelProgress.App.Services;
 
 namespace SteelProgress.App.ViewModels;
 
@@ -125,15 +126,12 @@ public class WorkoutViewModel : BaseViewModel
         LoadRoutines();
     }
 
-    private void FinishWorkout()
+    private async void FinishWorkout()
     {
-        var result = MessageBox.Show(
-            "¿Quieres finalizar el entrenamiento?",
-            "Finalizar entrenamiento",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
+        var confirmed = await ConfirmDialogService
+     .ConfirmAsync("Finalizar entrenamiento", "¿Quieres finalizar el entrenamiento?");
 
-        if (result != MessageBoxResult.Yes)
+        if (!confirmed)
             return;
 
         CurrentSession = null;
@@ -177,7 +175,7 @@ public class WorkoutViewModel : BaseViewModel
     {
         if (SelectedRoutineDay is null)
         {
-            MessageBox.Show("Selecciona una rutina y un día antes de iniciar el entrenamiento.");
+            NotificationService.Error("Selecciona una rutina y un día antes de iniciar el entrenamiento.");
             return;
         }
 
@@ -222,19 +220,19 @@ public class WorkoutViewModel : BaseViewModel
     {
         if (SelectedWorkoutExercise is null)
         {
-            MessageBox.Show("Selecciona un ejercicio.");
+            NotificationService.Error("Selecciona un ejercicio.");
             return;
         }
 
         if (Reps <= 0)
         {
-            MessageBox.Show("Las repeticiones deben ser mayores que 0.");
+            NotificationService.Error("Las repeticiones deben ser mayores que 0.");
             return;
         }
 
         if (Weight < 0)
         {
-            MessageBox.Show("El peso no puede ser negativo.");
+            NotificationService.Error("El peso no puede ser negativo.");
             return;
         }
 
@@ -257,7 +255,7 @@ public class WorkoutViewModel : BaseViewModel
     {
         if (SelectedWorkoutSet is null)
         {
-            MessageBox.Show("Selecciona una serie.");
+            NotificationService.Error("Selecciona una serie.");
             return;
         }
 
