@@ -71,4 +71,10 @@ public class RoutineRepository
         _context.RoutineDayExercises.Remove(rde);
         await _context.SaveChangesAsync();
     }
+
+    public void UpdateRoutineDayExercise(RoutineDayExercise exercise)
+    {
+        _context.RoutineDayExercises.Update(exercise);
+        _context.SaveChanges();
+    }
 }

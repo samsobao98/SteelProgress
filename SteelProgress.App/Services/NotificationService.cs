@@ -1,5 +1,6 @@
 ﻿namespace SteelProgress.App.Services;
 
+// Servicio global para mostrar notificaciones tipo toast en la UI
 public static class NotificationService
 {
     public static event Action<string, NotificationType>? OnNotificationRequested;

@@ -145,6 +145,7 @@ public class WorkoutViewModel : BaseViewModel
         Weight = 0;
 
         IsSessionActive = false;
+        WorkoutStateService.IsWorkoutActive = false;
     }
 
     private void LoadRoutines()
@@ -185,6 +186,7 @@ public class WorkoutViewModel : BaseViewModel
 
         LoadSession(session.Id);
         IsSessionActive = true;
+        WorkoutStateService.IsWorkoutActive = true;
     }
 
     public void LoadSession(int sessionId)
@@ -216,6 +218,7 @@ public class WorkoutViewModel : BaseViewModel
             SelectedExerciseSets.Add(set);
     }
 
+    // Guarda una serie asociada al ejercicio seleccionado en la sesión actual
     private void AddSet()
     {
         if (SelectedWorkoutExercise is null)

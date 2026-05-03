@@ -44,6 +44,9 @@ public class RoutineViewModel : BaseViewModel
     public ICommand AddDayCommand { get; }
     public ICommand DeleteDayCommand { get; }
 
+    public ICommand MoveExerciseUpCommand { get; }
+    public ICommand MoveExerciseDownCommand { get; }
+
     private readonly RoutineRepository _repository;
 
     public ObservableCollection<Routine> Routines { get; set; }
@@ -118,6 +121,9 @@ public class RoutineViewModel : BaseViewModel
         AddExerciseToDayCommand = new RelayCommand(AddExerciseToDay);
         DeleteExerciseFromDayCommand = new RelayCommand(DeleteExerciseFromDay);
 
+        MoveExerciseUpCommand = new RelayCommand(MoveExerciseUp);
+        MoveExerciseDownCommand = new RelayCommand(MoveExerciseDown);
+
         LoadAllExercises();
 
         LoadRoutines();
@@ -138,6 +144,53 @@ public class RoutineViewModel : BaseViewModel
             DayExercises.Add(item);
     }
 
+
+    private void MoveExerciseUp()
+    {
+        if (SelectedDayExercise is null)
+            return;
+
+        var currentIndex = DayExercises.IndexOf(SelectedDayExercise);
+
+        if (currentIndex <= 0)
+            return;
+
+        var previous = DayExercises[currentIndex - 1];
+
+        SwapExerciseOrder(SelectedDayExercise, previous);
+    }
+
+    private void MoveExerciseDown()
+    {
+        if (SelectedDayExercise is null)
+            return;
+
+        var currentIndex = DayExercises.IndexOf(SelectedDayExercise);
+
+        if (currentIndex < 0 || currentIndex >= DayExercises.Count - 1)
+            return;
+
+        var next = DayExercises[currentIndex + 1];
+
+        SwapExerciseOrder(SelectedDayExercise, next);
+    }
+
+    private void SwapExerciseOrder(RoutineDayExercise first, RoutineDayExercise second)
+    {
+        int tempOrder = first.Order;
+
+        first.Order = second.Order;
+        second.Order = tempOrder;
+
+        _repository.UpdateRoutineDayExercise(first);
+        _repository.UpdateRoutineDayExercise(second);
+
+        LoadDayExercises();
+
+        SelectedDayExercise = DayExercises
+            .FirstOrDefault(e => e.Id == first.Id);
+    }
+
     private void AddExerciseToDay()
     {
         if (SelectedRoutineDay is null || SelectedExerciseToAdd is null)
@@ -146,20 +199,38 @@ public class RoutineViewModel : BaseViewModel
             return;
         }
 
-        int order = DayExercises.Count + 1;
+        var nextOrder = DayExercises.Any()
+                        ? DayExercises.Max(e => e.Order) + 1
+                        : 1;
 
-        var rde = new RoutineDayExercise
+        var dayExercise = new RoutineDayExercise
         {
             RoutineDayId = SelectedRoutineDay.Id,
             ExerciseId = SelectedExerciseToAdd.Id,
-            Order = order
+            Order = nextOrder
         };
 
-        _repository.AddExerciseToDayAsync(rde).Wait();
+        _repository.AddExerciseToDayAsync(dayExercise).Wait();
 
         LoadDayExercises();
     }
 
+    private async Task ReorderDayExercises()
+    {
+        if (SelectedRoutineDay is null)
+            return;
+
+        var exercises = (await _repository
+            .GetExercisesByDayIdAsync(SelectedRoutineDay.Id))
+            .OrderBy(e => e.Order)
+            .ToList();
+
+        for (int i = 0; i < exercises.Count; i++)
+        {
+            exercises[i].Order = i + 1;
+            _repository.UpdateRoutineDayExercise(exercises[i]);
+        }
+    }
     private async void DeleteExerciseFromDay()
     {
         if (SelectedDayExercise is null)
@@ -174,7 +245,9 @@ public class RoutineViewModel : BaseViewModel
         if (!confirmed)
             return;
 
-        _repository.DeleteExerciseFromDayAsync(SelectedDayExercise).Wait();
+        await _repository.DeleteExerciseFromDayAsync(SelectedDayExercise);
+
+        await ReorderDayExercises();
 
         LoadDayExercises();
     }
@@ -242,11 +315,11 @@ public class RoutineViewModel : BaseViewModel
             return;
         }
 
-            var confirmed = await ConfirmDialogService
-        .ConfirmAsync("Eliminar día", $"¿Seguro que quieres eliminar el día {SelectedRoutineDay.Name}?");
+        var confirmed = await ConfirmDialogService
+    .ConfirmAsync("Eliminar día", $"¿Seguro que quieres eliminar el día {SelectedRoutineDay.Name}?");
 
-            if (!confirmed)
-                return;
+        if (!confirmed)
+            return;
 
         _repository.DeleteDayAsync(SelectedRoutineDay).Wait();
 

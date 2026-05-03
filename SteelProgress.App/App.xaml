@@ -109,6 +109,9 @@
         </Style>
 
             <Style TargetType="DataGrid">
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="CanUserAddRows" Value="False"/>
+                <Setter Property="CanUserDeleteRows" Value="False"/>
                 <Setter Property="Background" Value="{StaticResource BgSecondary}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
                 <Setter Property="RowBackground" Value="{StaticResource BgSecondary}"/>

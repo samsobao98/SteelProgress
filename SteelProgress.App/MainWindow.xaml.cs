@@ -5,7 +5,6 @@ using System.Windows.Media;
 using SteelProgress.App.Services;
 using System.Windows.Threading;
 using System.Windows.Media.Animation;
-using SteelProgress.App.Animations;
 namespace SteelProgress.App;
 
 public partial class MainWindow : Window
@@ -22,26 +21,47 @@ public partial class MainWindow : Window
         ConfirmDialogService.OnConfirmationRequested += ShowConfirmDialogAsync;
     }
 
-    private void Exit_Click(object sender, RoutedEventArgs e)
+    private async void Exit_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
+
         Application.Current.Shutdown();
     }
 
-    private void AnimateSidebarWidth(double targetWidth)
-{
-    var animation = new DoubleAnimation
+    //Controla el cambio de pestaña mientras hay un entrenamiento activo
+    private async Task<bool> CanNavigateAsync()
     {
-        To = targetWidth,
-        Duration = TimeSpan.FromMilliseconds(220),
-        EasingFunction = new QuadraticEase
+        if (!WorkoutStateService.IsWorkoutActive)
+            return true;
+
+        var confirmed = await ConfirmDialogService.ConfirmAsync(
+            "Entrenamiento activo",
+            "Hay un entrenamiento en curso. Si sales ahora, dejarás de ver la sesión activa. Las series ya registradas se mantendrán guardadas.");
+
+        if (confirmed)
+            WorkoutStateService.IsWorkoutActive = false;
+
+        return confirmed;
+    }
+
+    // Aplica animación suave al ancho del sidebar
+    private void AnimateSidebarWidth(double targetWidth)
+    {
+        var animation = new DoubleAnimation
         {
-            EasingMode = EasingMode.EaseInOut
-        }
-    };
+            To = targetWidth,
+            Duration = TimeSpan.FromMilliseconds(220),
+            EasingFunction = new QuadraticEase
+            {
+                EasingMode = EasingMode.EaseInOut
+            }
+        };
 
-    SidebarPanel.BeginAnimation(WidthProperty, animation);
-}
+        SidebarPanel.BeginAnimation(WidthProperty, animation);
+    }
 
+    // Navega a la pantalla principal tras la bienvenida, aplicando transición suave
     public async void GoToHome()
     {
         await Task.Delay(250);
@@ -95,6 +115,7 @@ public partial class MainWindow : Window
         _confirmTcs?.SetResult(false);
     }
 
+    // Controla la animación y visibilidad del sidebar (expandido/colapsado)
     private void ToggleSidebar_Click(object sender, RoutedEventArgs e)
     {
         _isSidebarCollapsed = !_isSidebarCollapsed;
@@ -248,28 +269,42 @@ public partial class MainWindow : Window
         button.BorderThickness = new Thickness(1);
     }
 
-    private void OpenHomeView_Click(object sender, RoutedEventArgs e)
+    private async void OpenHomeView_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
+
         Navigate(new HomeView(), BtnInicio);
     }
 
-    private void OpenExerciseView_Click(object sender, RoutedEventArgs e)
+    private async void OpenExerciseView_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
+
         Navigate(new ExerciseView(), BtnEjercicios);
     }
 
-    private void OpenRoutineWindow_Click(object sender, RoutedEventArgs e)
+    private async void OpenRoutineWindow_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
+
         Navigate(new RoutineView(), BtnRutinas);
     }
 
-    private void OpenWorkoutWindow_Click(object sender, RoutedEventArgs e)
+    private async void OpenWorkoutWindow_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
         Navigate(new WorkoutView(), BtnEntrenamiento);
     }
 
-    private void OpenHistoryWindow_Click(object sender, RoutedEventArgs e)
+    private async void OpenHistoryWindow_Click(object sender, RoutedEventArgs e)
     {
+        if (!await CanNavigateAsync())
+            return;
+
         Navigate(new HistoryView(), BtnHistorial);
     }
 

@@ -205,6 +205,8 @@
                                     <ColumnDefinition Width="3*"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" Margin="0,0,15,0">
@@ -228,6 +230,19 @@
                                         Height="36"
                                         Margin="0,24,0,0"
                                         Command="{Binding DeleteExerciseFromDayCommand}"/>
+                                <Button Grid.Column="3"
+                                        Content="Subir"
+                                        Width="100"
+                                        Height="36"
+                                        Margin="10,24,0,0"
+                                        Command="{Binding MoveExerciseUpCommand}"/>
+
+                                <Button Grid.Column="4"
+                                        Content="Bajar"
+                                        Width="100"
+                                        Height="36"
+                                        Margin="10,24,0,0"
+        Command="{Binding MoveExerciseDownCommand}"/>
                             </Grid>
                         </Border>
 

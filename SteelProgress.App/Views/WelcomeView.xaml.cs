@@ -15,6 +15,7 @@ public partial class WelcomeView : UserControl
         Loaded += WelcomeView_Loaded;
     }
 
+    // Animación de entrada escalonada de los elementos de la pantalla
     private void WelcomeView_Loaded(object sender, RoutedEventArgs e)
     {
         AnimateMainBorder();
@@ -85,6 +86,7 @@ public partial class WelcomeView : UserControl
         main?.GoToHome();
     }
 
+    // Animación de salida antes de navegar al Home
     private Task AnimateExit()
     {
         var tcs = new TaskCompletionSource<bool>();
