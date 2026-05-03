@@ -686,3 +686,78 @@ agradable y cómoda posible para el usuario.
 - Sidebar con comportamiento moderno y profesional
 - Branding consistente en toda la app
 - Tablas más dinámicas y agradables de usar
+
+
+## 03/05/2026 — Ajustes finales y control de datos
+
+---
+
+### Control de edición en tablas
+
+- Se ha deshabilitado la edición directa en los `DataGrid`
+- Configuración global:
+  - `IsReadOnly = true`
+  - `CanUserAddRows = false`
+  - `CanUserDeleteRows = false`
+- Ahora todas las modificaciones se realizan únicamente mediante botones y lógica controlada
+
+---
+
+### Reordenación de ejercicios en rutinas
+
+- Implementada funcionalidad para cambiar el orden de ejercicios dentro de un día:
+  - Botones "Subir" y "Bajar"
+- Intercambio de propiedad `Order` entre elementos
+- Actualización en base de datos mediante repositorio
+
+---
+
+### Corrección de orden tras eliminación
+
+- Solucionado problema de huecos en el orden al eliminar ejercicios
+- Implementado método `ReorderDayExercises`:
+  - Reasigna valores consecutivos (1, 2, 3...)
+- Ajuste en creación de ejercicios:
+  - Nuevo `Order = Max + 1` en lugar de `Count`
+
+---
+
+### Protección de navegación durante entreno activo
+
+- Implementado control global con `WorkoutStateService`
+- Si hay un entrenamiento activo:
+  - Se muestra un modal de confirmación al cambiar de vista
+- Evita pérdida accidental de contexto
+
+---
+
+### Configuración de base de datos para entrega
+
+- Verificado que la base de datos se crea automáticamente
+- Eliminación de archivos `.db` con datos de prueba
+- Uso de migraciones para generar estructura
+- Comprobación de persistencia tras reinicio
+
+---
+
+### Preparación para publicación
+
+- Aplicación configurada para iniciarse maximizada
+- Validación de funcionamiento en entorno limpio
+- Confirmación de que no depende de datos previos
+
+---
+
+### Estado actual
+
+- Aplicación completamente funcional
+- Flujo de usuario completo validado
+- UI pulida y consistente
+- Lista para entrega
+
+---
+
+### Pendiente (para siguiente iteración)
+
+- Permitir cancelar entrenamiento sin guardar datos
+- Guardado diferido hasta "Finalizar entrenamiento"
