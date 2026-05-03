@@ -1,29 +1,80 @@
 ﻿<UserControl x:Class="SteelProgress.App.Views.WelcomeView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="{StaticResource BgMain}">
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                Background="{StaticResource BgMain}">
+    <UserControl.Resources>
+        <Style x:Key="WelcomeFeatureCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
 
+            <Style.Triggers>
+
+                <!-- ESCALA -->
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                     To="1.08"
+                                     Duration="0:0:0.15"/>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                     To="1.08"
+                                     Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                     To="1"
+                                     Duration="0:0:0.15"/>
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                     To="1"
+                                     Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <!-- COLOR TEXTO -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="TextElement.Foreground"
+                    Value="{StaticResource Accent}"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <!-- FONDO DECORATIVO -->
         <Ellipse Width="420"
-                 Height="420"
-                 Fill="{StaticResource Accent}"
-                 Opacity="0.08"
-                 HorizontalAlignment="Right"
-                 VerticalAlignment="Top"
-                 Margin="0,-160,-120,0"/>
+                    Height="420"
+                    Fill="{StaticResource Accent}"
+                    Opacity="0.08"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,-160,-120,0"/>
 
         <Ellipse Width="300"
-                 Height="300"
-                 Fill="{StaticResource Accent}"
-                 Opacity="0.05"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Bottom"
-                 Margin="-100,0,0,-100"/>
+                    Height="300"
+                    Fill="{StaticResource Accent}"
+                    Opacity="0.05"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Margin="-100,0,0,-100"/>
 
         <!-- CARD CENTRAL -->
         <Border x:Name="MainBorder"
-                Width="620"
+                Width="760"
                 Background="{StaticResource BgSecondary}"
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="1"
@@ -39,85 +90,99 @@
 
             <StackPanel>
 
-                <TextBlock Text="STEEL"
-                           FontSize="52"
-                           FontWeight="Bold"
-                           TextAlignment="Center"/>
+                <Image  x:Name="LogoImage"
+                        Source="/Views/logo_icon.png"
+                        Width="450"
+                        Height="260"
+                        Stretch="Uniform"
+                        Margin="0,10,0,10"
+                        HorizontalAlignment="Center"/>
 
-                <TextBlock Text="PROGRESS"
-                           FontSize="52"
-                           FontWeight="Bold"
-                           Foreground="{StaticResource Accent}"
-                           TextAlignment="Center"
-                           Margin="0,-10,0,0"/>
+                <StackPanel x:Name="HeroTextPanel"
+                            Margin="0,15,0,30"
+                            HorizontalAlignment="Center">
 
-                <TextBlock Text="Registra. Analiza. Progresa."
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           TextAlignment="Center"
-                           Margin="0,22,0,0"/>
+                    <TextBlock Text="Entrena con datos. Mejora con intención."
+                                FontSize="20"
+                                FontWeight="Bold"
+                                TextAlignment="Center"/>
 
-                <TextBlock Text="Controla tus rutinas, guarda tus entrenamientos y visualiza tu evolución con datos reales."
-                           Foreground="{StaticResource TextSecondary}"
-                           FontSize="15"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"
-                           Margin="0,12,0,32"/>
+                    <TextBlock TextAlignment="Center"
+                                FontSize="14"
+                                Foreground="{StaticResource TextSecondary}"
+                                Margin="0,8,0,0"
+                                TextWrapping="Wrap">
 
-                <UniformGrid Columns="3"
-                             Margin="0,0,0,34">
+                            <Run Text="Todo tu progreso en un solo lugar. "/>
+                            <Run Text="Más claro. Más rápido. Más fuerte."
+                                    Foreground="{StaticResource Accent}"
+                                    FontWeight="SemiBold"/>        
+                    </TextBlock>
 
-                    <StackPanel Margin="8">
-                        <TextBlock Text="🏋"
-                                   FontSize="28"
-                                   TextAlignment="Center"/>
-                        <TextBlock Text="Entrena"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   TextAlignment="Center"
-                                   Margin="0,8,0,0"/>
-                        <TextBlock Text="Registra series y peso"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   TextAlignment="Center"
-                                   FontSize="12"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
+                </StackPanel>
 
-                    <StackPanel Margin="8">
-                        <TextBlock Text="📈"
-                                   FontSize="28"
-                                   TextAlignment="Center"/>
-                        <TextBlock Text="Progresa"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   TextAlignment="Center"
-                                   Margin="0,8,0,0"/>
-                        <TextBlock Text="Consulta gráficas"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   TextAlignment="Center"
-                                   FontSize="12"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
+                <UniformGrid    x:Name="FeaturesGrid"
+                                Columns="3"
+                                Margin="0,0,0,34">
 
-                    <StackPanel Margin="8">
-                        <TextBlock Text="🕘"
-                                   FontSize="28"
-                                   TextAlignment="Center"/>
-                        <TextBlock Text="Compara"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   TextAlignment="Center"
-                                   Margin="0,8,0,0"/>
-                        <TextBlock Text="Revisa tu historial"
-                                   Foreground="{StaticResource TextSecondary}"
-                                   TextAlignment="Center"
-                                   FontSize="12"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
+                    <Border Style="{StaticResource WelcomeFeatureCardStyle}" Margin="8">
+                        <StackPanel>
+                            <TextBlock Text="🏋"
+                                    FontSize="28"
+                                    TextAlignment="Center"/>
+                            <TextBlock Text="Entrena"
+                                    FontSize="16"
+                                    FontWeight="Bold"
+                                    TextAlignment="Center"
+                                    Margin="0,8,0,0"/>
+                            <TextBlock Text="Registra series y peso"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    TextAlignment="Center"
+                                    FontSize="12"
+                                    Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource WelcomeFeatureCardStyle}" Margin="8">
+                        <StackPanel>
+                            <TextBlock Text="📈"
+                                    FontSize="28"
+                                    TextAlignment="Center"/>
+                            <TextBlock Text="Progresa"
+                                    FontSize="16"
+                                    FontWeight="Bold"
+                                    TextAlignment="Center"
+                                    Margin="0,8,0,0"/>
+                            <TextBlock Text="Consulta gráficas"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    TextAlignment="Center"
+                                    FontSize="12"
+                                    Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource WelcomeFeatureCardStyle}" Margin="8">
+                        <StackPanel>
+                            <TextBlock Text="🕘"
+                                    FontSize="28"
+                                    TextAlignment="Center"/>
+                            <TextBlock Text="Compara"
+                                    FontSize="16"
+                                    FontWeight="Bold"
+                                    TextAlignment="Center"
+                                    Margin="0,8,0,0"/>
+                            <TextBlock Text="Revisa tu historial"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    TextAlignment="Center"
+                                    FontSize="12"
+                                    Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
 
                 </UniformGrid>
 
-                <Button Content="Empezar"
+                <Button x:Name="StartButton"
+                        Content="Empezar"
                         Height="52"
                         Width="220"
                         HorizontalAlignment="Center"

@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="logo_small.png" />
+    <None Remove="Views\logo_icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.25">
       <PrivateAssets>all</PrivateAssets>
@@ -19,6 +24,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SteelProgress.Data\SteelProgress.Data.csproj" />
     <ProjectReference Include="..\SteelProgress.Domain\SteelProgress.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="logo_small.png" />
+    <Resource Include="Views\logo_icon.png" />
   </ItemGroup>
 
 </Project>

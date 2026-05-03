@@ -133,21 +133,66 @@
                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
             </Style>
 
-            <Style TargetType="DataGridRow">
-                <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-                <Setter Property="Background" Value="{StaticResource BgSecondary}"/>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#2D2D2D"/>
-                    </Trigger>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="{StaticResource Accent}"/>
-                        <Setter Property="Foreground" Value="Black"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        
-            <Style x:Key="DataGridTextCellStyle" TargetType="TextBlock">
+        <Style TargetType="DataGridRow">
+            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Background" Value="{StaticResource BgSecondary}"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform X="0"/>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+
+                <!-- Entrada suave al cargar -->
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0"
+                                     To="1"
+                                     Duration="0:0:0.25"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <!-- Hover: pequeño desplazamiento -->
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                     To="4"
+                                     Duration="0:0:0.12"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                     To="0"
+                                     Duration="0:0:0.12"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <!-- Hover visual -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2D2D2D"/>
+                </Trigger>
+
+                <!-- Selección -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource Accent}"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DataGridTextCellStyle" TargetType="TextBlock">
                 <Setter Property="Padding" Value="14,0,0,0"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>

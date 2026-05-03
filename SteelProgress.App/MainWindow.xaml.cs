@@ -5,7 +5,7 @@ using System.Windows.Media;
 using SteelProgress.App.Services;
 using System.Windows.Threading;
 using System.Windows.Media.Animation;
-
+using SteelProgress.App.Animations;
 namespace SteelProgress.App;
 
 public partial class MainWindow : Window
@@ -22,21 +22,54 @@ public partial class MainWindow : Window
         ConfirmDialogService.OnConfirmationRequested += ShowConfirmDialogAsync;
     }
 
-    public void GoToHome()
+    private void Exit_Click(object sender, RoutedEventArgs e)
     {
+        Application.Current.Shutdown();
+    }
+
+    private void AnimateSidebarWidth(double targetWidth)
+{
+    var animation = new DoubleAnimation
+    {
+        To = targetWidth,
+        Duration = TimeSpan.FromMilliseconds(220),
+        EasingFunction = new QuadraticEase
+        {
+            EasingMode = EasingMode.EaseInOut
+        }
+    };
+
+    SidebarPanel.BeginAnimation(WidthProperty, animation);
+}
+
+    public async void GoToHome()
+    {
+        await Task.Delay(250);
+
+        ShowSidebar();
+
+        MainContent.Opacity = 0;
         MainContent.Content = new HomeView();
         SetActiveButton(BtnInicio);
-        ShowSidebar();
+
+        var fadeIn = new DoubleAnimation
+        {
+            From = 0,
+            To = 1,
+            Duration = TimeSpan.FromMilliseconds(450)
+        };
+
+        MainContent.BeginAnimation(OpacityProperty, fadeIn);
     }
 
     private void HideSidebar()
     {
-        SidebarColumn.Width = new GridLength(0);
+        AnimateSidebarWidth(0);
     }
 
     private void ShowSidebar()
     {
-        SidebarColumn.Width = new GridLength(220);
+        AnimateSidebarWidth(220);
     }
 
     private Task<bool> ShowConfirmDialogAsync(string title, string message)
@@ -68,23 +101,41 @@ public partial class MainWindow : Window
 
         if (_isSidebarCollapsed)
         {
-            SidebarColumn.Width = new GridLength(70);
+            AnimateSidebarWidth(70);
 
             BtnInicioText.Visibility = Visibility.Collapsed;
             BtnEjerciciosText.Visibility = Visibility.Collapsed;
             BtnRutinasText.Visibility = Visibility.Collapsed;
             BtnEntrenamientoText.Visibility = Visibility.Collapsed;
             BtnHistorialText.Visibility = Visibility.Collapsed;
+
+
+            SidebarBottomText.Visibility = Visibility.Collapsed;
+            BtnSalir.Visibility = Visibility.Collapsed;
+
+            SidebarBottomLogo.Visibility = Visibility.Visible;
+            SidebarBottomLogo.Width = 32;
+            SidebarBottomLogo.Height = 32;
+            SidebarBottomLogo.Margin = new Thickness(0);
         }
         else
         {
-            SidebarColumn.Width = new GridLength(220);
+            AnimateSidebarWidth(220);
 
             BtnInicioText.Visibility = Visibility.Visible;
             BtnEjerciciosText.Visibility = Visibility.Visible;
             BtnRutinasText.Visibility = Visibility.Visible;
             BtnEntrenamientoText.Visibility = Visibility.Visible;
             BtnHistorialText.Visibility = Visibility.Visible;
+
+
+            SidebarBottomText.Visibility = Visibility.Visible;
+            BtnSalir.Visibility = Visibility.Visible;
+
+            SidebarBottomLogo.Visibility = Visibility.Visible;
+            SidebarBottomLogo.Width = 36;
+            SidebarBottomLogo.Height = 36;
+            SidebarBottomLogo.Margin = new Thickness(0, 0, 8, 0);
         }
     }
 
