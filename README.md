@@ -621,3 +621,68 @@ agradable y cómoda posible para el usuario.
 - UI más consistente y moderna
 - Flujo inicial de la app más profesional
 - Experiencia de usuario notablemente mejorada
+
+
+## 02/05/2026 — Branding, sidebar y animaciones UI
+
+---
+
+### Logo e identidad visual
+
+- Creación de logo principal y versión reducida (SP)
+- Integración del logo en:
+  - WelcomeView (branding principal)
+  - Sidebar (parte inferior)
+- Ajuste de tamaños y márgenes para correcta visualización
+- Uso de imagen con fondo transparente
+
+---
+
+### Rediseño del sidebar
+
+- Reorganización del layout usando Grid:
+  - Menú en la parte superior
+  - Espacio central flexible
+  - Branding y acciones en la parte inferior
+- Integración del logo en la esquina inferior izquierda
+- Añadido botón de salida minimalista (icono ↪) en esquina inferior derecha
+- Eliminación del botón “Salir” tradicional del menú
+
+---
+
+### Comportamiento dinámico del sidebar
+
+- Al colapsar:
+  - Se oculta el texto "SteelProgress"
+  - Se oculta el botón de salida
+  - Se mantiene solo el icono del logo centrado
+- Al expandir:
+  - Se restauran todos los elementos
+- Corrección de errores de visibilidad y alineación
+
+---
+
+### Animación del sidebar
+
+- Sustitución del cambio brusco de ancho por animación suave
+- Implementación mediante animación de `Width` en el `Border`
+- Uso de `DoubleAnimation` con `QuadraticEase`
+- Integración con métodos `ShowSidebar()` y `HideSidebar()`
+
+---
+
+### Animaciones en tablas
+
+- Animación de entrada de filas (`fade-in`)
+- Desplazamiento horizontal suave en hover
+- Mantenimiento de estilos de selección existentes
+- Aplicación global mediante `Style` de `DataGridRow`
+
+---
+
+### Resultado
+
+- UI más fluida y coherente
+- Sidebar con comportamiento moderno y profesional
+- Branding consistente en toda la app
+- Tablas más dinámicas y agradables de usar
