@@ -761,3 +761,68 @@ agradable y cómoda posible para el usuario.
 
 - Permitir cancelar entrenamiento sin guardar datos
 - Guardado diferido hasta "Finalizar entrenamiento"
+
+
+## 04/05/2026 — Gestión de cancelación de entrenamiento
+
+---
+
+### Nuevo flujo de entrenamiento
+
+- Modificado el comportamiento del registro de series durante un entrenamiento:
+  - Las series ya no se guardan directamente en base de datos
+  - Se almacenan temporalmente en memoria durante la sesión activa
+
+---
+
+### Almacenamiento temporal de series
+
+- Uso de `ObservableCollection<WorkoutSet> CurrentSets` para gestionar las series en curso
+- Actualización de la UI para mostrar datos desde memoria en lugar de base de datos
+- Eliminación de dependencia directa de la BD durante el entrenamiento
+
+---
+
+### Guardado diferido
+
+- Las series se guardan en base de datos únicamente al finalizar el entrenamiento
+- Implementación en `FinishWorkout()`:
+  - Recorrido de `CurrentSets`
+  - Inserción en base de datos mediante repositorio
+
+---
+
+### Cancelación de entrenamiento
+
+- Añadido botón y lógica para cancelar entrenamiento activo
+- Implementación de confirmación mediante modal
+- Al cancelar:
+  - Se eliminan las series temporales
+  - Se elimina la sesión creada en base de datos
+  - Se restablece el estado de la UI
+
+---
+
+### Ajustes en lógica de sets
+
+- `AddSet()` ahora añade series solo en memoria
+- `DeleteSet()` elimina series de la colección temporal
+- Eliminado guardado automático en BD en estas acciones
+
+---
+
+### Integración con estado global
+
+- Uso de `WorkoutStateService` para controlar si hay un entrenamiento activo
+- Actualización del estado al:
+  - Iniciar entrenamiento
+  - Finalizar
+  - Cancelar
+
+---
+
+### Resultado
+
+- Flujo de entrenamiento más realista y controlado
+- El usuario puede decidir si guardar o descartar la sesión
+- Mejora significativa en experiencia de usuario y control de datos
