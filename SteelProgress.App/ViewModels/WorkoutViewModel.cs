@@ -19,6 +19,10 @@ public class WorkoutViewModel : BaseViewModel
     public ObservableCollection<WorkoutExercise> Exercises { get; set; } = new();
     public ObservableCollection<WorkoutSet> SelectedExerciseSets { get; set; } = new();
 
+    public ObservableCollection<WorkoutSet> CurrentSets { get; set; } = new();
+    public ICommand CancelWorkoutCommand { get; }
+
+
     private Routine? _selectedRoutine;
     public Routine? SelectedRoutine
     {
@@ -123,16 +127,23 @@ public class WorkoutViewModel : BaseViewModel
         DeleteSetCommand = new RelayCommand(DeleteSet);
         FinishWorkoutCommand = new RelayCommand(FinishWorkout);
 
+        CancelWorkoutCommand = new RelayCommand(CancelWorkout);
+
         LoadRoutines();
     }
 
-    private async void FinishWorkout()
+    private async void CancelWorkout()
     {
         var confirmed = await ConfirmDialogService
-     .ConfirmAsync("Finalizar entrenamiento", "¿Quieres finalizar el entrenamiento?");
+            .ConfirmAsync("Cancelar entrenamiento", "¿Seguro que quieres cancelar? No se guardarán las series registradas.");
 
         if (!confirmed)
             return;
+
+        if (CurrentSession is not null)
+            await _workoutRepository.DeleteSessionAsync(CurrentSession);
+
+        CurrentSets.Clear();
 
         CurrentSession = null;
         SelectedWorkoutExercise = null;
@@ -146,6 +157,43 @@ public class WorkoutViewModel : BaseViewModel
 
         IsSessionActive = false;
         WorkoutStateService.IsWorkoutActive = false;
+
+        NotificationService.Info("Entrenamiento cancelado.");
+    }
+
+    private async void FinishWorkout()
+    {
+        if (!CurrentSets.Any())
+        {
+            NotificationService.Error("No hay series registradas.");
+            return;
+        }
+
+        var confirmed = await ConfirmDialogService
+            .ConfirmAsync("Finalizar entrenamiento", "¿Quieres finalizar y guardar el entrenamiento?");
+
+        if (!confirmed)
+            return;
+
+        foreach (var set in CurrentSets)
+            await _workoutRepository.AddSetAsync(set);
+
+        CurrentSets.Clear();
+
+        CurrentSession = null;
+        SelectedWorkoutExercise = null;
+        SelectedWorkoutSet = null;
+
+        Exercises.Clear();
+        SelectedExerciseSets.Clear();
+
+        Reps = 0;
+        Weight = 0;
+
+        IsSessionActive = false;
+        WorkoutStateService.IsWorkoutActive = false;
+
+        NotificationService.Success("Entrenamiento guardado correctamente.");
     }
 
     private void LoadRoutines()
@@ -180,11 +228,15 @@ public class WorkoutViewModel : BaseViewModel
             return;
         }
 
+        CurrentSets.Clear();
+        SelectedExerciseSets.Clear();
+
         var session = _workoutRepository
             .CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id)
             .Result;
 
         LoadSession(session.Id);
+
         IsSessionActive = true;
         WorkoutStateService.IsWorkoutActive = true;
     }
@@ -214,7 +266,11 @@ public class WorkoutViewModel : BaseViewModel
         if (SelectedWorkoutExercise is null)
             return;
 
-        foreach (var set in SelectedWorkoutExercise.Sets.OrderBy(s => s.Id))
+        var sets = CurrentSets
+            .Where(s => s.WorkoutExerciseId == SelectedWorkoutExercise.Id)
+            .ToList();
+
+        foreach (var set in sets)
             SelectedExerciseSets.Add(set);
     }
 
@@ -246,12 +302,13 @@ public class WorkoutViewModel : BaseViewModel
             Weight = Weight
         };
 
-        _workoutRepository.AddSetAsync(workoutSet).Wait();
-
-        ReloadCurrentSession();
+        CurrentSets.Add(workoutSet);
+        SelectedExerciseSets.Add(workoutSet);
 
         Reps = 0;
         Weight = 0;
+
+        NotificationService.Success("Serie añadida.");
     }
 
     private void DeleteSet()
@@ -262,9 +319,12 @@ public class WorkoutViewModel : BaseViewModel
             return;
         }
 
-        _workoutRepository.DeleteSetAsync(SelectedWorkoutSet).Wait();
+        CurrentSets.Remove(SelectedWorkoutSet);
+        SelectedExerciseSets.Remove(SelectedWorkoutSet);
 
-        ReloadCurrentSession();
+        SelectedWorkoutSet = null;
+
+        NotificationService.Info("Serie eliminada.");
     }
 
     private void ReloadCurrentSession()

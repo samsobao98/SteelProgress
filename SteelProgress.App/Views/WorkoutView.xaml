@@ -39,6 +39,14 @@
                         Command="{Binding FinishWorkoutCommand}"
                         Visibility="{Binding IsSessionActive, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
+                <Button DockPanel.Dock="Right"
+                        Content="Cancelar entrenamiento"
+                        Width="140"
+                        Height="36"
+                        Margin="10,0,20,0"
+                        Command="{Binding CancelWorkoutCommand}"
+                        Visibility="{Binding IsSessionActive, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
             </DockPanel>
             
         </Border>
@@ -165,12 +173,12 @@
 
                         <!-- EJERCICIO ACTUAL -->
                         <Border Grid.Column="0"
-                Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="18"
-                Margin="0,0,20,0">
+                                Background="{StaticResource BgSecondary}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="18"
+                                Margin="0,0,20,0">
 
                             <StackPanel>
                                 <TextBlock Text="Ejercicio actual"
@@ -192,11 +200,11 @@
 
                         <!-- FORMULARIO SET -->
                         <Border Grid.Column="1"
-                Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderColor}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="18">
+                                Background="{StaticResource BgSecondary}"
+                                BorderBrush="{StaticResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="18">
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -241,11 +249,11 @@
 
                     <!-- SERIES MÁS GRANDES -->
                     <Border Grid.Row="1"
-            Background="{StaticResource BgSecondary}"
-            BorderBrush="{StaticResource BorderColor}"
-            BorderThickness="1"
-            CornerRadius="10"
-            Padding="22">
+                            Background="{StaticResource BgSecondary}"
+                            BorderBrush="{StaticResource BorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="22">
 
                         <Grid>
                             <Grid.RowDefinitions>
@@ -260,19 +268,19 @@
                        Margin="0,0,0,15"/>
 
                             <ListBox Grid.Row="1"
-                     ItemsSource="{Binding SelectedExerciseSets}"
-                     SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
-                     Background="Transparent"
-                     BorderThickness="0">
+                                     ItemsSource="{Binding SelectedExerciseSets}"
+                                     SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
+                                     Background="Transparent"
+                                     BorderThickness="0">
 
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="Transparent"
-                                BorderBrush="{StaticResource BorderColor}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="10"
-                                Margin="0,0,0,8">
+                                                BorderBrush="{StaticResource BorderColor}"
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                Padding="10"
+                                                Margin="0,0,0,8">
 
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -282,13 +290,13 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <Border Grid.Column="0"
-                                        Width="36"
-                                        Height="36"
-                                        CornerRadius="18"
-                                        Background="{StaticResource BgSecondary}"
-                                        BorderBrush="{StaticResource BorderColor}"
-                                        BorderThickness="1"
-                                        Margin="0,0,14,0">
+                                                        Width="36"
+                                                        Height="36"
+                                                        CornerRadius="18"
+                                                        Background="{StaticResource BgSecondary}"
+                                                        BorderBrush="{StaticResource BorderColor}"
+                                                        BorderThickness="1"
+                                                        Margin="0,0,14,0">
                                                     <TextBlock Text="✓"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"

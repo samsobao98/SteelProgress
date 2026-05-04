@@ -74,6 +74,27 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .ToListAsync();
     }
 
+    public async Task DeleteSessionAsync(WorkoutSession session)
+    {
+        var sessionToDelete = await _context.WorkoutSessions
+            .Include(ws => ws.Exercises)
+                .ThenInclude(we => we.Sets)
+            .FirstOrDefaultAsync(ws => ws.Id == session.Id);
+
+        if (sessionToDelete is null)
+            return;
+
+        foreach (var exercise in sessionToDelete.Exercises)
+        {
+            _context.WorkoutSets.RemoveRange(exercise.Sets);
+        }
+
+        _context.WorkoutExercises.RemoveRange(sessionToDelete.Exercises);
+        _context.WorkoutSessions.Remove(sessionToDelete);
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task AddSetAsync(WorkoutSet workoutSet)
     {
         await _context.WorkoutSets.AddAsync(workoutSet);
