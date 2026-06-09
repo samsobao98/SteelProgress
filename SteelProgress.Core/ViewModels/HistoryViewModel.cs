@@ -1,13 +1,17 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.EntityFrameworkCore;
+using SteelProgress.Data.Context;
 using SteelProgress.Domain.Entities;
 
-namespace SteelProgress.App.ViewModels;
+namespace SteelProgress.Core.ViewModels;
 
-public class HistoryViewModel : BaseViewModel
+public partial class HistoryViewModel : ObservableObject
 {
-    public ObservableCollection<WorkoutSession> Sessions { get; set; } = new();
-    public ObservableCollection<HistoryExerciseSummary> ExerciseSummaries { get; set; } = new();
+    private readonly AppDbContext _dbContext;
+
+    public ObservableCollection<WorkoutSession> Sessions { get; } = new();
+    public ObservableCollection<HistoryExerciseSummary> ExerciseSummaries { get; } = new();
 
     private WorkoutSession? _selectedSession;
     public WorkoutSession? SelectedSession
@@ -17,41 +21,39 @@ public class HistoryViewModel : BaseViewModel
         {
             _selectedSession = value;
             OnPropertyChanged();
-            LoadSelectedSessionDetails();
+            _ = LoadSelectedSessionDetailsAsync();
         }
     }
 
-    private HistoryExerciseSummary? _selectedExerciseSummary;
-    public HistoryExerciseSummary? SelectedExerciseSummary
+    [ObservableProperty] private HistoryExerciseSummary? _selectedExerciseSummary;
+
+    public HistoryViewModel(AppDbContext dbContext)
     {
-        get => _selectedExerciseSummary;
-        set
-        {
-            _selectedExerciseSummary = value;
-            OnPropertyChanged();
-        }
+        _dbContext = dbContext;
+        _ = InitializeAsync();
     }
 
-    public HistoryViewModel()
+    private async Task InitializeAsync()
     {
-        LoadSessions();
-        SelectedSession = Sessions.FirstOrDefault();
+        await LoadSessionsAsync();
+        _selectedSession = Sessions.FirstOrDefault();
+        OnPropertyChanged(nameof(SelectedSession));
+        await LoadSelectedSessionDetailsAsync();
     }
 
-    private void LoadSessions()
+    private async Task LoadSessionsAsync()
     {
-        var sessions = App.DbContext.WorkoutSessions
+        var sessions = await _dbContext.WorkoutSessions
             .Include(ws => ws.RoutineDay)
             .OrderByDescending(ws => ws.Date)
-            .ToList();
+            .ToListAsync();
 
         Sessions.Clear();
-
         foreach (var session in sessions)
             Sessions.Add(session);
     }
 
-    private void LoadSelectedSessionDetails()
+    private async Task LoadSelectedSessionDetailsAsync()
     {
         ExerciseSummaries.Clear();
         SelectedExerciseSummary = null;
@@ -59,18 +61,18 @@ public class HistoryViewModel : BaseViewModel
         if (SelectedSession is null)
             return;
 
-        var currentSession = App.DbContext.WorkoutSessions
+        var currentSession = await _dbContext.WorkoutSessions
             .Include(ws => ws.RoutineDay)
             .Include(ws => ws.Exercises)
                 .ThenInclude(we => we.Exercise)
             .Include(ws => ws.Exercises)
                 .ThenInclude(we => we.Sets)
-            .FirstOrDefault(ws => ws.Id == SelectedSession.Id);
+            .FirstOrDefaultAsync(ws => ws.Id == SelectedSession.Id);
 
         if (currentSession is null)
             return;
 
-        var previousSession = App.DbContext.WorkoutSessions
+        var previousSession = await _dbContext.WorkoutSessions
             .Include(ws => ws.Exercises)
                 .ThenInclude(we => we.Exercise)
             .Include(ws => ws.Exercises)
@@ -78,24 +80,21 @@ public class HistoryViewModel : BaseViewModel
             .Where(ws => ws.RoutineDayId == currentSession.RoutineDayId
                          && ws.Date < currentSession.Date)
             .OrderByDescending(ws => ws.Date)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         foreach (var exercise in currentSession.Exercises)
         {
             var previousExercise = previousSession?.Exercises
                 .FirstOrDefault(e => e.ExerciseId == exercise.ExerciseId);
 
-            var summary = new HistoryExerciseSummary
+            ExerciseSummaries.Add(new HistoryExerciseSummary
             {
                 ExerciseId = exercise.ExerciseId,
                 ExerciseName = exercise.Exercise?.Name ?? "Ejercicio",
-                Sets = new ObservableCollection<WorkoutSet>(
-                    exercise.Sets.OrderBy(s => s.Id)),
+                Sets = new ObservableCollection<WorkoutSet>(exercise.Sets.OrderBy(s => s.Id)),
                 BestSetText = GetBestSetText(exercise),
                 ComparisonText = GetComparisonText(exercise, previousExercise)
-            };
-
-            ExerciseSummaries.Add(summary);
+            });
         }
     }
 
@@ -106,10 +105,7 @@ public class HistoryViewModel : BaseViewModel
             .ThenByDescending(s => s.Reps)
             .FirstOrDefault();
 
-        if (bestSet is null)
-            return "Sin series";
-
-        return $"{bestSet.Weight} kg x {bestSet.Reps}";
+        return bestSet is null ? "Sin series" : $"{bestSet.Weight} kg x {bestSet.Reps}";
     }
 
     private static string GetComparisonText(WorkoutExercise current, WorkoutExercise? previous)
@@ -146,12 +142,8 @@ public class HistoryViewModel : BaseViewModel
 public class HistoryExerciseSummary
 {
     public int ExerciseId { get; set; }
-
     public string ExerciseName { get; set; } = string.Empty;
-
     public string BestSetText { get; set; } = string.Empty;
-
     public string ComparisonText { get; set; } = string.Empty;
-
     public ObservableCollection<WorkoutSet> Sets { get; set; } = new();
 }

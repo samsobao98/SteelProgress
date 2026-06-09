@@ -1,53 +1,21 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SteelProgress.Core.Services;
 using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
-using System.Windows;
-using System.Windows.Input;
-using SteelProgress.App.Commands;
-using SteelProgress.App.Services;
 
-namespace SteelProgress.App.ViewModels;
-//Carga los ejercicios, los guarda en una ObservableCollection para enlazarla en una interfaz posteriormente
-public class ExerciseViewModel : BaseViewModel
+namespace SteelProgress.Core.ViewModels;
+
+public partial class ExerciseViewModel : ObservableObject
 {
     private readonly ExerciseRepository _repository;
-    public ICommand AddExerciseCommand { get; }
-    public ICommand UpdateExerciseCommand { get; }
-    public ICommand DeleteExerciseCommand { get; }
-    public ObservableCollection<Exercise> Exercises { get; set; }
 
-    private string _name = string.Empty;
-    public string Name
-    {
-        get => _name;
-        set
-        {
-            _name = value;
-            OnPropertyChanged();
-        }
-    }
+    public ObservableCollection<Exercise> Exercises { get; } = new();
 
-    private string _muscleGroup = string.Empty;
-    public string MuscleGroup
-    {
-        get => _muscleGroup;
-        set
-        {
-            _muscleGroup = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string _notes = string.Empty;
-    public string Notes
-    {
-        get => _notes;
-        set
-        {
-            _notes = value;
-            OnPropertyChanged();
-        }
-    }
+    [ObservableProperty] private string _name = string.Empty;
+    [ObservableProperty] private string _muscleGroup = string.Empty;
+    [ObservableProperty] private string _notes = string.Empty;
 
     private Exercise? _selectedExercise;
     public Exercise? SelectedExercise
@@ -64,22 +32,15 @@ public class ExerciseViewModel : BaseViewModel
     public ExerciseViewModel(ExerciseRepository repository)
     {
         _repository = repository;
-        Exercises = new ObservableCollection<Exercise>();
-        AddExerciseCommand = new RelayCommand(AddExercise);
-        UpdateExerciseCommand = new RelayCommand(UpdateExercise);
-        DeleteExerciseCommand = new RelayCommand(DeleteExercise);
+        _ = LoadExercisesAsync();
     }
 
-    public void LoadExercises()
+    private async Task LoadExercisesAsync()
     {
-        var exercises = _repository.GetAllAsync().Result;
-
+        var exercises = await _repository.GetAllAsync();
         Exercises.Clear();
-
         foreach (var exercise in exercises)
-        {
             Exercises.Add(exercise);
-        }
     }
 
     public void ClearForm()
@@ -90,7 +51,7 @@ public class ExerciseViewModel : BaseViewModel
         SelectedExercise = null;
     }
 
-    public void LoadSelectedExerciseIntoForm()
+    private void LoadSelectedExerciseIntoForm()
     {
         if (SelectedExercise is null)
         {
@@ -105,7 +66,8 @@ public class ExerciseViewModel : BaseViewModel
         Notes = SelectedExercise.Notes ?? string.Empty;
     }
 
-    private void AddExercise()
+    [RelayCommand]
+    private async Task AddExercise()
     {
         string name = Name.Trim();
         string muscleGroup = MuscleGroup.Trim();
@@ -123,9 +85,7 @@ public class ExerciseViewModel : BaseViewModel
             return;
         }
 
-        bool exists = _repository.ExistsByNameAsync(name).Result;
-
-        if (exists)
+        if (await _repository.ExistsByNameAsync(name))
         {
             NotificationService.Error("Ya existe un ejercicio con ese nombre.");
             return;
@@ -138,14 +98,14 @@ public class ExerciseViewModel : BaseViewModel
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes
         };
 
-        _repository.AddAsync(exercise).Wait();
-        LoadExercises();
+        await _repository.AddAsync(exercise);
+        await LoadExercisesAsync();
         ClearForm();
-
-       NotificationService.Success("Ejercicio añadido correctamente.");
+        NotificationService.Success("Ejercicio añadido correctamente.");
     }
 
-    private void UpdateExercise()
+    [RelayCommand]
+    private async Task UpdateExercise()
     {
         if (SelectedExercise is null)
         {
@@ -169,11 +129,7 @@ public class ExerciseViewModel : BaseViewModel
             return;
         }
 
-        bool duplicateExists = _repository
-            .ExistsByNameExceptIdAsync(name, SelectedExercise.Id)
-            .Result;
-
-        if (duplicateExists)
+        if (await _repository.ExistsByNameExceptIdAsync(name, SelectedExercise.Id))
         {
             NotificationService.Error("Ya existe otro ejercicio con ese nombre.");
             return;
@@ -183,14 +139,14 @@ public class ExerciseViewModel : BaseViewModel
         SelectedExercise.MuscleGroup = muscleGroup;
         SelectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
 
-        _repository.UpdateAsync(SelectedExercise).Wait();
-        LoadExercises();
+        await _repository.UpdateAsync(SelectedExercise);
+        await LoadExercisesAsync();
         ClearForm();
-
         NotificationService.Success("Ejercicio actualizado correctamente.");
     }
 
-    private async void DeleteExercise()
+    [RelayCommand]
+    private async Task DeleteExercise()
     {
         if (SelectedExercise is null)
         {
@@ -199,13 +155,13 @@ public class ExerciseViewModel : BaseViewModel
         }
 
         var confirmed = await ConfirmDialogService
-    .ConfirmAsync("Eliminar Ejercicio", $"¿Seguro que quieres eliminar '{SelectedExercise.Name}'?");
+            .ConfirmAsync("Eliminar Ejercicio", $"¿Seguro que quieres eliminar '{SelectedExercise.Name}'?");
 
         if (!confirmed)
             return;
 
-        _repository.DeleteAsync(SelectedExercise).Wait();
-        LoadExercises();
+        await _repository.DeleteAsync(SelectedExercise);
+        await LoadExercisesAsync();
         ClearForm();
     }
 }

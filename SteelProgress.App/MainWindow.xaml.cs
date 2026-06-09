@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using SteelProgress.App.Services;
+using SteelProgress.Core.Services;
 using System.Windows.Threading;
 using System.Windows.Media.Animation;
 namespace SteelProgress.App;

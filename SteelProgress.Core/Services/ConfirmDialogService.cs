@@ -1,6 +1,5 @@
-﻿namespace SteelProgress.App.Services;
+namespace SteelProgress.Core.Services;
 
-// Servicio para mostrar diálogos de confirmación personalizados (modal)
 public static class ConfirmDialogService
 {
     public static event Func<string, string, Task<bool>>? OnConfirmationRequested;

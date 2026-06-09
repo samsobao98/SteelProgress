@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using SteelProgress.App.ViewModels;
+using System.Windows.Controls;
+using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Repositories;
 
 namespace SteelProgress.App.Views;
@@ -10,7 +10,8 @@ public partial class RoutineView : UserControl
     {
         InitializeComponent();
 
-        var repository = new RoutineRepository(App.DbContext);
-        DataContext = new RoutineViewModel(repository);
+        var routineRepository = new RoutineRepository(App.DbContext);
+        var exerciseRepository = new ExerciseRepository(App.DbContext);
+        DataContext = new RoutineViewModel(routineRepository, exerciseRepository);
     }
 }

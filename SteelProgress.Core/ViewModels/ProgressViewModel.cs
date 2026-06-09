@@ -1,18 +1,22 @@
-﻿using LiveChartsCore;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.EntityFrameworkCore;
 using SkiaSharp;
+using SteelProgress.Data.Context;
 using SteelProgress.Domain.Entities;
-using System.Collections.ObjectModel;
 
+namespace SteelProgress.Core.ViewModels;
 
-namespace SteelProgress.App.ViewModels;
-
-public class ProgressViewModel : BaseViewModel
+public partial class ProgressViewModel : ObservableObject
 {
-    public ObservableCollection<Exercise> Exercises { get; set; } = new();
+    private readonly AppDbContext _dbContext;
+    private readonly int? _initialExerciseId;
+
+    public ObservableCollection<Exercise> Exercises { get; } = new();
 
     private Exercise? _selectedExercise;
     public Exercise? SelectedExercise
@@ -22,44 +26,40 @@ public class ProgressViewModel : BaseViewModel
         {
             _selectedExercise = value;
             OnPropertyChanged();
-            LoadChart();
+            _ = LoadChartAsync();
         }
     }
 
-    public Axis[] YAxes { get; set; } = Array.Empty<Axis>();
-    public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
-    public Axis[] XAxes { get; set; } = Array.Empty<Axis>();
+    [ObservableProperty] private ISeries[] _series = Array.Empty<ISeries>();
+    [ObservableProperty] private Axis[] _xAxes = Array.Empty<Axis>();
+    [ObservableProperty] private Axis[] _yAxes = Array.Empty<Axis>();
 
-    public ProgressViewModel(int? selectedExerciseId = null)
+    public ProgressViewModel(AppDbContext dbContext, int? selectedExerciseId = null)
     {
-        LoadExercises();
-
-        if (selectedExerciseId.HasValue)
-        {
-            SelectedExercise = Exercises
-                .FirstOrDefault(e => e.Id == selectedExerciseId.Value);
-        }
+        _dbContext = dbContext;
+        _initialExerciseId = selectedExerciseId;
+        _ = InitializeAsync();
     }
 
-    private void LoadExercises()
+    private async Task InitializeAsync()
     {
-        var list = App.DbContext.Exercises.ToList();
-
+        var list = await _dbContext.Exercises.ToListAsync();
         foreach (var ex in list)
             Exercises.Add(ex);
+
+        if (_initialExerciseId.HasValue)
+            SelectedExercise = Exercises.FirstOrDefault(e => e.Id == _initialExerciseId.Value);
     }
 
-    private void LoadChart()
+    private async Task LoadChartAsync()
     {
         if (SelectedExercise is null)
             return;
 
-
-
-        var sessions = App.DbContext.WorkoutSessions
+        var sessions = await _dbContext.WorkoutSessions
             .Include(s => s.Exercises)
                 .ThenInclude(e => e.Sets)
-            .ToList();
+            .ToListAsync();
 
         var data = sessions
             .Select(s => new
@@ -80,11 +80,9 @@ public class ProgressViewModel : BaseViewModel
             .Select(x => new ObservablePoint(x.Date.Ticks, x.MaxWeight))
             .ToList();
 
-
         if (!values.Any())
         {
-            Series = new ISeries[0];
-            OnPropertyChanged(nameof(Series));
+            Series = Array.Empty<ISeries>();
             return;
         }
 
@@ -119,12 +117,5 @@ public class ProgressViewModel : BaseViewModel
                 SeparatorsPaint = null
             }
         };
-
-        OnPropertyChanged(nameof(Series));
-        OnPropertyChanged(nameof(XAxes));
-        OnPropertyChanged(nameof(YAxes));
-
-        OnPropertyChanged(nameof(Series));
-        OnPropertyChanged(nameof(XAxes));
     }
 }

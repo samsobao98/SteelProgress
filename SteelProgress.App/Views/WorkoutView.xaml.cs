@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using SteelProgress.App.ViewModels;
+using System.Windows.Controls;
+using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Repositories;
 
 namespace SteelProgress.App.Views;
@@ -12,7 +12,6 @@ public partial class WorkoutView : UserControl
 
         var workoutRepository = new WorkoutRepository(App.DbContext);
         var routineRepository = new RoutineRepository(App.DbContext);
-
         DataContext = new WorkoutViewModel(workoutRepository, routineRepository);
     }
 }

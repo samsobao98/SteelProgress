@@ -1,7 +1,8 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
-using SteelProgress.App.ViewModels;
-using SteelProgress.App.Services;
+using SteelProgress.Core.Services;
+using SteelProgress.Core.ViewModels;
+
 namespace SteelProgress.App.Views;
 
 public partial class HistoryView : UserControl
@@ -9,7 +10,7 @@ public partial class HistoryView : UserControl
     public HistoryView()
     {
         InitializeComponent();
-        DataContext = new HistoryViewModel();
+        DataContext = new HistoryViewModel(App.DbContext);
     }
 
     private void OpenSelectedExerciseProgress_Click(object sender, RoutedEventArgs e)
@@ -17,7 +18,7 @@ public partial class HistoryView : UserControl
         if (DataContext is not HistoryViewModel viewModel ||
             viewModel.SelectedExerciseSummary is null)
         {
-           NotificationService.Error("Selecciona un ejercicio del historial.");
+            NotificationService.Error("Selecciona un ejercicio del historial.");
             return;
         }
 

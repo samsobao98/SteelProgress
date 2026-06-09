@@ -1,4 +1,4 @@
-﻿namespace SteelProgress.App.Services;
+namespace SteelProgress.Core.Services;
 
 public static class WorkoutStateService
 {
