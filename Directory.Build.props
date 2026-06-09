@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Workaround para APT2265: aapt2 (herramienta del SDK de Android) no soporta
+    caracteres no-ASCII en rutas. La ruta del proyecto contiene 'í' (SamuelRodríguez).
+    Redirigimos el directorio intermedio de TODOS los proyectos a C:\SPBuild\ (ruta ASCII pura).
+    La condición por TargetFramework no funcionaba durante el restore (outer build).
+  -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>C:\SPBuild\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

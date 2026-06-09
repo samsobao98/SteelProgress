@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             x:Class="SteelProgress.Spike.MainPage"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="SteelProgress — Spike MAUI"
+                   FontSize="22" FontAttributes="Bold"
+                   TextColor="#00FF88"
+                   HorizontalOptions="Center" />
+
+            <!-- Bloque 1: Test EF Core + SQLite -->
+            <Border BackgroundColor="#1A1A1A" Stroke="#333333" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Test 1 — EF Core + SQLite"
+                           FontAttributes="Bold" TextColor="White" FontSize="16" />
+                    <Label x:Name="DbStatusLabel"
+                           Text="Esperando..."
+                           TextColor="#B3B3B3" FontSize="14" />
+                    <Label x:Name="ExerciseCountLabel"
+                           Text=""
+                           TextColor="#00FF88" FontSize="13" />
+                    <Button x:Name="InsertBtn"
+                            Text="Insertar ejercicio de prueba"
+                            BackgroundColor="#00FF88"
+                            TextColor="#121212"
+                            FontAttributes="Bold"
+                            Clicked="OnInsertClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Bloque 2: Test LiveCharts -->
+            <Border BackgroundColor="#1A1A1A" Stroke="#333333" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Test 2 — LiveCharts"
+                           FontAttributes="Bold" TextColor="White" FontSize="16" />
+                    <lvc:CartesianChart x:Name="TestChart"
+                                        HeightRequest="200" />
+                    <Label x:Name="ChartStatusLabel"
+                           Text="Esperando..."
+                           TextColor="#B3B3B3" FontSize="13" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
