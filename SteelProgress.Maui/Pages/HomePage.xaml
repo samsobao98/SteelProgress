@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#1E1E2E"
+    Title="Inicio">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="20">
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="26"
+                Text="SteelProgress"
+                TextColor="#CDD6F4" />
+
+            <!-- Stats 2x2 -->
+            <Grid
+                ColumnDefinitions="*,*"
+                ColumnSpacing="12"
+                RowDefinitions="Auto,Auto"
+                RowSpacing="12">
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    BackgroundColor="#313244"
+                    Padding="16"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="36"
+                            Text="{Binding ExerciseCount}"
+                            TextColor="#89B4FA" />
+                        <Label
+                            FontSize="13"
+                            Text="Ejercicios"
+                            TextColor="#BAC2DE" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    BackgroundColor="#313244"
+                    Padding="16"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="36"
+                            Text="{Binding RoutineCount}"
+                            TextColor="#A6E3A1" />
+                        <Label
+                            FontSize="13"
+                            Text="Rutinas"
+                            TextColor="#BAC2DE" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    BackgroundColor="#313244"
+                    Padding="16"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="36"
+                            Text="{Binding SessionCount}"
+                            TextColor="#CBA6F7" />
+                        <Label
+                            FontSize="13"
+                            Text="Sesiones"
+                            TextColor="#BAC2DE" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    BackgroundColor="#313244"
+                    Padding="16"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="14"
+                            Text="{Binding LastWorkoutDay}"
+                            TextColor="#F38BA8" />
+                        <Label
+                            FontSize="13"
+                            Text="Último entreno"
+                            TextColor="#BAC2DE" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </Grid>
+
+            <!-- Recent sessions -->
+            <Label
+                FontAttributes="Bold"
+                FontSize="18"
+                Text="Últimas sesiones"
+                TextColor="#CDD6F4" />
+
+            <CollectionView ItemsSource="{Binding RecentSessions}">
+                <CollectionView.EmptyView>
+                    <Label
+                        HorizontalTextAlignment="Center"
+                        Text="No hay sesiones registradas"
+                        TextColor="#585B70" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            BackgroundColor="#313244"
+                            Margin="0,0,0,8"
+                            Padding="14"
+                            StrokeShape="RoundRectangle 8"
+                            StrokeThickness="0">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label
+                                    FontAttributes="Bold"
+                                    Text="{Binding RoutineDay.Name}"
+                                    TextColor="#CDD6F4"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}"
+                                    TextColor="#6C7086"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

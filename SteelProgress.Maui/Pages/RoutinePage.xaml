@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.RoutinePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#1E1E2E"
+    Title="Rutinas">
+    <Label
+        HorizontalOptions="Center"
+        Text="Rutinas — Próximamente"
+        TextColor="#585B70"
+        VerticalOptions="Center" />
+</ContentPage>

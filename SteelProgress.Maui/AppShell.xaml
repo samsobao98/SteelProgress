@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="SteelProgress.Maui.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.TabBarBackgroundColor="#1E1E2E"
+    Shell.TabBarForegroundColor="#CDD6F4"
+    Shell.TabBarTitleColor="#CDD6F4"
+    Shell.TabBarUnselectedColor="#585B70">
+
+    <TabBar>
+        <Tab Title="Inicio">
+            <ShellContent x:Name="HomeContent" Route="HomePage" />
+        </Tab>
+        <Tab Title="Ejercicios">
+            <ShellContent x:Name="ExerciseContent" Route="ExercisePage" />
+        </Tab>
+        <Tab Title="Rutinas">
+            <ShellContent x:Name="RoutineContent" Route="RoutinePage" />
+        </Tab>
+        <Tab Title="Entreno">
+            <ShellContent x:Name="WorkoutContent" Route="WorkoutPage" />
+        </Tab>
+        <Tab Title="Historial">
+            <ShellContent x:Name="HistoryContent" Route="HistoryPage" />
+        </Tab>
+    </TabBar>
+
+</Shell>
