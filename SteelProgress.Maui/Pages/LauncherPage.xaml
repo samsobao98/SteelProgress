@@ -81,11 +81,26 @@
                 Spacing="28"
                 Margin="0,28,0,24">
 
+                <!-- Edit mode toggle (only when profiles exist and not creating) -->
+                <Label
+                    IsVisible="{Binding IsNotCreating}"
+                    Text="{Binding EditModeButtonText}"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#A6E3A1"
+                    HorizontalOptions="End"
+                    Margin="0,0,24,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleEditModeCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
                 <!-- Horizontal profile row (when profiles exist) -->
                 <ScrollView
                     Orientation="Horizontal"
                     IsVisible="{Binding HasProfiles}"
-                    HorizontalScrollBarVisibility="Never">
+                    HorizontalScrollBarVisibility="Never"
+                    Margin="0,-20,0,0">
                     <HorizontalStackLayout Spacing="16" Padding="24,4">
 
                         <!-- Profile cards via BindableLayout -->
@@ -103,21 +118,40 @@
                                                 Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SelectProfileCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </VerticalStackLayout.GestureRecognizers>
-                                        <Border
-                                            BackgroundColor="{Binding AvatarColor}"
-                                            HeightRequest="72"
-                                            WidthRequest="72"
-                                            HorizontalOptions="Center"
-                                            StrokeShape="RoundRectangle 36"
-                                            StrokeThickness="0">
-                                            <Label
-                                                Text="{Binding Name, Converter={StaticResource InitialConverter}}"
-                                                FontAttributes="Bold"
-                                                FontSize="28"
-                                                TextColor="#1E1E2E"
+                                        <Grid WidthRequest="72" HeightRequest="72" HorizontalOptions="Center">
+                                            <Border
+                                                BackgroundColor="{Binding AvatarColor}"
+                                                HeightRequest="72"
+                                                WidthRequest="72"
                                                 HorizontalOptions="Center"
-                                                VerticalOptions="Center" />
-                                        </Border>
+                                                StrokeShape="RoundRectangle 36"
+                                                StrokeThickness="0">
+                                                <Label
+                                                    Text="{Binding Name, Converter={StaticResource InitialConverter}}"
+                                                    FontAttributes="Bold"
+                                                    FontSize="28"
+                                                    TextColor="#1E1E2E"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="Center" />
+                                            </Border>
+                                            <!-- Trash overlay — visible in edit mode -->
+                                            <Border
+                                                BackgroundColor="#CC181825"
+                                                IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsEditMode}"
+                                                StrokeShape="RoundRectangle 36"
+                                                StrokeThickness="0">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={x:Reference ThisPage}, Path=ConfirmDeleteCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <Label
+                                                    Text="🗑"
+                                                    FontSize="24"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="Center" />
+                                            </Border>
+                                        </Grid>
                                         <Label
                                             Text="{Binding Name}"
                                             FontSize="13"
@@ -136,7 +170,7 @@
                             WidthRequest="86"
                             Spacing="8"
                             HorizontalOptions="Center"
-                            IsVisible="{Binding IsNotCreating}">
+                            IsVisible="{Binding CanAddProfile}">
                             <VerticalStackLayout.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
                             </VerticalStackLayout.GestureRecognizers>

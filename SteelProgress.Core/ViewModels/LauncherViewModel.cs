@@ -18,17 +18,25 @@ public partial class LauncherViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotCreating))]
+    [NotifyPropertyChangedFor(nameof(CanAddProfile))]
     private bool _isCreating;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
     private bool _isLoaded;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanAddProfile))]
+    [NotifyPropertyChangedFor(nameof(EditModeButtonText))]
+    private bool _isEditMode;
+
     public bool IsLoading => !IsLoaded;
     public bool IsNotCreating => !IsCreating;
+    public bool CanAddProfile => !IsCreating && !IsEditMode;
     public bool HasProfiles => Profiles.Count > 0;
     public bool IsFirstTimeSetup => !HasProfiles;
     public string SubtitleText => HasProfiles ? "¿Quién entrena hoy?" : "Crea tu primer perfil";
+    public string EditModeButtonText => IsEditMode ? "Listo" : "Editar";
 
     public IReadOnlyList<string> AvailableColors { get; } = new[]
     {
@@ -68,8 +76,35 @@ public partial class LauncherViewModel : ObservableObject
     [RelayCommand]
     public void SelectProfile(UserProfile profile)
     {
+        if (IsEditMode) return;
         _currentUserService.SetCurrentUser(profile.Id);
         ProfileChosen?.Invoke();
+    }
+
+    [RelayCommand]
+    public void ToggleEditMode()
+    {
+        if (!HasProfiles) return;
+        IsEditMode = !IsEditMode;
+    }
+
+    public async Task DeleteProfileAsync(UserProfile profile)
+    {
+        using var scope = _sp.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var entity = await db.UserProfiles.FindAsync(profile.Id);
+        if (entity is null) return;
+        db.UserProfiles.Remove(entity);
+        await db.SaveChangesAsync();
+
+        Profiles.Remove(profile);
+        NotifyProfileDerived();
+
+        if (!HasProfiles)
+        {
+            IsEditMode = false;
+            IsCreating = true;
+        }
     }
 
     [RelayCommand]
@@ -77,6 +112,7 @@ public partial class LauncherViewModel : ObservableObject
     {
         NewProfileName = string.Empty;
         SelectedColor = "#A6E3A1";
+        IsEditMode = false;
         IsCreating = true;
     }
 
@@ -117,5 +153,7 @@ public partial class LauncherViewModel : ObservableObject
         OnPropertyChanged(nameof(HasProfiles));
         OnPropertyChanged(nameof(IsFirstTimeSetup));
         OnPropertyChanged(nameof(SubtitleText));
+        OnPropertyChanged(nameof(CanAddProfile));
+        OnPropertyChanged(nameof(EditModeButtonText));
     }
 }
