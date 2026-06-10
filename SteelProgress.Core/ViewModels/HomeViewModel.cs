@@ -23,6 +23,8 @@ public partial class HomeViewModel : ObservableObject
         _ = LoadDataAsync();
     }
 
+    public Task RefreshAsync() => LoadDataAsync();
+
     private async Task LoadDataAsync()
     {
         ExerciseCount = await _dbContext.Exercises.CountAsync();

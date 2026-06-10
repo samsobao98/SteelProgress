@@ -15,6 +15,7 @@ public partial class AppShell : Shell
         RoutineContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<RoutinePage>());
         WorkoutContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<WorkoutPage>());
         HistoryContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<HistoryPage>());
+        ProgressContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ProgressPage>());
 
         // Wire static service delegates — AppShell lives for app lifetime, so one subscription is correct
         ConfirmDialogService.OnConfirmationRequested += (title, msg) =>

@@ -33,6 +33,8 @@ public partial class HistoryViewModel : ObservableObject
         _ = InitializeAsync();
     }
 
+    public Task RefreshAsync() => InitializeAsync();
+
     private async Task InitializeAsync()
     {
         await LoadSessionsAsync();

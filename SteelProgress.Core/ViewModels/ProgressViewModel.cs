@@ -41,6 +41,8 @@ public partial class ProgressViewModel : ObservableObject
         _ = InitializeAsync();
     }
 
+    public Task RefreshAsync() => InitializeAsync();
+
     private async Task InitializeAsync()
     {
         var list = await _dbContext.Exercises.ToListAsync();

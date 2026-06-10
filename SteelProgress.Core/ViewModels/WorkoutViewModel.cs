@@ -57,6 +57,8 @@ public partial class WorkoutViewModel : ObservableObject
         _ = LoadRoutinesAsync();
     }
 
+    public Task RefreshAsync() => IsSessionActive ? Task.CompletedTask : LoadRoutinesAsync();
+
     private async Task LoadRoutinesAsync()
     {
         var routines = await _routineRepository.GetAllAsync();

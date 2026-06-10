@@ -4,10 +4,18 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class HistoryPage : ContentPage
 {
+    private readonly HistoryViewModel _vm;
+
     public HistoryPage(HistoryViewModel vm)
     {
         InitializeComponent();
-        BindingContext = vm;
+        BindingContext = _vm = vm;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await _vm.RefreshAsync();
     }
 
     private void ShowSection(int section)

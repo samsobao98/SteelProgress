@@ -54,6 +54,8 @@ public partial class RoutineViewModel : ObservableObject
         _ = InitializeAsync();
     }
 
+    public Task RefreshAsync() => InitializeAsync();
+
     private async Task InitializeAsync()
     {
         await LoadAllExercisesAsync();

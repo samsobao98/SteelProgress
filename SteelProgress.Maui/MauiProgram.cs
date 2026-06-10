@@ -39,6 +39,7 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineViewModel>();
         builder.Services.AddTransient<WorkoutViewModel>();
         builder.Services.AddTransient<HistoryViewModel>();
+        builder.Services.AddTransient<ProgressViewModel>();
 
         // Pages
         builder.Services.AddTransient<HomePage>();
@@ -46,6 +47,7 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutinePage>();
         builder.Services.AddTransient<WorkoutPage>();
         builder.Services.AddTransient<HistoryPage>();
+        builder.Services.AddTransient<ProgressPage>();
 
         // Shell y bienvenida viven toda la vida de la app
         builder.Services.AddSingleton<AppShell>();

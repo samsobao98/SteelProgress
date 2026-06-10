@@ -35,6 +35,8 @@ public partial class ExerciseViewModel : ObservableObject
         _ = LoadExercisesAsync();
     }
 
+    public Task RefreshAsync() => LoadExercisesAsync();
+
     private async Task LoadExercisesAsync()
     {
         var exercises = await _repository.GetAllAsync();
