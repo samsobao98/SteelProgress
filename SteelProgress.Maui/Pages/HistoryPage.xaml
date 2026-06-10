@@ -110,7 +110,10 @@
                     Text="{Binding SelectedSession.Date, StringFormat='Sesión del {0:dd/MM/yyyy}'}"
                     TextColor="#89B4FA" />
 
-                <CollectionView ItemsSource="{Binding ExerciseSummaries}">
+                <CollectionView
+                    ItemsSource="{Binding ExerciseSummaries}"
+                    SelectedItem="{Binding SelectedExerciseSummary, Mode=TwoWay}"
+                    SelectionMode="Single">
                     <CollectionView.EmptyView>
                         <Label
                             HorizontalTextAlignment="Center"
@@ -191,6 +194,14 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+
+                <Button
+                    BackgroundColor="#CBA6F7"
+                    Clicked="OnVerProgresoClicked"
+                    FontAttributes="Bold"
+                    FontSize="14"
+                    Text="Ver progreso de este ejercicio"
+                    TextColor="#1E1E2E" />
 
             </VerticalStackLayout>
         </ScrollView>

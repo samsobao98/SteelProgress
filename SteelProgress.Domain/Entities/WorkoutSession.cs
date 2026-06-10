@@ -9,11 +9,12 @@ namespace SteelProgress.Domain.Entities;
 public class WorkoutSession
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
+    public UserProfile? UserProfile { get; set; }
 
     public DateTime Date { get; set; }
 
     public int RoutineDayId { get; set; }
-
     public RoutineDay? RoutineDay { get; set; }
 
     public ICollection<WorkoutExercise> Exercises { get; set; } = new List<WorkoutExercise>();

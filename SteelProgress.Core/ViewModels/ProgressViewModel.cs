@@ -34,6 +34,8 @@ public partial class ProgressViewModel : ObservableObject
     [ObservableProperty] private Axis[] _xAxes = Array.Empty<Axis>();
     [ObservableProperty] private Axis[] _yAxes = Array.Empty<Axis>();
 
+    public ObservableCollection<ProgressEntry> ProgressEntries { get; } = new();
+
     public ProgressViewModel(AppDbContext dbContext, int? selectedExerciseId = null)
     {
         _dbContext = dbContext;
@@ -43,9 +45,15 @@ public partial class ProgressViewModel : ObservableObject
 
     public Task RefreshAsync() => InitializeAsync();
 
+    public void SelectExerciseById(int id)
+    {
+        SelectedExercise = Exercises.FirstOrDefault(e => e.Id == id);
+    }
+
     private async Task InitializeAsync()
     {
         var list = await _dbContext.Exercises.ToListAsync();
+        Exercises.Clear();
         foreach (var ex in list)
             Exercises.Add(ex);
 
@@ -81,6 +89,10 @@ public partial class ProgressViewModel : ObservableObject
         var values = data
             .Select(x => new ObservablePoint(x.Date.Ticks, x.MaxWeight))
             .ToList();
+
+        ProgressEntries.Clear();
+        foreach (var d in data)
+            ProgressEntries.Add(new ProgressEntry { Date = d.Date, MaxWeight = d.MaxWeight });
 
         if (!values.Any())
         {
@@ -120,4 +132,10 @@ public partial class ProgressViewModel : ObservableObject
             }
         };
     }
+}
+
+public class ProgressEntry
+{
+    public DateTime Date { get; set; }
+    public double MaxWeight { get; set; }
 }

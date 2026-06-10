@@ -24,9 +24,6 @@
         <Tab Title="Historial">
             <ShellContent x:Name="HistoryContent" Route="HistoryPage" />
         </Tab>
-        <Tab Title="Progreso">
-            <ShellContent x:Name="ProgressContent" Route="ProgressPage" />
-        </Tab>
     </TabBar>
 
 </Shell>

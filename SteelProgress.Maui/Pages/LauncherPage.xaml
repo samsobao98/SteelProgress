@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.LauncherPage"
+    x:Name="ThisPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
+    BackgroundColor="#1E1E2E"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:InitialLetterConverter x:Key="InitialConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Background decoration -->
+        <Ellipse
+            Grid.RowSpan="3"
+            Fill="#A6E3A1"
+            HeightRequest="300"
+            HorizontalOptions="End"
+            Opacity="0.06"
+            VerticalOptions="Start"
+            WidthRequest="300"
+            Margin="0,-80,-80,0" />
+        <Ellipse
+            Grid.RowSpan="3"
+            Fill="#A6E3A1"
+            HeightRequest="200"
+            HorizontalOptions="Start"
+            Opacity="0.04"
+            VerticalOptions="End"
+            WidthRequest="200"
+            Margin="-60,0,0,-60" />
+
+        <!-- Row 0: Logo -->
+        <VerticalStackLayout
+            x:Name="HeaderSection"
+            Grid.Row="0"
+            Opacity="0"
+            TranslationY="-30"
+            Margin="0,56,0,0">
+            <Image
+                Source="logo_icon.png"
+                HeightRequest="90"
+                HorizontalOptions="Center"
+                Aspect="AspectFit" />
+        </VerticalStackLayout>
+
+        <!-- Row 1: Subtitle -->
+        <Label
+            x:Name="SubtitleLabel"
+            Grid.Row="1"
+            Opacity="0"
+            Text="{Binding SubtitleText}"
+            FontSize="19"
+            FontAttributes="Bold"
+            TextColor="#BAC2DE"
+            HorizontalTextAlignment="Center"
+            Margin="0,20,0,0" />
+
+        <!-- Row 2: Content -->
+        <Grid Grid.Row="2">
+
+            <!-- Loading spinner -->
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="#A6E3A1"
+                WidthRequest="48"
+                HeightRequest="48"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <!-- Content (shown once loaded) -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsLoaded}"
+                VerticalOptions="Start"
+                Spacing="28"
+                Margin="0,28,0,24">
+
+                <!-- Horizontal profile row (when profiles exist) -->
+                <ScrollView
+                    Orientation="Horizontal"
+                    IsVisible="{Binding HasProfiles}"
+                    HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="16" Padding="24,4">
+
+                        <!-- Profile cards via BindableLayout -->
+                        <HorizontalStackLayout
+                            Spacing="16"
+                            BindableLayout.ItemsSource="{Binding Profiles}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <VerticalStackLayout
+                                        WidthRequest="86"
+                                        Spacing="8"
+                                        HorizontalOptions="Center">
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SelectProfileCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </VerticalStackLayout.GestureRecognizers>
+                                        <Border
+                                            BackgroundColor="{Binding AvatarColor}"
+                                            HeightRequest="72"
+                                            WidthRequest="72"
+                                            HorizontalOptions="Center"
+                                            StrokeShape="RoundRectangle 36"
+                                            StrokeThickness="0">
+                                            <Label
+                                                Text="{Binding Name, Converter={StaticResource InitialConverter}}"
+                                                FontAttributes="Bold"
+                                                FontSize="28"
+                                                TextColor="#1E1E2E"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center" />
+                                        </Border>
+                                        <Label
+                                            Text="{Binding Name}"
+                                            FontSize="13"
+                                            FontAttributes="Bold"
+                                            TextColor="#CDD6F4"
+                                            HorizontalTextAlignment="Center"
+                                            LineBreakMode="TailTruncation"
+                                            MaxLines="1" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+
+                        <!-- "+" add profile button -->
+                        <VerticalStackLayout
+                            WidthRequest="86"
+                            Spacing="8"
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding IsNotCreating}">
+                            <VerticalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
+                            </VerticalStackLayout.GestureRecognizers>
+                            <Border
+                                BackgroundColor="#252536"
+                                HeightRequest="72"
+                                WidthRequest="72"
+                                HorizontalOptions="Center"
+                                StrokeShape="RoundRectangle 36"
+                                StrokeThickness="2"
+                                Stroke="#45475A">
+                                <Label
+                                    Text="+"
+                                    FontSize="32"
+                                    TextColor="#6C7086"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+                            <Label
+                                Text="Añadir"
+                                FontSize="13"
+                                TextColor="#6C7086"
+                                HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Profile creation form -->
+                <Border
+                    IsVisible="{Binding IsCreating}"
+                    BackgroundColor="#313244"
+                    Padding="24"
+                    Margin="20,0"
+                    StrokeShape="RoundRectangle 16"
+                    StrokeThickness="1"
+                    Stroke="#A6E3A1">
+                    <VerticalStackLayout Spacing="16">
+
+                        <Label
+                            Text="Nuevo perfil"
+                            FontAttributes="Bold"
+                            FontSize="17"
+                            TextColor="#CDD6F4" />
+
+                        <Border
+                            BackgroundColor="#45475A"
+                            StrokeShape="RoundRectangle 8"
+                            StrokeThickness="0"
+                            Padding="4,0">
+                            <Entry
+                                Placeholder="Nombre del perfil"
+                                PlaceholderColor="#585B70"
+                                Text="{Binding NewProfileName}"
+                                TextColor="#CDD6F4"
+                                BackgroundColor="Transparent"
+                                ReturnType="Done"
+                                ReturnCommand="{Binding CreateProfileCommand}" />
+                        </Border>
+
+                        <Label Text="Color del avatar" FontSize="12" TextColor="#BAC2DE" />
+
+                        <CollectionView
+                            ItemsSource="{Binding AvailableColors}"
+                            HeightRequest="52"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedColor, Mode=TwoWay}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        BackgroundColor="{Binding .}"
+                                        HeightRequest="44"
+                                        WidthRequest="44"
+                                        Stroke="Transparent"
+                                        StrokeShape="RoundRectangle 22"
+                                        StrokeThickness="0"
+                                        Margin="4,4">
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup Name="CommonStates">
+                                                <VisualState Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="StrokeThickness" Value="0" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Stroke" Value="White" />
+                                                        <Setter Property="StrokeThickness" Value="3" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <!-- First-time: single Empezar button (full width) -->
+                        <Button
+                            IsVisible="{Binding IsFirstTimeSetup}"
+                            Text="Empezar"
+                            BackgroundColor="#A6E3A1"
+                            TextColor="#1E1E2E"
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            HeightRequest="52"
+                            CornerRadius="10"
+                            Command="{Binding CreateProfileCommand}" />
+
+                        <!-- Returning user: Cancelar + Crear side by side -->
+                        <Grid
+                            ColumnDefinitions="*,*"
+                            ColumnSpacing="10"
+                            IsVisible="{Binding HasProfiles}">
+                            <Button
+                                Grid.Column="0"
+                                Text="Cancelar"
+                                BackgroundColor="#45475A"
+                                TextColor="#CDD6F4"
+                                HeightRequest="48"
+                                CornerRadius="8"
+                                Command="{Binding CancelCreatingCommand}" />
+                            <Button
+                                Grid.Column="1"
+                                Text="Crear"
+                                BackgroundColor="#A6E3A1"
+                                TextColor="#1E1E2E"
+                                FontAttributes="Bold"
+                                HeightRequest="48"
+                                CornerRadius="8"
+                                Command="{Binding CreateProfileCommand}" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -1,6 +1,9 @@
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using SteelProgress.Core.Services;
+using SteelProgress.Domain.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Context;
 using SteelProgress.Data.Repositories;
@@ -22,9 +25,16 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
+
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "steelprogress.db");
         builder.Services.AddDbContext<AppDbContext>(
-            opt => opt.UseSqlite($"Data Source={dbPath}"),
+            (sp, opt) =>
+            {
+                opt.UseSqlite($"Data Source={dbPath}");
+                // EF 8 snapshots differ in format from EF 10 model — suppress false-positive
+                opt.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+            },
             ServiceLifetime.Transient,
             ServiceLifetime.Transient);
 
@@ -39,7 +49,9 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineViewModel>();
         builder.Services.AddTransient<WorkoutViewModel>();
         builder.Services.AddTransient<HistoryViewModel>();
-        builder.Services.AddTransient<ProgressViewModel>();
+        builder.Services.AddTransient<ProgressViewModel>(sp =>
+            new ProgressViewModel(sp.GetRequiredService<AppDbContext>()));
+        builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
         builder.Services.AddTransient<HomePage>();
@@ -49,9 +61,9 @@ public static class MauiProgram
         builder.Services.AddTransient<HistoryPage>();
         builder.Services.AddTransient<ProgressPage>();
 
-        // Shell y bienvenida viven toda la vida de la app
+        // Shell and launcher live for the app lifetime
         builder.Services.AddSingleton<AppShell>();
-        builder.Services.AddSingleton<WelcomePage>();
+        builder.Services.AddSingleton<LauncherPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

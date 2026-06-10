@@ -36,4 +36,11 @@ public partial class HistoryPage : ContentPage
 
     private void OnSesionesClicked(object? sender, EventArgs e) => ShowSection(0);
     private void OnDetalleClicked(object? sender, EventArgs e)  => ShowSection(1);
+
+    private async void OnVerProgresoClicked(object? sender, EventArgs e)
+    {
+        if (_vm.SelectedExerciseSummary is null)
+            return;
+        await Shell.Current.GoToAsync($"ProgressPage?exerciseId={_vm.SelectedExerciseSummary.ExerciseId}");
+    }
 }

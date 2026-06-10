@@ -3,7 +3,6 @@
     x:Class="SteelProgress.Maui.Pages.ProgressPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     BackgroundColor="#1E1E2E"
     Title="Progreso">
 
@@ -25,7 +24,7 @@
                     TextColor="#CDD6F4" />
                 <Label
                     FontSize="13"
-                    Text="Evolución del peso máximo por sesión"
+                    Text="{Binding SelectedExercise.Name, TargetNullValue='Peso máximo por sesión'}"
                     TextColor="#BAC2DE" />
             </VerticalStackLayout>
         </Border>
@@ -51,33 +50,61 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- Gráfica -->
-        <Border
+        <!-- Lista de entradas de progreso -->
+        <CollectionView
             Grid.Row="2"
-            BackgroundColor="#313244"
-            Margin="12,10,12,12"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <Grid RowDefinitions="Auto,*">
-
+            ItemsSource="{Binding ProgressEntries}"
+            Margin="12,10,12,12">
+            <CollectionView.EmptyView>
                 <Label
-                    Grid.Row="0"
-                    FontAttributes="Bold"
-                    FontSize="15"
-                    Margin="0,0,0,12"
-                    Text="{Binding SelectedExercise.Name, TargetNullValue='Selecciona un ejercicio para ver su progreso'}"
-                    TextColor="#CDD6F4" />
+                    HorizontalTextAlignment="Center"
+                    Text="Sin datos para este ejercicio"
+                    TextColor="#585B70"
+                    VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        BackgroundColor="#313244"
+                        Margin="0,0,0,8"
+                        Padding="14,12"
+                        StrokeShape="RoundRectangle 8"
+                        StrokeThickness="0">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
 
-                <lvc:CartesianChart
-                    Grid.Row="1"
-                    Series="{Binding Series}"
-                    XAxes="{Binding XAxes}"
-                    YAxes="{Binding YAxes}"
-                    BackgroundColor="Transparent" />
+                            <!-- Fecha -->
+                            <Label
+                                Grid.Column="0"
+                                FontSize="13"
+                                Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}"
+                                TextColor="#6C7086"
+                                VerticalOptions="Center"
+                                WidthRequest="65" />
 
-            </Grid>
-        </Border>
+                            <!-- Barra fija decorativa -->
+                            <BoxView
+                                Grid.Column="1"
+                                BackgroundColor="#45475A"
+                                CornerRadius="3"
+                                HeightRequest="8"
+                                HorizontalOptions="Fill"
+                                Margin="8,0"
+                                VerticalOptions="Center" />
+
+                            <!-- Peso máximo -->
+                            <Label
+                                Grid.Column="2"
+                                FontAttributes="Bold"
+                                FontSize="16"
+                                Text="{Binding MaxWeight, StringFormat='{0} kg'}"
+                                TextColor="#89B4FA"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
     </Grid>
 
