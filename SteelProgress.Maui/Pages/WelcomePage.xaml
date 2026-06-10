@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.WelcomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#1E1E2E"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid>
+
+        <!-- Decoración fondo: círculo top-right -->
+        <Ellipse
+            Fill="#89B4FA"
+            HeightRequest="340"
+            HorizontalOptions="End"
+            Opacity="0.08"
+            VerticalOptions="Start"
+            WidthRequest="340"
+            Margin="0,-120,-100,0" />
+
+        <!-- Decoración fondo: círculo bottom-left -->
+        <Ellipse
+            Fill="#89B4FA"
+            HeightRequest="240"
+            HorizontalOptions="Start"
+            Opacity="0.05"
+            VerticalOptions="End"
+            WidthRequest="240"
+            Margin="-80,0,0,-80" />
+
+        <!-- Card central -->
+        <Border
+            x:Name="MainCard"
+            BackgroundColor="#313244"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Margin="20"
+            Opacity="0"
+            Padding="28"
+            StrokeShape="RoundRectangle 18"
+            StrokeThickness="1"
+            Stroke="#45475A"
+            TranslationY="30">
+
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Logo -->
+                <Image
+                    x:Name="LogoImage"
+                    Source="logo_icon.png"
+                    HeightRequest="160"
+                    HorizontalOptions="Center"
+                    Aspect="AspectFit"
+                    Opacity="0"
+                    TranslationY="15"
+                    Margin="0,0,0,16" />
+
+                <!-- Tagline -->
+                <VerticalStackLayout
+                    x:Name="HeroText"
+                    Spacing="6"
+                    HorizontalOptions="Center"
+                    Opacity="0"
+                    TranslationY="15"
+                    Margin="0,0,0,24">
+                    <Label
+                        Text="Entrena con datos. Mejora con intención."
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        HorizontalTextAlignment="Center"
+                        TextColor="#CDD6F4" />
+                    <Label
+                        FontSize="13"
+                        HorizontalTextAlignment="Center"
+                        TextColor="#BAC2DE">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Todo tu progreso en un solo lugar. " />
+                                <Span
+                                    Text="Más claro. Más rápido. Más fuerte."
+                                    FontAttributes="Bold"
+                                    TextColor="#89B4FA" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+
+                <!-- Feature cards -->
+                <Grid
+                    x:Name="FeatureCards"
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="8"
+                    Opacity="0"
+                    TranslationY="15"
+                    Margin="0,0,0,24">
+
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="#45475A"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="🏋" FontSize="24" HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="Entrena"
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#CDD6F4" />
+                            <Label
+                                Text="Registra series y peso"
+                                FontSize="11"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#BAC2DE" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        BackgroundColor="#45475A"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="📈" FontSize="24" HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="Progresa"
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#CDD6F4" />
+                            <Label
+                                Text="Consulta gráficas"
+                                FontSize="11"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#BAC2DE" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        BackgroundColor="#45475A"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                            <Label Text="🕘" FontSize="24" HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="Compara"
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#CDD6F4" />
+                            <Label
+                                Text="Revisa tu historial"
+                                FontSize="11"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#BAC2DE" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </Grid>
+
+                <!-- Botón Empezar -->
+                <Button
+                    x:Name="StartButton"
+                    BackgroundColor="#89B4FA"
+                    Clicked="OnStartClicked"
+                    FontAttributes="Bold"
+                    FontSize="17"
+                    HeightRequest="52"
+                    HorizontalOptions="Center"
+                    Opacity="0"
+                    Text="Empezar"
+                    TextColor="#1E1E2E"
+                    TranslationY="15"
+                    WidthRequest="200" />
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

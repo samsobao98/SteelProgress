@@ -5,9 +5,196 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     BackgroundColor="#1E1E2E"
     Title="Historial">
-    <Label
-        HorizontalOptions="Center"
-        Text="Historial — Próximamente"
-        TextColor="#585B70"
-        VerticalOptions="Center" />
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="#313244"
+            Margin="12,12,12,0"
+            Padding="16"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="0">
+            <VerticalStackLayout Spacing="4">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    Text="Historial"
+                    TextColor="#CDD6F4" />
+                <Label
+                    FontSize="13"
+                    Text="Consulta y compara tus sesiones anteriores"
+                    TextColor="#BAC2DE" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Selector de sección -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="6"
+            Margin="12,10,12,0">
+            <Button
+                x:Name="BtnSesiones"
+                Grid.Column="0"
+                BackgroundColor="#89B4FA"
+                Clicked="OnSesionesClicked"
+                FontSize="13"
+                Text="Sesiones"
+                TextColor="#1E1E2E" />
+            <Button
+                x:Name="BtnDetalle"
+                Grid.Column="1"
+                BackgroundColor="#45475A"
+                Clicked="OnDetalleClicked"
+                FontSize="13"
+                Text="Detalle"
+                TextColor="#CDD6F4" />
+        </Grid>
+
+        <!-- ===== SECCIÓN SESIONES ===== -->
+        <CollectionView
+            x:Name="SectionSesiones"
+            Grid.Row="2"
+            ItemsSource="{Binding Sessions}"
+            Margin="12,10,12,12"
+            SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
+            SelectionMode="Single">
+            <CollectionView.EmptyView>
+                <Label
+                    HorizontalTextAlignment="Center"
+                    Text="No hay sesiones registradas"
+                    TextColor="#585B70"
+                    VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        BackgroundColor="#313244"
+                        Margin="0,0,0,8"
+                        Padding="14"
+                        StrokeShape="RoundRectangle 8"
+                        StrokeThickness="0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label
+                                Grid.Column="0"
+                                FontAttributes="Bold"
+                                FontSize="15"
+                                Text="{Binding RoutineDay.Name}"
+                                TextColor="#CDD6F4"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                FontSize="13"
+                                Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}"
+                                TextColor="#6C7086"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- ===== SECCIÓN DETALLE ===== -->
+        <ScrollView
+            x:Name="SectionDetalle"
+            Grid.Row="2"
+            IsVisible="False"
+            Margin="12,10,12,12">
+            <VerticalStackLayout Spacing="12">
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="15"
+                    Text="{Binding SelectedSession.Date, StringFormat='Sesión del {0:dd/MM/yyyy}'}"
+                    TextColor="#89B4FA" />
+
+                <CollectionView ItemsSource="{Binding ExerciseSummaries}">
+                    <CollectionView.EmptyView>
+                        <Label
+                            HorizontalTextAlignment="Center"
+                            Text="Selecciona una sesión en la pestaña Sesiones"
+                            TextColor="#585B70" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                BackgroundColor="#313244"
+                                Margin="0,0,0,10"
+                                Padding="16"
+                                StrokeShape="RoundRectangle 10"
+                                StrokeThickness="0">
+                                <VerticalStackLayout Spacing="8">
+
+                                    <!-- Nombre + mejor serie -->
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="17"
+                                                Text="{Binding ExerciseName}"
+                                                TextColor="#CDD6F4" />
+                                            <Label
+                                                FontSize="13"
+                                                Text="{Binding ComparisonText}"
+                                                TextColor="#A6E3A1" />
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="2">
+                                            <Label
+                                                FontSize="11"
+                                                HorizontalTextAlignment="End"
+                                                Text="Mejor serie"
+                                                TextColor="#585B70" />
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="16"
+                                                HorizontalTextAlignment="End"
+                                                Text="{Binding BestSetText}"
+                                                TextColor="#CBA6F7" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+
+                                    <!-- Series chips -->
+                                    <Label FontSize="12" Text="Series:" TextColor="#BAC2DE" />
+                                    <FlexLayout
+                                        BindableLayout.ItemsSource="{Binding Sets}"
+                                        Wrap="Wrap"
+                                        Direction="Row">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border
+                                                    BackgroundColor="#45475A"
+                                                    Margin="0,0,6,6"
+                                                    Padding="10,6"
+                                                    StrokeShape="RoundRectangle 6"
+                                                    StrokeThickness="0">
+                                                    <Label
+                                                        FontSize="13"
+                                                        Text="{Binding Weight, StringFormat='{0} kg x '}"
+                                                        TextColor="#CDD6F4">
+                                                        <Label.FormattedText>
+                                                            <FormattedString>
+                                                                <Span Text="{Binding Weight}" TextColor="#89B4FA" FontAttributes="Bold" />
+                                                                <Span Text=" kg × " TextColor="#BAC2DE" />
+                                                                <Span Text="{Binding Reps}" TextColor="#A6E3A1" FontAttributes="Bold" />
+                                                            </FormattedString>
+                                                        </Label.FormattedText>
+                                                    </Label>
+                                                </Border>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
 </ContentPage>

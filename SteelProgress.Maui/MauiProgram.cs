@@ -33,8 +33,12 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineRepository>();
         builder.Services.AddTransient<WorkoutRepository>();
 
-        // ViewModels — add more in Phase 3 as pages are built
+        // ViewModels
         builder.Services.AddTransient<HomeViewModel>();
+        builder.Services.AddTransient<ExerciseViewModel>();
+        builder.Services.AddTransient<RoutineViewModel>();
+        builder.Services.AddTransient<WorkoutViewModel>();
+        builder.Services.AddTransient<HistoryViewModel>();
 
         // Pages
         builder.Services.AddTransient<HomePage>();
@@ -43,20 +47,14 @@ public static class MauiProgram
         builder.Services.AddTransient<WorkoutPage>();
         builder.Services.AddTransient<HistoryPage>();
 
-        // Shell lives for app lifetime
+        // Shell y bienvenida viven toda la vida de la app
         builder.Services.AddSingleton<AppShell>();
+        builder.Services.AddSingleton<WelcomePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
 
-        var app = builder.Build();
-
-        // Auto-migrate on startup — no "dotnet ef database update" on mobile
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.Migrate();
-
-        return app;
+        return builder.Build();
     }
 }

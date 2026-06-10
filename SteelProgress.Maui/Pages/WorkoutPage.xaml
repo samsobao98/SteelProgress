@@ -5,9 +5,278 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     BackgroundColor="#1E1E2E"
     Title="Entreno">
-    <Label
-        HorizontalOptions="Center"
-        Text="Entreno — Próximamente"
-        TextColor="#585B70"
-        VerticalOptions="Center" />
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="#313244"
+            Margin="12,12,12,0"
+            Padding="16"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="0">
+            <VerticalStackLayout Spacing="4">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    Text="Entrenamiento"
+                    TextColor="#CDD6F4" />
+                <Label
+                    FontSize="13"
+                    Text="Selecciona rutina y día, luego registra tus series"
+                    TextColor="#BAC2DE" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ===== VISTA PREPARACIÓN (IsSessionActive = false) ===== -->
+        <ScrollView Grid.Row="1" Grid.RowSpan="2">
+            <Grid>
+                <Border
+                    BackgroundColor="#313244"
+                    Margin="12,12,12,0"
+                    Padding="24"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0"
+                    VerticalOptions="Center">
+                    <Border.Triggers>
+                        <DataTrigger
+                            Binding="{Binding IsSessionActive}"
+                            TargetType="Border"
+                            Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <VerticalStackLayout Spacing="16">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalTextAlignment="Center"
+                            Text="Preparar entrenamiento"
+                            TextColor="#CDD6F4" />
+                        <Label
+                            FontSize="13"
+                            HorizontalTextAlignment="Center"
+                            Text="Elige la rutina y el día que vas a entrenar hoy"
+                            TextColor="#BAC2DE" />
+
+                        <VerticalStackLayout Spacing="4">
+                            <Label FontSize="12" Text="Rutina" TextColor="#BAC2DE" />
+                            <Picker
+                                BackgroundColor="#45475A"
+                                ItemDisplayBinding="{Binding Name}"
+                                ItemsSource="{Binding Routines}"
+                                SelectedItem="{Binding SelectedRoutine}"
+                                Title="Selecciona una rutina"
+                                TitleColor="#585B70"
+                                TextColor="#CDD6F4" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="4">
+                            <Label FontSize="12" Text="Día de rutina" TextColor="#BAC2DE" />
+                            <Picker
+                                BackgroundColor="#45475A"
+                                ItemDisplayBinding="{Binding Name}"
+                                ItemsSource="{Binding RoutineDays}"
+                                SelectedItem="{Binding SelectedRoutineDay}"
+                                Title="Selecciona un día"
+                                TitleColor="#585B70"
+                                TextColor="#CDD6F4" />
+                        </VerticalStackLayout>
+
+                        <Button
+                            BackgroundColor="#A6E3A1"
+                            Command="{Binding StartWorkoutCommand}"
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            Text="Iniciar entrenamiento"
+                            TextColor="#1E1E2E" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===== VISTA ACTIVA (IsSessionActive = true) ===== -->
+                <Grid IsVisible="False" RowDefinitions="Auto,*,Auto">
+                    <Grid.Triggers>
+                        <DataTrigger
+                            Binding="{Binding IsSessionActive}"
+                            TargetType="Grid"
+                            Value="True">
+                            <Setter Property="IsVisible" Value="True" />
+                        </DataTrigger>
+                    </Grid.Triggers>
+
+                    <!-- Lista de ejercicios de la sesión -->
+                    <CollectionView
+                        Grid.Row="0"
+                        ItemsSource="{Binding Exercises}"
+                        Margin="12,12,12,0"
+                        SelectedItem="{Binding SelectedWorkoutExercise, Mode=TwoWay}"
+                        SelectionMode="Single">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout ItemSpacing="8" Orientation="Horizontal" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    BackgroundColor="#313244"
+                                    Padding="12,8"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    WidthRequest="130">
+                                    <Label
+                                        FontSize="13"
+                                        LineBreakMode="WordWrap"
+                                        Text="{Binding Exercise.Name}"
+                                        TextColor="#CDD6F4" />
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Series del ejercicio seleccionado -->
+                    <CollectionView
+                        Grid.Row="1"
+                        ItemsSource="{Binding SelectedExerciseSets}"
+                        Margin="12,10,12,0"
+                        SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
+                        SelectionMode="Single">
+                        <CollectionView.Header>
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="15"
+                                Margin="0,0,0,8"
+                                Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
+                                TextColor="#CDD6F4" />
+                        </CollectionView.Header>
+                        <CollectionView.EmptyView>
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Text="Sin series aún"
+                                TextColor="#585B70" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    BackgroundColor="#313244"
+                                    Margin="0,0,0,6"
+                                    Padding="14,10"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0">
+                                    <Grid ColumnDefinitions="*,*">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label FontSize="11" Text="Peso" TextColor="#585B70" />
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="20"
+                                                Text="{Binding Weight, StringFormat='{0} kg'}"
+                                                TextColor="#89B4FA" />
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                            <Label FontSize="11" Text="Reps" TextColor="#585B70" />
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="20"
+                                                Text="{Binding Reps, StringFormat='x{0}'}"
+                                                TextColor="#A6E3A1" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Botón eliminar serie -->
+                    <Button
+                        Grid.Row="2"
+                        BackgroundColor="#45475A"
+                        Command="{Binding DeleteSetCommand}"
+                        FontSize="13"
+                        Margin="12,8,12,0"
+                        Text="Eliminar serie seleccionada"
+                        TextColor="#F38BA8" />
+                </Grid>
+            </Grid>
+        </ScrollView>
+
+        <!-- Formulario añadir serie (solo en activo) -->
+        <Border
+            Grid.Row="2"
+            BackgroundColor="#313244"
+            IsVisible="False"
+            Margin="12,0,12,0"
+            Padding="16"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="0">
+            <Border.Triggers>
+                <DataTrigger
+                    Binding="{Binding IsSessionActive}"
+                    TargetType="Border"
+                    Value="True">
+                    <Setter Property="IsVisible" Value="True" />
+                </DataTrigger>
+            </Border.Triggers>
+            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label FontSize="12" Text="Reps" TextColor="#BAC2DE" />
+                    <Entry
+                        BackgroundColor="#45475A"
+                        Keyboard="Numeric"
+                        Placeholder="0"
+                        PlaceholderColor="#585B70"
+                        Text="{Binding Reps}"
+                        TextColor="#CDD6F4" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label FontSize="12" Text="Peso (kg)" TextColor="#BAC2DE" />
+                    <Entry
+                        BackgroundColor="#45475A"
+                        Keyboard="Numeric"
+                        Placeholder="0"
+                        PlaceholderColor="#585B70"
+                        Text="{Binding Weight}"
+                        TextColor="#CDD6F4" />
+                </VerticalStackLayout>
+                <Button
+                    Grid.Column="2"
+                    BackgroundColor="#89B4FA"
+                    Command="{Binding AddSetCommand}"
+                    FontAttributes="Bold"
+                    Margin="0,20,0,0"
+                    Text="+ Serie"
+                    TextColor="#1E1E2E" />
+            </Grid>
+        </Border>
+
+        <!-- Botones Cancelar / Finalizar (solo en activo) -->
+        <Grid
+            Grid.Row="3"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="8"
+            IsVisible="False"
+            Margin="12,8,12,12">
+            <Grid.Triggers>
+                <DataTrigger
+                    Binding="{Binding IsSessionActive}"
+                    TargetType="Grid"
+                    Value="True">
+                    <Setter Property="IsVisible" Value="True" />
+                </DataTrigger>
+            </Grid.Triggers>
+            <Button
+                Grid.Column="0"
+                BackgroundColor="#45475A"
+                Command="{Binding CancelWorkoutCommand}"
+                Text="Cancelar"
+                TextColor="#F38BA8" />
+            <Button
+                Grid.Column="1"
+                BackgroundColor="#A6E3A1"
+                Command="{Binding FinishWorkoutCommand}"
+                FontAttributes="Bold"
+                Text="Finalizar"
+                TextColor="#1E1E2E" />
+        </Grid>
+
+    </Grid>
+
 </ContentPage>

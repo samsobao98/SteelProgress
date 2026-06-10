@@ -5,9 +5,137 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     BackgroundColor="#1E1E2E"
     Title="Ejercicios">
-    <Label
-        HorizontalOptions="Center"
-        Text="Ejercicios — Próximamente"
-        TextColor="#585B70"
-        VerticalOptions="Center" />
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="#313244"
+            Margin="12,12,12,0"
+            Padding="16"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="0">
+            <VerticalStackLayout Spacing="4">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    Text="Ejercicios"
+                    TextColor="#CDD6F4" />
+                <Label
+                    FontSize="13"
+                    Text="Crea y gestiona los ejercicios disponibles para tus rutinas"
+                    TextColor="#BAC2DE" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Lista de ejercicios -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Exercises}"
+            Margin="12,12,12,0"
+            SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
+            SelectionMode="Single">
+            <CollectionView.EmptyView>
+                <Label
+                    HorizontalTextAlignment="Center"
+                    Text="No hay ejercicios registrados"
+                    TextColor="#585B70"
+                    VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        BackgroundColor="#313244"
+                        Margin="0,0,0,8"
+                        Padding="14"
+                        StrokeShape="RoundRectangle 8"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="2">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="15"
+                                Text="{Binding Name}"
+                                TextColor="#CDD6F4" />
+                            <Label
+                                FontSize="13"
+                                Text="{Binding MuscleGroup}"
+                                TextColor="#89B4FA" />
+                            <Label
+                                FontSize="12"
+                                Text="{Binding Notes}"
+                                TextColor="#6C7086" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Formulario inferior -->
+        <Border
+            Grid.Row="2"
+            BackgroundColor="#313244"
+            Margin="12"
+            Padding="16"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="0">
+            <VerticalStackLayout Spacing="10">
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label FontSize="12" Text="Nombre" TextColor="#BAC2DE" />
+                        <Entry
+                            BackgroundColor="#45475A"
+                            Placeholder="Nombre"
+                            PlaceholderColor="#585B70"
+                            Text="{Binding Name}"
+                            TextColor="#CDD6F4" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label FontSize="12" Text="Grupo muscular" TextColor="#BAC2DE" />
+                        <Entry
+                            BackgroundColor="#45475A"
+                            Placeholder="Grupo muscular"
+                            PlaceholderColor="#585B70"
+                            Text="{Binding MuscleGroup}"
+                            TextColor="#CDD6F4" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label FontSize="12" Text="Notas (opcional)" TextColor="#BAC2DE" />
+                    <Entry
+                        BackgroundColor="#45475A"
+                        Placeholder="Notas opcionales"
+                        PlaceholderColor="#585B70"
+                        Text="{Binding Notes}"
+                        TextColor="#CDD6F4" />
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Button
+                        Grid.Column="0"
+                        BackgroundColor="#89B4FA"
+                        Command="{Binding AddExerciseCommand}"
+                        Text="Añadir"
+                        TextColor="#1E1E2E" />
+                    <Button
+                        Grid.Column="1"
+                        BackgroundColor="#A6E3A1"
+                        Command="{Binding UpdateExerciseCommand}"
+                        Text="Actualizar"
+                        TextColor="#1E1E2E" />
+                    <Button
+                        Grid.Column="2"
+                        BackgroundColor="#F38BA8"
+                        Command="{Binding DeleteExerciseCommand}"
+                        Text="Eliminar"
+                        TextColor="#1E1E2E" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
 </ContentPage>
