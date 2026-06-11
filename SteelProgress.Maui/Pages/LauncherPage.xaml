@@ -11,43 +11,71 @@
 
     <ContentPage.Resources>
         <conv:InitialLetterConverter x:Key="InitialConverter" />
+        <conv:StringNotNullOrEmptyConverter x:Key="StringNotEmptyConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,Auto,*">
 
-        <!-- Background decoration -->
+        <!-- Animated background orbs -->
         <Ellipse
+            x:Name="Orb1"
             Grid.RowSpan="3"
             Fill="#A6E3A1"
-            HeightRequest="300"
+            HeightRequest="320"
+            WidthRequest="320"
             HorizontalOptions="End"
-            Opacity="0.06"
             VerticalOptions="Start"
-            WidthRequest="300"
-            Margin="0,-80,-80,0" />
+            Opacity="0.07"
+            Margin="0,-100,-100,0" />
         <Ellipse
+            x:Name="Orb2"
             Grid.RowSpan="3"
-            Fill="#A6E3A1"
-            HeightRequest="200"
+            Fill="#89B4FA"
+            HeightRequest="220"
+            WidthRequest="220"
             HorizontalOptions="Start"
-            Opacity="0.04"
             VerticalOptions="End"
-            WidthRequest="200"
+            Opacity="0.06"
             Margin="-60,0,0,-60" />
+        <Ellipse
+            x:Name="Orb3"
+            Grid.RowSpan="3"
+            Fill="#CBA6F7"
+            HeightRequest="180"
+            WidthRequest="180"
+            HorizontalOptions="End"
+            VerticalOptions="Center"
+            Opacity="0.05"
+            Margin="0,60,-50,0" />
 
-        <!-- Row 0: Logo -->
-        <VerticalStackLayout
+        <!-- Row 0: Logo (Grid para poder superponer el aura) -->
+        <Grid
             x:Name="HeaderSection"
             Grid.Row="0"
             Opacity="0"
             TranslationY="-30"
-            Margin="0,56,0,0">
-            <Image
-                Source="logo_icon.png"
-                HeightRequest="90"
+            Margin="0,56,0,0"
+            HeightRequest="128"
+            HorizontalOptions="Center"
+            WidthRequest="220">
+            <!-- Aura: elipse verde que se expande y desvanece en bucle -->
+            <Ellipse
+                x:Name="LogoAura"
+                Fill="#A6E3A1"
+                WidthRequest="114"
+                HeightRequest="114"
+                Opacity="0"
                 HorizontalOptions="Center"
+                VerticalOptions="Center" />
+            <!-- Logo con spring bounce en la entrada -->
+            <Image
+                x:Name="LogoImage"
+                Source="logo_icon.png"
+                HeightRequest="114"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
                 Aspect="AspectFit" />
-        </VerticalStackLayout>
+        </Grid>
 
         <!-- Row 1: Subtitle -->
         <Label
@@ -55,11 +83,11 @@
             Grid.Row="1"
             Opacity="0"
             Text="{Binding SubtitleText}"
-            FontSize="19"
+            FontSize="15"
             FontAttributes="Bold"
             TextColor="#BAC2DE"
             HorizontalTextAlignment="Center"
-            Margin="0,20,0,0" />
+            Margin="0,14,0,0" />
 
         <!-- Row 2: Content -->
         <Grid Grid.Row="2">
@@ -74,243 +102,363 @@
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
 
-            <!-- Content (shown once loaded) -->
+            <!-- Profile list (shown when loaded and not creating) -->
             <VerticalStackLayout
-                IsVisible="{Binding IsLoaded}"
+                IsVisible="{Binding IsNotCreating}"
                 VerticalOptions="Start"
                 Spacing="28"
-                Margin="0,28,0,24">
+                Margin="0,24,0,24">
 
-                <!-- Edit mode toggle (only when profiles exist and not creating) -->
+                <!-- Carousel (built programmatically in code-behind) -->
+                <Grid
+                    x:Name="CarouselContainer"
+                    IsVisible="{Binding HasProfiles}"
+                    HeightRequest="162"
+                    IsClippedToBounds="False"
+                    Margin="0,-20,0,0" />
+
+                <!-- Add profile -->
                 <Label
-                    IsVisible="{Binding IsNotCreating}"
-                    Text="{Binding EditModeButtonText}"
+                    IsVisible="{Binding CanAddProfile}"
+                    Text="＋ Añadir perfil"
+                    TextColor="#6C7086"
                     FontSize="14"
                     FontAttributes="Bold"
-                    TextColor="#A6E3A1"
-                    HorizontalOptions="End"
-                    Margin="0,0,24,0">
+                    HorizontalOptions="Center">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleEditModeCommand}" />
+                        <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
                     </Label.GestureRecognizers>
                 </Label>
 
-                <!-- Horizontal profile row (when profiles exist) -->
-                <ScrollView
-                    Orientation="Horizontal"
-                    IsVisible="{Binding HasProfiles}"
-                    HorizontalScrollBarVisibility="Never"
-                    Margin="0,-20,0,0">
-                    <HorizontalStackLayout Spacing="16" Padding="24,4">
+            </VerticalStackLayout>
 
-                        <!-- Profile cards via BindableLayout -->
-                        <HorizontalStackLayout
-                            Spacing="16"
-                            BindableLayout.ItemsSource="{Binding Profiles}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate>
-                                    <VerticalStackLayout
-                                        WidthRequest="86"
-                                        Spacing="8"
-                                        HorizontalOptions="Center">
-                                        <VerticalStackLayout.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding Source={x:Reference ThisPage}, Path=BindingContext.SelectProfileCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </VerticalStackLayout.GestureRecognizers>
-                                        <Grid WidthRequest="72" HeightRequest="72" HorizontalOptions="Center">
-                                            <Border
-                                                BackgroundColor="{Binding AvatarColor}"
-                                                HeightRequest="72"
-                                                WidthRequest="72"
-                                                HorizontalOptions="Center"
-                                                StrokeShape="RoundRectangle 36"
-                                                StrokeThickness="0">
-                                                <Label
-                                                    Text="{Binding Name, Converter={StaticResource InitialConverter}}"
-                                                    FontAttributes="Bold"
-                                                    FontSize="28"
-                                                    TextColor="#1E1E2E"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center" />
-                                            </Border>
-                                            <!-- Trash overlay — visible in edit mode -->
-                                            <Border
-                                                BackgroundColor="#CC181825"
-                                                IsVisible="{Binding Source={x:Reference ThisPage}, Path=BindingContext.IsEditMode}"
-                                                StrokeShape="RoundRectangle 36"
-                                                StrokeThickness="0">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding Source={x:Reference ThisPage}, Path=ConfirmDeleteCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Border.GestureRecognizers>
-                                                <Label
-                                                    Text="🗑"
-                                                    FontSize="24"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center" />
-                                            </Border>
-                                        </Grid>
-                                        <Label
-                                            Text="{Binding Name}"
-                                            FontSize="13"
-                                            FontAttributes="Bold"
-                                            TextColor="#CDD6F4"
-                                            HorizontalTextAlignment="Center"
-                                            LineBreakMode="TailTruncation"
-                                            MaxLines="1" />
-                                    </VerticalStackLayout>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </HorizontalStackLayout>
+            <!-- Creation form (full height) -->
+            <Grid
+                IsVisible="{Binding IsCreating}"
+                RowDefinitions="*,Auto,Auto,Auto,Auto"
+                VerticalOptions="Fill">
 
-                        <!-- "+" add profile button -->
-                        <VerticalStackLayout
-                            WidthRequest="86"
-                            Spacing="8"
-                            HorizontalOptions="Center"
-                            IsVisible="{Binding CanAddProfile}">
-                            <VerticalStackLayout.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
-                            </VerticalStackLayout.GestureRecognizers>
-                            <Border
-                                BackgroundColor="#252536"
-                                HeightRequest="72"
-                                WidthRequest="72"
-                                HorizontalOptions="Center"
-                                StrokeShape="RoundRectangle 36"
-                                StrokeThickness="2"
-                                Stroke="#45475A">
-                                <Label
-                                    Text="+"
-                                    FontSize="32"
-                                    TextColor="#6C7086"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" />
-                            </Border>
-                            <Label
-                                Text="Añadir"
-                                FontSize="13"
-                                TextColor="#6C7086"
-                                HorizontalTextAlignment="Center" />
-                        </VerticalStackLayout>
+                <!-- Row 0: Avatar + descripción live preview -->
+                <VerticalStackLayout
+                    Grid.Row="0"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Spacing="18">
 
-                    </HorizontalStackLayout>
-                </ScrollView>
-
-                <!-- Profile creation form -->
-                <Border
-                    IsVisible="{Binding IsCreating}"
-                    BackgroundColor="#313244"
-                    Padding="24"
-                    Margin="20,0"
-                    StrokeShape="RoundRectangle 16"
-                    StrokeThickness="1"
-                    Stroke="#A6E3A1">
-                    <VerticalStackLayout Spacing="16">
-
-                        <Label
-                            Text="Nuevo perfil"
-                            FontAttributes="Bold"
-                            FontSize="17"
-                            TextColor="#CDD6F4" />
-
+                    <!-- Avatar con halo -->
+                    <Grid HorizontalOptions="Center">
                         <Border
-                            BackgroundColor="#45475A"
-                            StrokeShape="RoundRectangle 8"
+                            x:Name="AvatarHalo"
+                            BackgroundColor="{Binding SelectedColor}"
+                            WidthRequest="136"
+                            HeightRequest="136"
+                            Opacity="0.18"
                             StrokeThickness="0"
-                            Padding="4,0">
-                            <Entry
-                                Placeholder="Nombre del perfil"
-                                PlaceholderColor="#585B70"
-                                Text="{Binding NewProfileName}"
-                                TextColor="#CDD6F4"
-                                BackgroundColor="Transparent"
-                                ReturnType="Done"
-                                ReturnCommand="{Binding CreateProfileCommand}" />
+                            StrokeShape="RoundRectangle 68"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Border
+                            x:Name="AvatarBorder"
+                            BackgroundColor="{Binding SelectedColor}"
+                            WidthRequest="112"
+                            HeightRequest="112"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 56"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <Label
+                                x:Name="AvatarInitialLabel"
+                                Text="{Binding NewProfileName, Converter={StaticResource InitialConverter}}"
+                                TextColor="#1E1E2E"
+                                FontSize="36"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
                         </Border>
+                    </Grid>
 
-                        <Label Text="Color del avatar" FontSize="12" TextColor="#BAC2DE" />
+                    <!-- Descripción: preview en tiempo real entre comillas -->
+                    <Label
+                        x:Name="DescriptionPreview"
+                        Text="{Binding DescriptionPreviewText}"
+                        FontSize="14"
+                        FontAttributes="Italic"
+                        TextColor="#45475A"
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                        MaxLines="3"
+                        LineBreakMode="WordWrap"
+                        Margin="24,0">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding HasDescription}" Value="True">
+                                <Setter Property="TextColor" Value="#BAC2DE" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
 
-                        <CollectionView
-                            ItemsSource="{Binding AvailableColors}"
-                            HeightRequest="52"
-                            SelectionMode="Single"
-                            SelectedItem="{Binding SelectedColor, Mode=TwoWay}">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        BackgroundColor="{Binding .}"
-                                        HeightRequest="44"
-                                        WidthRequest="44"
-                                        Stroke="Transparent"
-                                        StrokeShape="RoundRectangle 22"
-                                        StrokeThickness="0"
-                                        Margin="4,4">
-                                        <VisualStateManager.VisualStateGroups>
-                                            <VisualStateGroup Name="CommonStates">
-                                                <VisualState Name="Normal">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="StrokeThickness" Value="0" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                                <VisualState Name="Selected">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="Stroke" Value="White" />
-                                                        <Setter Property="StrokeThickness" Value="3" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                            </VisualStateGroup>
-                                        </VisualStateManager.VisualStateGroups>
-                                    </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                </VerticalStackLayout>
 
-                        <!-- First-time: single Empezar button (full width) -->
+                <!-- Row 1: Nombre (floating label) -->
+                <Grid
+                    x:Name="EntryContainer"
+                    Grid.Row="1"
+                    HeightRequest="68"
+                    Margin="32,0">
+                    <Entry
+                        x:Name="NameEntry"
+                        Text="{Binding NewProfileName}"
+                        TextColor="#CDD6F4"
+                        BackgroundColor="Transparent"
+                        FontSize="18"
+                        ReturnType="Next"
+                        VerticalOptions="End"
+                        Margin="0,24,0,4" />
+                    <Label
+                        x:Name="FloatingLabel"
+                        Text="Nombre"
+                        TextColor="#6C7086"
+                        FontSize="18"
+                        AnchorX="0"
+                        AnchorY="0.5"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Start"
+                        TranslationY="22" />
+                    <BoxView
+                        BackgroundColor="#45475A"
+                        HeightRequest="1"
+                        VerticalOptions="End"
+                        HorizontalOptions="Fill" />
+                    <BoxView
+                        x:Name="BottomLineActive"
+                        BackgroundColor="#A6E3A1"
+                        HeightRequest="2"
+                        ScaleX="0"
+                        AnchorX="0"
+                        VerticalOptions="End"
+                        HorizontalOptions="Fill" />
+                </Grid>
+
+                <!-- Row 2: Frase (floating label, opcional) -->
+                <Grid
+                    x:Name="FraseContainer"
+                    Grid.Row="2"
+                    HeightRequest="68"
+                    Margin="32,12,32,0">
+                    <Entry
+                        x:Name="FraseEntry"
+                        Text="{Binding NewProfileDescription}"
+                        TextColor="#CDD6F4"
+                        BackgroundColor="Transparent"
+                        FontSize="16"
+                        MaxLength="55"
+                        ReturnType="Done"
+                        ReturnCommand="{Binding CreateProfileCommand}"
+                        VerticalOptions="End"
+                        Margin="0,24,0,4" />
+                    <Label
+                        x:Name="FraseLabel"
+                        Text="Frase (opcional)"
+                        TextColor="#6C7086"
+                        FontSize="16"
+                        AnchorX="0"
+                        AnchorY="0.5"
+                        VerticalOptions="Start"
+                        HorizontalOptions="Start"
+                        TranslationY="22" />
+                    <BoxView
+                        BackgroundColor="#45475A"
+                        HeightRequest="1"
+                        VerticalOptions="End"
+                        HorizontalOptions="Fill" />
+                    <BoxView
+                        x:Name="FraseLineActive"
+                        BackgroundColor="#A6E3A1"
+                        HeightRequest="2"
+                        ScaleX="0"
+                        AnchorX="0"
+                        VerticalOptions="End"
+                        HorizontalOptions="Fill" />
+                </Grid>
+
+                <!-- Row 3: Color picker -->
+                <VerticalStackLayout
+                    Grid.Row="3"
+                    Spacing="10"
+                    Margin="0,20,0,0">
+                    <Label
+                        Text="COLOR"
+                        TextColor="#6C7086"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        CharacterSpacing="2"
+                        HorizontalOptions="Center" />
+                    <ScrollView
+                        Orientation="Horizontal"
+                        HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout
+                            x:Name="ColorPickerContainer"
+                            Spacing="8"
+                            Padding="20,0"
+                            HorizontalOptions="Center" />
+                    </ScrollView>
+                </VerticalStackLayout>
+
+                <!-- Row 4: Action buttons -->
+                <VerticalStackLayout
+                    Grid.Row="4"
+                    Margin="24,12,24,32"
+                    Spacing="10">
+                    <Button
+                        IsVisible="{Binding IsFirstTimeSetup}"
+                        Text="Empezar"
+                        BackgroundColor="#A6E3A1"
+                        TextColor="#1E1E2E"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        HeightRequest="52"
+                        CornerRadius="12"
+                        Command="{Binding CreateProfileCommand}" />
+                    <Grid
+                        ColumnDefinitions="*,*"
+                        ColumnSpacing="10"
+                        IsVisible="{Binding HasProfiles}">
                         <Button
-                            IsVisible="{Binding IsFirstTimeSetup}"
-                            Text="Empezar"
+                            Grid.Column="0"
+                            Text="Cancelar"
+                            BackgroundColor="#252536"
+                            TextColor="#CDD6F4"
+                            FontSize="15"
+                            HeightRequest="50"
+                            CornerRadius="10"
+                            BorderColor="#45475A"
+                            BorderWidth="1"
+                            Command="{Binding CancelCreatingCommand}" />
+                        <Button
+                            Grid.Column="1"
+                            Text="Crear"
                             BackgroundColor="#A6E3A1"
                             TextColor="#1E1E2E"
                             FontAttributes="Bold"
-                            FontSize="16"
-                            HeightRequest="52"
+                            FontSize="15"
+                            HeightRequest="50"
                             CornerRadius="10"
                             Command="{Binding CreateProfileCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
 
-                        <!-- Returning user: Cancelar + Crear side by side -->
-                        <Grid
-                            ColumnDefinitions="*,*"
-                            ColumnSpacing="10"
-                            IsVisible="{Binding HasProfiles}">
-                            <Button
-                                Grid.Column="0"
-                                Text="Cancelar"
-                                BackgroundColor="#45475A"
-                                TextColor="#CDD6F4"
-                                HeightRequest="48"
-                                CornerRadius="8"
-                                Command="{Binding CancelCreatingCommand}" />
-                            <Button
-                                Grid.Column="1"
-                                Text="Crear"
-                                BackgroundColor="#A6E3A1"
+            </Grid>
+
+        </Grid>
+
+        <!-- Profile selection overlay — last child renders on top of everything -->
+        <Grid
+            x:Name="ProfileOverlay"
+            Grid.RowSpan="3"
+            IsVisible="False">
+
+            <!-- Backdrop: tap to dismiss -->
+            <BoxView
+                x:Name="OverlayBackdrop"
+                BackgroundColor="#1E1E2E"
+                Opacity="0">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayBackdropTapped" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <!-- Card panel: blocks backdrop tap from leaking through -->
+            <Border
+                x:Name="OverlayPanel"
+                BackgroundColor="#252536"
+                StrokeShape="RoundRectangle 24"
+                StrokeThickness="1"
+                Stroke="#45475A"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Padding="36,32"
+                MinimumWidthRequest="260"
+                Opacity="0"
+                Scale="0.85">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayPanelTapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Avatar -->
+                    <Border
+                        x:Name="OverlayAvatar"
+                        WidthRequest="130"
+                        HeightRequest="130"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 65"
+                        HorizontalOptions="Center">
+                        <Label
+                            x:Name="OverlayInitial"
+                            TextColor="#1E1E2E"
+                            FontSize="48"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Name -->
+                    <Label
+                        x:Name="OverlayName"
+                        TextColor="#CDD6F4"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center" />
+
+                    <!-- Description (visible only when profile has one) -->
+                    <Label
+                        x:Name="OverlayDescription"
+                        TextColor="#BAC2DE"
+                        FontSize="13"
+                        FontAttributes="Italic"
+                        HorizontalTextAlignment="Center"
+                        LineBreakMode="WordWrap"
+                        MaxLines="2"
+                        IsVisible="False"
+                        Margin="0,-6,0,0" />
+
+                    <!-- Buttons -->
+                    <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
+                        <Border
+                            BackgroundColor="#A6E3A1"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            Padding="0,13">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnOverlayEntrarTapped" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="Entrar"
                                 TextColor="#1E1E2E"
+                                FontSize="16"
                                 FontAttributes="Bold"
-                                HeightRequest="48"
-                                CornerRadius="8"
-                                Command="{Binding CreateProfileCommand}" />
-                        </Grid>
-
+                                HorizontalOptions="Center" />
+                        </Border>
+                        <Border
+                            BackgroundColor="#313244"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1"
+                            Stroke="#F38BA8"
+                            Padding="0,13">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnOverlayEliminarTapped" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="Eliminar"
+                                TextColor="#F38BA8"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center" />
+                        </Border>
                     </VerticalStackLayout>
-                </Border>
 
-            </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
         </Grid>
 
     </Grid>
