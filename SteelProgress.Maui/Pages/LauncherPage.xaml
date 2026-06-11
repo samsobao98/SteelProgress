@@ -373,90 +373,212 @@
                 StrokeShape="RoundRectangle 24"
                 StrokeThickness="1"
                 Stroke="#45475A"
-                HorizontalOptions="Center"
+                HorizontalOptions="Fill"
                 VerticalOptions="Center"
-                Padding="36,32"
-                MinimumWidthRequest="260"
+                Margin="20,0"
+                Padding="28,28"
                 Opacity="0"
                 Scale="0.85">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnOverlayPanelTapped" />
                 </Border.GestureRecognizers>
-                <VerticalStackLayout Spacing="16">
 
-                    <!-- Avatar -->
-                    <Border
-                        x:Name="OverlayAvatar"
-                        WidthRequest="130"
-                        HeightRequest="130"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 65"
-                        HorizontalOptions="Center">
-                        <Label
-                            x:Name="OverlayInitial"
-                            TextColor="#1E1E2E"
-                            FontSize="48"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Border>
+                <!-- Wrapper: only one panel visible at a time -->
+                <Grid>
 
-                    <!-- Name -->
-                    <Label
-                        x:Name="OverlayName"
-                        TextColor="#CDD6F4"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        HorizontalTextAlignment="Center" />
+                    <!-- VIEW content -->
+                    <VerticalStackLayout x:Name="OverlayViewContent" Spacing="16">
 
-                    <!-- Description (visible only when profile has one) -->
-                    <Label
-                        x:Name="OverlayDescription"
-                        TextColor="#BAC2DE"
-                        FontSize="13"
-                        FontAttributes="Italic"
-                        HorizontalTextAlignment="Center"
-                        LineBreakMode="WordWrap"
-                        MaxLines="2"
-                        IsVisible="False"
-                        Margin="0,-6,0,0" />
-
-                    <!-- Buttons -->
-                    <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
                         <Border
-                            BackgroundColor="#A6E3A1"
-                            StrokeShape="RoundRectangle 12"
+                            x:Name="OverlayAvatar"
+                            WidthRequest="120"
+                            HeightRequest="120"
                             StrokeThickness="0"
-                            Padding="0,13">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnOverlayEntrarTapped" />
-                            </Border.GestureRecognizers>
+                            StrokeShape="RoundRectangle 60"
+                            HorizontalOptions="Center">
                             <Label
-                                Text="Entrar"
+                                x:Name="OverlayInitial"
                                 TextColor="#1E1E2E"
-                                FontSize="16"
+                                FontSize="44"
                                 FontAttributes="Bold"
-                                HorizontalOptions="Center" />
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
                         </Border>
-                        <Border
-                            BackgroundColor="#313244"
-                            StrokeShape="RoundRectangle 12"
-                            StrokeThickness="1"
-                            Stroke="#F38BA8"
-                            Padding="0,13">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnOverlayEliminarTapped" />
-                            </Border.GestureRecognizers>
-                            <Label
-                                Text="Eliminar"
-                                TextColor="#F38BA8"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center" />
-                        </Border>
+
+                        <Label
+                            x:Name="OverlayName"
+                            TextColor="#CDD6F4"
+                            FontSize="20"
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            x:Name="OverlayDescription"
+                            TextColor="#BAC2DE"
+                            FontSize="13"
+                            FontAttributes="Italic"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            IsVisible="False"
+                            Margin="0,-6,0,0" />
+
+                        <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
+                            <Border
+                                BackgroundColor="#A6E3A1"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="0"
+                                Padding="0,13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOverlayEntrarTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Entrar" TextColor="#1E1E2E" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                            </Border>
+                            <Border
+                                BackgroundColor="#313244"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1"
+                                Stroke="#89B4FA"
+                                Padding="0,13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOverlayEditarTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Editar" TextColor="#89B4FA" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                            </Border>
+                            <Border
+                                BackgroundColor="#313244"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1"
+                                Stroke="#F38BA8"
+                                Padding="0,13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOverlayEliminarTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Eliminar" TextColor="#F38BA8" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                            </Border>
+                        </VerticalStackLayout>
+
                     </VerticalStackLayout>
 
-                </VerticalStackLayout>
+                    <!-- EDIT content (hidden by default) -->
+                    <VerticalStackLayout x:Name="OverlayEditContent" Spacing="14" IsVisible="False">
+
+                        <!-- Avatar reacts to color picker selection -->
+                        <Border
+                            x:Name="OverlayEditAvatar"
+                            WidthRequest="96"
+                            HeightRequest="96"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 48"
+                            HorizontalOptions="Center">
+                            <Label
+                                x:Name="OverlayEditInitial"
+                                TextColor="#1E1E2E"
+                                FontSize="34"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <!-- Name entry -->
+                        <Grid HeightRequest="52" Margin="0,4,0,0">
+                            <Entry
+                                x:Name="OverlayEditNameEntry"
+                                Text="{Binding EditingName, Mode=TwoWay}"
+                                Placeholder="Nombre"
+                                PlaceholderColor="#6C7086"
+                                TextColor="#CDD6F4"
+                                BackgroundColor="Transparent"
+                                FontSize="16"
+                                MaxLength="30"
+                                ReturnType="Next"
+                                VerticalOptions="End"
+                                Margin="0,0,0,8" />
+                            <BoxView
+                                BackgroundColor="#45475A"
+                                HeightRequest="1"
+                                VerticalOptions="End"
+                                HorizontalOptions="Fill" />
+                            <BoxView
+                                x:Name="OverlayEditNameLineActive"
+                                BackgroundColor="#A6E3A1"
+                                HeightRequest="1.5"
+                                ScaleX="0"
+                                AnchorX="0"
+                                VerticalOptions="End"
+                                HorizontalOptions="Fill" />
+                        </Grid>
+
+                        <!-- Description entry -->
+                        <Grid HeightRequest="52" Margin="0,4,0,0">
+                            <Entry
+                                x:Name="OverlayEditDescEntry"
+                                Text="{Binding EditingDescription, Mode=TwoWay}"
+                                Placeholder="Frase corta (opcional)"
+                                PlaceholderColor="#6C7086"
+                                TextColor="#CDD6F4"
+                                BackgroundColor="Transparent"
+                                FontSize="15"
+                                MaxLength="55"
+                                ReturnType="Done"
+                                VerticalOptions="End"
+                                Margin="0,0,0,8" />
+                            <BoxView
+                                BackgroundColor="#45475A"
+                                HeightRequest="1"
+                                VerticalOptions="End"
+                                HorizontalOptions="Fill" />
+                            <BoxView
+                                x:Name="OverlayEditDescLineActive"
+                                BackgroundColor="#A6E3A1"
+                                HeightRequest="1.5"
+                                ScaleX="0"
+                                AnchorX="0"
+                                VerticalOptions="End"
+                                HorizontalOptions="Fill" />
+                        </Grid>
+
+                        <!-- Color picker (built programmatically) -->
+                        <ScrollView
+                            Orientation="Horizontal"
+                            HorizontalScrollBarVisibility="Never"
+                            Margin="0,6">
+                            <HorizontalStackLayout
+                                x:Name="OverlayEditColorPicker"
+                                Spacing="4"
+                                HorizontalOptions="Center" />
+                        </ScrollView>
+
+                        <!-- Cancelar / Guardar -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,4,0,0">
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="#313244"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="1"
+                                Stroke="#45475A"
+                                Padding="0,13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOverlayCancelarTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Cancelar" TextColor="#BAC2DE" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
+                            </Border>
+                            <Border
+                                Grid.Column="1"
+                                BackgroundColor="#A6E3A1"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="0"
+                                Padding="0,13">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOverlayGuardarTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Guardar" TextColor="#1E1E2E" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                    </VerticalStackLayout>
+
+                </Grid>
             </Border>
 
         </Grid>

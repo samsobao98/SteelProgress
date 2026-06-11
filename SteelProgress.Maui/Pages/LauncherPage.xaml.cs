@@ -28,13 +28,24 @@ public partial class LauncherPage : ContentPage
     private readonly List<View> _carouselCards = new();
     private bool _isCarouselAnimating;
 
+    // ── Overlay edit ─────────────────────────────────────────────────────
+    private readonly Dictionary<string, (Border dot, Border halo)> _overlayColorDots = new();
+    private bool _isOverlayEditing;
+    private bool _overlayEditEntriesSetup;
+
     public ICommand ConfirmDeleteCommand { get; }
 
     public LauncherPage(LauncherViewModel vm, AppShell shell)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
-        vm.ProfileChosen += () => Application.Current!.Windows[0].Page = shell;
+        vm.ProfileChosen += () =>
+        {
+            shell.Opacity = 0;
+            Application.Current!.Windows[0].Page = shell;
+            _ = shell.FadeToAsync(1, 420, Easing.CubicOut);
+        };
+        vm.ProfileUpdated += OnProfileUpdated;
         ConfirmDeleteCommand = new Command<UserProfile>(async p => await ConfirmAndDeleteAsync(p));
         vm.PropertyChanged += OnViewModelPropertyChanged;
         vm.Profiles.CollectionChanged += (_, _) =>
@@ -382,6 +393,14 @@ public partial class LauncherPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() => SyncColorDotSelection(_vm.SelectedColor));
         }
+        else if (e.PropertyName == nameof(LauncherViewModel.EditingColor) && _isOverlayEditing)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                OverlayEditAvatar.BackgroundColor = Color.FromArgb(_vm.EditingColor);
+                SyncOverlayColorPicker(_vm.EditingColor);
+            });
+        }
     }
 
     private void ResetFormState()
@@ -543,6 +562,12 @@ public partial class LauncherPage : ContentPage
     {
         _overlayProfile = profile;
 
+        // Always open in view mode, even if previously closed from edit mode
+        OverlayViewContent.IsVisible = true;
+        OverlayViewContent.Opacity = 1;
+        OverlayEditContent.IsVisible = false;
+        _isOverlayEditing = false;
+
         OverlayAvatar.BackgroundColor = Color.FromArgb(profile.AvatarColor);
         OverlayInitial.Text = profile.Name.Length > 0
             ? profile.Name.TrimStart()[0].ToString().ToUpperInvariant()
@@ -573,6 +598,7 @@ public partial class LauncherPage : ContentPage
 
     private async Task HideProfileOverlay()
     {
+        _isOverlayEditing = false;
         await Task.WhenAll(
             OverlayBackdrop.FadeToAsync(0, 200, Easing.CubicIn),
             OverlayPanel.FadeToAsync(0, 180, Easing.CubicIn),
@@ -587,12 +613,20 @@ public partial class LauncherPage : ContentPage
 
     private void OnOverlayPanelTapped(object? sender, TappedEventArgs e) { }
 
-    private void OnOverlayEntrarTapped(object? sender, TappedEventArgs e)
+    private async void OnOverlayEntrarTapped(object? sender, TappedEventArgs e)
     {
         if (_overlayProfile is null) return;
         var profile = _overlayProfile;
-        ProfileOverlay.IsVisible = false;
         _overlayProfile = null;
+
+        // Panel zooms out and dissolves while backdrop seals to solid dark
+        await Task.WhenAll(
+            OverlayBackdrop.FadeToAsync(1.0, 340, Easing.CubicIn),
+            OverlayPanel.ScaleToAsync(1.10, 380, Easing.CubicOut),
+            OverlayPanel.FadeToAsync(0, 300, Easing.CubicIn)
+        );
+        ProfileOverlay.IsVisible = false;
+
         _vm.SelectProfileCommand.Execute(profile);
     }
 
@@ -602,6 +636,172 @@ public partial class LauncherPage : ContentPage
         var profile = _overlayProfile;
         await HideProfileOverlay();
         await ConfirmAndDeleteAsync(profile);
+    }
+
+    // ── Overlay edit mode ──────────────────────────────────────────────────
+
+    private async void OnOverlayEditarTapped(object? sender, TappedEventArgs e)
+    {
+        if (_overlayProfile is null) return;
+        await SwitchOverlayToEditModeAsync();
+    }
+
+    private async void OnOverlayGuardarTapped(object? sender, TappedEventArgs e)
+        => await _vm.UpdateProfileAsync();
+
+    private async void OnOverlayCancelarTapped(object? sender, TappedEventArgs e)
+        => await SwitchOverlayToViewModeAsync();
+
+    private async Task SwitchOverlayToEditModeAsync()
+    {
+        _isOverlayEditing = true;
+        _vm.StartEditing(_overlayProfile!);
+
+        // Set up avatar before fading in (EditingColor PropertyChanged fires during
+        // StartEditing but _isOverlayEditing was just set — handle explicitly here too)
+        OverlayEditAvatar.BackgroundColor = Color.FromArgb(_vm.EditingColor);
+        OverlayEditInitial.Text = _vm.EditingName.Length > 0
+            ? _vm.EditingName.TrimStart()[0].ToString().ToUpperInvariant()
+            : "?";
+
+        BuildOverlayColorPicker();
+        SyncOverlayColorPicker(_vm.EditingColor);
+        SetupOverlayEditEntries();
+
+        OverlayEditNameLineActive.ScaleX = 0;
+        OverlayEditDescLineActive.ScaleX = 0;
+
+        await OverlayViewContent.FadeToAsync(0, 140, Easing.CubicIn);
+        OverlayEditContent.Opacity = 0;
+        OverlayEditContent.IsVisible = true;
+        OverlayViewContent.IsVisible = false;
+        await OverlayEditContent.FadeToAsync(1, 180, Easing.CubicOut);
+    }
+
+    private async Task SwitchOverlayToViewModeAsync()
+    {
+        _isOverlayEditing = false;
+        await OverlayEditContent.FadeToAsync(0, 140, Easing.CubicIn);
+        OverlayViewContent.Opacity = 0;
+        OverlayViewContent.IsVisible = true;
+        OverlayEditContent.IsVisible = false;
+        await OverlayViewContent.FadeToAsync(1, 180, Easing.CubicOut);
+    }
+
+    private void SetupOverlayEditEntries()
+    {
+        if (_overlayEditEntriesSetup) return;
+        _overlayEditEntriesSetup = true;
+
+        OverlayEditNameEntry.Focused += (_, _) => AnimateUnderlineIn(OverlayEditNameLineActive);
+        OverlayEditNameEntry.Unfocused += (_, _) => AnimateUnderlineOut(OverlayEditNameLineActive);
+        OverlayEditNameEntry.TextChanged += (_, e) =>
+        {
+            var text = e.NewTextValue ?? string.Empty;
+            OverlayEditInitial.Text = string.IsNullOrWhiteSpace(text)
+                ? "?"
+                : text.TrimStart()[0].ToString().ToUpperInvariant();
+        };
+        OverlayEditNameEntry.Completed += (_, _) => OverlayEditDescEntry.Focus();
+
+        OverlayEditDescEntry.Focused += (_, _) => AnimateUnderlineIn(OverlayEditDescLineActive);
+        OverlayEditDescEntry.Unfocused += (_, _) => AnimateUnderlineOut(OverlayEditDescLineActive);
+        OverlayEditDescEntry.Completed += async (_, _) => await _vm.UpdateProfileAsync();
+    }
+
+    private void BuildOverlayColorPicker()
+    {
+        OverlayEditColorPicker.Children.Clear();
+        _overlayColorDots.Clear();
+
+        foreach (var color in _vm.AvailableColors)
+        {
+            var capturedColor = color;
+
+            var halo = new Border
+            {
+                BackgroundColor = Color.FromArgb(color),
+                WidthRequest = 50,
+                HeightRequest = 50,
+                Opacity = 0,
+                StrokeThickness = 0,
+                StrokeShape = new RoundRectangle { CornerRadius = 25 },
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            var dot = new Border
+            {
+                BackgroundColor = Color.FromArgb(color),
+                WidthRequest = 32,
+                HeightRequest = 32,
+                StrokeThickness = 0,
+                StrokeShape = new RoundRectangle { CornerRadius = 16 },
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            var cell = new Grid
+            {
+                WidthRequest = 50,
+                HeightRequest = 56,
+                HorizontalOptions = LayoutOptions.Center
+            };
+            cell.Add(halo);
+            cell.Add(dot);
+
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += (_, _) => _vm.EditingColor = capturedColor;
+            cell.GestureRecognizers.Add(tap);
+
+            _overlayColorDots[color] = (dot, halo);
+            OverlayEditColorPicker.Children.Add(cell);
+        }
+    }
+
+    private void SyncOverlayColorPicker(string color)
+    {
+        foreach (var (c, pair) in _overlayColorDots)
+        {
+            if (c == color)
+            {
+                pair.dot.Scale = 1.2;
+                pair.halo.Opacity = 0.35;
+            }
+            else
+            {
+                pair.dot.Scale = 1.0;
+                pair.halo.Opacity = 0;
+            }
+        }
+    }
+
+    private void OnProfileUpdated()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            BuildCarousel();
+
+            if (_overlayProfile is not null)
+            {
+                OverlayAvatar.BackgroundColor = Color.FromArgb(_overlayProfile.AvatarColor);
+                OverlayInitial.Text = _overlayProfile.Name.Length > 0
+                    ? _overlayProfile.Name.TrimStart()[0].ToString().ToUpperInvariant()
+                    : "?";
+                OverlayName.Text = _overlayProfile.Name;
+                if (!string.IsNullOrWhiteSpace(_overlayProfile.Description))
+                {
+                    OverlayDescription.Text = $"\"{_overlayProfile.Description.Trim()}\"";
+                    OverlayDescription.IsVisible = true;
+                }
+                else
+                {
+                    OverlayDescription.IsVisible = false;
+                }
+            }
+
+            await SwitchOverlayToViewModeAsync();
+        });
     }
 
     // ── Delete confirmation ────────────────────────────────────────────────

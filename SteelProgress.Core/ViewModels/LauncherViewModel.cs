@@ -55,6 +55,47 @@ public partial class LauncherViewModel : ObservableObject
             : $"\"{NewProfileDescription.Trim()}\"";
 
     public event Action? ProfileChosen;
+    public event Action? ProfileUpdated;
+
+    // ── Editing ──────────────────────────────────────────────────────────
+    [ObservableProperty] private string _editingName = string.Empty;
+    [ObservableProperty] private string _editingDescription = string.Empty;
+    [ObservableProperty] private string _editingColor = "#A6E3A1";
+
+    private UserProfile? _profileBeingEdited;
+
+    public void StartEditing(UserProfile profile)
+    {
+        _profileBeingEdited = profile;
+        EditingName = profile.Name;
+        EditingDescription = profile.Description ?? string.Empty;
+        EditingColor = profile.AvatarColor;
+    }
+
+    [RelayCommand]
+    public async Task UpdateProfileAsync()
+    {
+        if (_profileBeingEdited is null) return;
+        var name = EditingName.Trim();
+        if (string.IsNullOrEmpty(name)) return;
+
+        var desc = EditingDescription.Trim();
+        using var scope = _sp.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var entity = await db.UserProfiles.FindAsync(_profileBeingEdited.Id);
+        if (entity is null) return;
+
+        entity.Name = name;
+        entity.Description = desc.Length > 0 ? desc : null;
+        entity.AvatarColor = EditingColor;
+        await db.SaveChangesAsync();
+
+        _profileBeingEdited.Name = entity.Name;
+        _profileBeingEdited.Description = entity.Description;
+        _profileBeingEdited.AvatarColor = entity.AvatarColor;
+        _profileBeingEdited = null;
+        ProfileUpdated?.Invoke();
+    }
 
     public LauncherViewModel(IServiceProvider sp, ICurrentUserService currentUserService)
     {
@@ -144,10 +185,8 @@ public partial class LauncherViewModel : ObservableObject
         }
 
         Profiles.Add(profile);
-        _currentUserService.SetCurrentUser(profile.Id);
         IsCreating = false;
         NotifyProfileDerived();
-        ProfileChosen?.Invoke();
     }
 
     private void NotifyProfileDerived()
