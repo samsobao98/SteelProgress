@@ -13,9 +13,35 @@ public partial class ExerciseViewModel : ObservableObject
 
     public ObservableCollection<Exercise> Exercises { get; } = new();
 
+    public IReadOnlyList<string> MuscleGroups { get; } =
+    [
+        "Pecho",
+        "Espalda",
+        "Hombros",
+        "Bíceps",
+        "Tríceps",
+        "Antebrazo",
+        "Abdominales",
+        "Lumbares",
+        "Cuádriceps",
+        "Isquiotibiales",
+        "Glúteos",
+        "Gemelos",
+        "Cardio",
+        "Cuerpo completo",
+    ];
+
     [ObservableProperty] private string _name = string.Empty;
-    [ObservableProperty] private string _muscleGroup = string.Empty;
+    [ObservableProperty] private string? _muscleGroup;
     [ObservableProperty] private string _notes = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAddMode), nameof(OverlayTitle), nameof(SaveButtonText))]
+    private bool _isEditMode;
+
+    public bool IsAddMode => !IsEditMode;
+    public string OverlayTitle => IsEditMode ? "Editar ejercicio" : "Nuevo ejercicio";
+    public string SaveButtonText => IsEditMode ? "Guardar cambios" : "Añadir ejercicio";
 
     private Exercise? _selectedExercise;
     public Exercise? SelectedExercise
@@ -25,6 +51,7 @@ public partial class ExerciseViewModel : ObservableObject
         {
             _selectedExercise = value;
             OnPropertyChanged();
+            IsEditMode = value is not null;
             LoadSelectedExerciseIntoForm();
         }
     }
@@ -48,8 +75,8 @@ public partial class ExerciseViewModel : ObservableObject
     public void ClearForm()
     {
         Name = string.Empty;
-        MuscleGroup = string.Empty;
         Notes = string.Empty;
+        MuscleGroup = null;
         SelectedExercise = null;
     }
 
@@ -58,7 +85,7 @@ public partial class ExerciseViewModel : ObservableObject
         if (SelectedExercise is null)
         {
             Name = string.Empty;
-            MuscleGroup = string.Empty;
+            MuscleGroup = null;
             Notes = string.Empty;
             return;
         }
@@ -72,7 +99,7 @@ public partial class ExerciseViewModel : ObservableObject
     private async Task AddExercise()
     {
         string name = Name.Trim();
-        string muscleGroup = MuscleGroup.Trim();
+        string muscleGroup = MuscleGroup?.Trim() ?? string.Empty;
         string notes = Notes.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
@@ -116,7 +143,7 @@ public partial class ExerciseViewModel : ObservableObject
         }
 
         string name = Name.Trim();
-        string muscleGroup = MuscleGroup.Trim();
+        string muscleGroup = MuscleGroup?.Trim() ?? string.Empty;
         string notes = Notes.Trim();
 
         if (string.IsNullOrWhiteSpace(name))

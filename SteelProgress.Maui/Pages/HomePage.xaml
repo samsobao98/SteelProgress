@@ -3,147 +3,292 @@
     x:Class="SteelProgress.Maui.Pages.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     BackgroundColor="#1E1E2E"
-    Title="Inicio">
+    Shell.NavBarIsVisible="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="20">
+    <Grid>
 
-            <Label
-                FontAttributes="Bold"
-                FontSize="26"
-                Text="SteelProgress"
-                TextColor="#CDD6F4" />
+        <!-- Decorative background orbs -->
+        <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
+            <Ellipse
+                AbsoluteLayout.LayoutBounds="1, 0, 300, 300"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Fill="#CBA6F7"
+                Opacity="0.05" />
+            <Ellipse
+                AbsoluteLayout.LayoutBounds="0, 1, 220, 220"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Fill="#89B4FA"
+                Opacity="0.04" />
+        </AbsoluteLayout>
 
-            <!-- Stats 2x2 -->
-            <Grid
-                ColumnDefinitions="*,*"
-                ColumnSpacing="12"
-                RowDefinitions="Auto,Auto"
-                RowSpacing="12">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="0">
 
-                <Border
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    BackgroundColor="#313244"
-                    Padding="16"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
+                <!-- ── Header ── -->
+                <Grid
+                    x:Name="HeaderSection"
+                    ColumnDefinitions="52,*"
+                    ColumnSpacing="14"
+                    Margin="0,4,0,28"
+                    Opacity="0"
+                    TranslationY="-16">
+
+                    <Border
+                        BackgroundColor="{Binding ProfileColor}"
+                        HeightRequest="52"
+                        WidthRequest="52"
+                        StrokeShape="RoundRectangle 26"
+                        StrokeThickness="0"
+                        VerticalOptions="Center">
                         <Label
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            Text="{Binding ProfileInitial}"
+                            FontSize="22"
                             FontAttributes="Bold"
-                            FontSize="36"
-                            Text="{Binding ExerciseCount}"
-                            TextColor="#89B4FA" />
-                        <Label
-                            FontSize="13"
-                            Text="Ejercicios"
-                            TextColor="#BAC2DE" />
-                    </VerticalStackLayout>
-                </Border>
+                            TextColor="#1E1E2E" />
+                    </Border>
 
-                <Border
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    BackgroundColor="#313244"
-                    Padding="16"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="{Binding Greeting}" FontSize="12" TextColor="#6C7086" />
                         <Label
+                            Text="{Binding ProfileName}"
+                            FontSize="24"
                             FontAttributes="Bold"
-                            FontSize="36"
-                            Text="{Binding RoutineCount}"
-                            TextColor="#A6E3A1" />
-                        <Label
-                            FontSize="13"
-                            Text="Rutinas"
-                            TextColor="#BAC2DE" />
+                            TextColor="#CDD6F4" />
                     </VerticalStackLayout>
-                </Border>
+                </Grid>
 
+                <!-- ── HERO: Sesiones (stat protagonista, rotura del grid idéntico) ── -->
                 <Border
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    BackgroundColor="#313244"
-                    Padding="16"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
-                        <Label
-                            FontAttributes="Bold"
-                            FontSize="36"
-                            Text="{Binding SessionCount}"
-                            TextColor="#CBA6F7" />
-                        <Label
-                            FontSize="13"
-                            Text="Sesiones"
-                            TextColor="#BAC2DE" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    BackgroundColor="#313244"
-                    Padding="16"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
-                        <Label
-                            FontAttributes="Bold"
-                            FontSize="14"
-                            Text="{Binding LastWorkoutDay}"
-                            TextColor="#F38BA8" />
-                        <Label
-                            FontSize="13"
-                            Text="Último entreno"
-                            TextColor="#BAC2DE" />
-                    </VerticalStackLayout>
-                </Border>
-
-            </Grid>
-
-            <!-- Recent sessions -->
-            <Label
-                FontAttributes="Bold"
-                FontSize="18"
-                Text="Últimas sesiones"
-                TextColor="#CDD6F4" />
-
-            <CollectionView ItemsSource="{Binding RecentSessions}">
-                <CollectionView.EmptyView>
-                    <Label
-                        HorizontalTextAlignment="Center"
-                        Text="No hay sesiones registradas"
-                        TextColor="#585B70" />
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border
-                            BackgroundColor="#313244"
-                            Margin="0,0,0,8"
-                            Padding="14"
-                            StrokeShape="RoundRectangle 8"
-                            StrokeThickness="0">
-                            <Grid ColumnDefinitions="*,Auto">
+                    x:Name="StatHeroCard"
+                    BackgroundColor="#252536"
+                    Padding="22,20"
+                    StrokeShape="RoundRectangle 18"
+                    StrokeThickness="0"
+                    Margin="0,0,0,12"
+                    Scale="0.95"
+                    Opacity="0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <VerticalStackLayout Spacing="6">
+                            <HorizontalStackLayout Spacing="8">
+                                <mi:MauiIcon
+                                    Icon="{mi:Material Timeline}"
+                                    IconColor="#CBA6F7"
+                                    IconSize="16"
+                                    VerticalOptions="Center" />
                                 <Label
+                                    Text="SESIONES"
+                                    FontSize="11"
                                     FontAttributes="Bold"
-                                    Text="{Binding RoutineDay.Name}"
-                                    TextColor="#CDD6F4"
-                                    VerticalOptions="Center" />
-                                <Label
-                                    Grid.Column="1"
-                                    Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}"
                                     TextColor="#6C7086"
+                                    CharacterSpacing="1.5"
                                     VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                            </HorizontalStackLayout>
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="56"
+                                LineHeight="0.85"
+                                Text="{Binding SessionCount}"
+                                TextColor="#CDD6F4" />
+                            <Label
+                                FontSize="13"
+                                Text="{Binding WeekSessionCount, StringFormat='{0} esta semana'}"
+                                TextColor="#CBA6F7" />
+                        </VerticalStackLayout>
+                        <!-- Vertical accent — thin, not a side-stripe card border -->
+                        <BoxView
+                            Grid.Column="1"
+                            WidthRequest="3"
+                            BackgroundColor="#CBA6F7"
+                            Opacity="0.4"
+                            CornerRadius="2"
+                            VerticalOptions="Fill" />
+                    </Grid>
+                </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- ── 3 stats secundarios (asimétrico respecto al hero) ── -->
+                <Grid
+                    x:Name="StatRow"
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="10"
+                    Margin="0,0,0,20"
+                    Opacity="0"
+                    TranslationX="-20">
+
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="#252536"
+                        Padding="14"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6">
+                            <mi:MauiIcon Icon="{mi:Material FitnessCenter}" IconColor="#89B4FA" IconSize="18" HorizontalOptions="Start" />
+                            <Label FontAttributes="Bold" FontSize="26" Text="{Binding ExerciseCount}" TextColor="#89B4FA" />
+                            <Label FontSize="11" Text="Ejercicios" TextColor="#6C7086" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        BackgroundColor="#252536"
+                        Padding="14"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6">
+                            <mi:MauiIcon Icon="{mi:Material FormatListBulleted}" IconColor="#A6E3A1" IconSize="18" HorizontalOptions="Start" />
+                            <Label FontAttributes="Bold" FontSize="26" Text="{Binding RoutineCount}" TextColor="#A6E3A1" />
+                            <Label FontSize="11" Text="Rutinas" TextColor="#6C7086" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        BackgroundColor="#252536"
+                        Padding="14"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="6">
+                            <mi:MauiIcon Icon="{mi:Material CalendarToday}" IconColor="#F38BA8" IconSize="18" HorizontalOptions="Start" />
+                            <Label FontAttributes="Bold" FontSize="14" Text="{Binding LastWorkoutRelative}" TextColor="#F38BA8" />
+                            <Label FontSize="11" Text="Último" TextColor="#6C7086" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- ── CTA ── -->
+                <Border
+                    x:Name="CtaSection"
+                    BackgroundColor="#A6E3A1"
+                    Padding="22,18"
+                    StrokeShape="RoundRectangle 18"
+                    StrokeThickness="0"
+                    Margin="0,0,0,28"
+                    Scale="0.97"
+                    Opacity="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnWorkoutCtaTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="3">
+                            <Label
+                                Text="Iniciar entrenamiento"
+                                FontAttributes="Bold"
+                                FontSize="18"
+                                TextColor="#1E1E2E" />
+                            <Label
+                                Text="¿Listo para entrenar hoy?"
+                                FontSize="12"
+                                TextColor="#2D4A2D" />
+                        </VerticalStackLayout>
+                        <mi:MauiIcon
+                            Grid.Column="1"
+                            Icon="{mi:Material DirectionsRun}"
+                            IconColor="#1E1E2E"
+                            IconSize="36"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- ── Últimas sesiones ── -->
+                <Grid
+                    x:Name="SessionsSection"
+                    RowDefinitions="Auto,Auto"
+                    RowSpacing="12"
+                    Opacity="0">
+
+                    <Label
+                        Grid.Row="0"
+                        FontAttributes="Bold"
+                        FontSize="17"
+                        Text="Últimas sesiones"
+                        TextColor="#CDD6F4" />
+
+                    <CollectionView
+                        Grid.Row="1"
+                        ItemsSource="{Binding RecentSessions}">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout Padding="0,24" Spacing="10" HorizontalOptions="Center">
+                                <mi:MauiIcon
+                                    Icon="{mi:Material FitnessCenter}"
+                                    IconColor="#45475A"
+                                    IconSize="42"
+                                    HorizontalOptions="Center" />
+                                <Label
+                                    HorizontalTextAlignment="Center"
+                                    Text="Sin sesiones registradas"
+                                    TextColor="#585B70"
+                                    FontSize="14" />
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,0,0,10">
+                                    <!-- Sin barra lateral uniforme: tarjetas limpias diferenciadas por chip de fecha -->
+                                    <Border
+                                        BackgroundColor="#252536"
+                                        Padding="16,14"
+                                        StrokeShape="RoundRectangle 14"
+                                        StrokeThickness="0">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    FontSize="15"
+                                                    Text="{Binding DayName}"
+                                                    TextColor="#CDD6F4"
+                                                    LineBreakMode="TailTruncation" />
+                                                <HorizontalStackLayout Spacing="6">
+                                                    <mi:MauiIcon
+                                                        Icon="{mi:Material FitnessCenter}"
+                                                        IconColor="#6C7086"
+                                                        IconSize="13"
+                                                        VerticalOptions="Center" />
+                                                    <Label
+                                                        FontSize="12"
+                                                        Text="{Binding ExerciseCount, StringFormat='{0} ejercicios'}"
+                                                        TextColor="#6C7086"
+                                                        VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+                                            <!-- Chip de fecha con color contextual: verde=hoy, azul=ayer, gris=resto -->
+                                            <VerticalStackLayout
+                                                Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                HorizontalOptions="End"
+                                                Spacing="4">
+                                                <Border
+                                                    BackgroundColor="{Binding ChipColor}"
+                                                    Padding="10,5"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    StrokeThickness="0"
+                                                    HorizontalOptions="End">
+                                                    <Label
+                                                        FontSize="11"
+                                                        FontAttributes="Bold"
+                                                        Text="{Binding RelativeDate}"
+                                                        TextColor="{Binding ChipTextColor}" />
+                                                </Border>
+                                                <Label
+                                                    FontSize="11"
+                                                    Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}"
+                                                    TextColor="#585B70"
+                                                    HorizontalTextAlignment="End" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>
