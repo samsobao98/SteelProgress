@@ -31,7 +31,10 @@ public partial class App : Application
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.MigrateAsync();
+        // El seed de perfil debe ir ANTES que el de la biblioteca: adopta los
+        // ejercicios legacy con UserId null que aún no son de sistema.
         await SeedDefaultProfileIfNeededAsync(db);
+        await SeedExerciseLibraryIfNeededAsync(db);
     }
 
     private static async Task SeedDefaultProfileIfNeededAsync(AppDbContext db)
@@ -42,7 +45,7 @@ public partial class App : Application
         // Comprueba si hay datos previos sin perfil asignado
         var hasOrphanRoutines = await db.Routines.IgnoreQueryFilters().AnyAsync(r => r.UserId == 0);
         var hasOrphanSessions = await db.WorkoutSessions.IgnoreQueryFilters().AnyAsync(s => s.UserId == 0);
-        var hasOrphanExercises = await db.Exercises.IgnoreQueryFilters().AnyAsync(e => e.UserId == null);
+        var hasOrphanExercises = await db.Exercises.IgnoreQueryFilters().AnyAsync(e => e.UserId == null && !e.IsSystem);
 
         if (!hasOrphanRoutines && !hasOrphanSessions && !hasOrphanExercises) return;
 
@@ -60,7 +63,40 @@ public partial class App : Application
             .ExecuteUpdateAsync(s => s.SetProperty(ws => ws.UserId, defaultProfile.Id));
 
         await db.Exercises.IgnoreQueryFilters()
-            .Where(e => e.UserId == null)
+            .Where(e => e.UserId == null && !e.IsSystem)
             .ExecuteUpdateAsync(s => s.SetProperty(e => e.UserId, defaultProfile.Id));
+    }
+
+    private sealed record LibraryExercise(
+        string Name,
+        string MuscleGroup,
+        string? SecondaryMuscles,
+        string? Equipment,
+        string? Instructions);
+
+    private static async Task SeedExerciseLibraryIfNeededAsync(AppDbContext db)
+    {
+        var hasLibrary = await db.Exercises.IgnoreQueryFilters().AnyAsync(e => e.IsSystem);
+        if (hasLibrary) return;
+
+        using var stream = await FileSystem.OpenAppPackageFileAsync("exercise_library.json");
+        var items = await System.Text.Json.JsonSerializer.DeserializeAsync<List<LibraryExercise>>(
+            stream,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (items is null || items.Count == 0) return;
+
+        db.Exercises.AddRange(items.Select(i => new Exercise
+        {
+            Name = i.Name,
+            MuscleGroup = i.MuscleGroup,
+            SecondaryMuscles = i.SecondaryMuscles,
+            Equipment = i.Equipment,
+            Instructions = i.Instructions,
+            UserId = null,
+            IsSystem = true
+        }));
+
+        await db.SaveChangesAsync();
     }
 }

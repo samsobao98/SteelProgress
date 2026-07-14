@@ -62,7 +62,7 @@ public class AppDbContext : DbContext
             {
                 if (entry.State != EntityState.Added) continue;
 
-                if (entry.Entity is Exercise ex && ex.UserId == null)
+                if (entry.Entity is Exercise ex && ex.UserId == null && !ex.IsSystem)
                     ex.UserId = userId;
                 else if (entry.Entity is Routine r && r.UserId == 0)
                     r.UserId = userId;

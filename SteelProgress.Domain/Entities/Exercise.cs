@@ -15,5 +15,14 @@ namespace SteelProgress.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string MuscleGroup { get; set; } = string.Empty;
         public string? Notes { get; set; }
+
+        // Campos de biblioteca (seed con UserId == null; también editables en propios)
+        public string? SecondaryMuscles { get; set; }
+        public string? Equipment { get; set; }
+        public string? Instructions { get; set; }
+
+        // Persistido (no computado): distingue la biblioteca precargada de datos
+        // legacy con UserId null, que el seed de perfiles migra a un perfil.
+        public bool IsSystem { get; set; }
     }
 }

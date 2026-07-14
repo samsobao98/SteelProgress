@@ -11,6 +11,7 @@
     <ContentPage.Resources>
         <converters:MuscleGroupColorConverter x:Key="MuscleGroupColor" />
         <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmpty" />
+        <converters:InvertedBoolConverter x:Key="InvertedBool" />
     </ContentPage.Resources>
 
     <Grid>
@@ -25,7 +26,7 @@
         </AbsoluteLayout>
 
         <!-- ── Contenido principal ── -->
-        <Grid RowDefinitions="Auto,*">
+        <Grid RowDefinitions="Auto,Auto,Auto,*">
 
             <!-- Mini-header sin card — solo título + contador -->
             <Grid
@@ -53,10 +54,48 @@
                 </Border>
             </Grid>
 
+            <!-- Búsqueda -->
+            <Border
+                Grid.Row="1"
+                BackgroundColor="#252536"
+                Padding="14,2"
+                Margin="20,0,20,10"
+                StrokeShape="RoundRectangle 14"
+                StrokeThickness="0">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <mi:MauiIcon
+                        Icon="{mi:Material Search}"
+                        IconColor="#6C7086"
+                        IconSize="20"
+                        VerticalOptions="Center" />
+                    <Entry
+                        Grid.Column="1"
+                        Text="{Binding SearchText, Mode=TwoWay}"
+                        Placeholder="Buscar ejercicio..."
+                        PlaceholderColor="#45475A"
+                        TextColor="#CDD6F4"
+                        BackgroundColor="Transparent"
+                        FontSize="14"
+                        ReturnType="Search" />
+                </Grid>
+            </Border>
+
+            <!-- Chips de filtro por grupo muscular (construidos en code-behind) -->
+            <ScrollView
+                Grid.Row="2"
+                Orientation="Horizontal"
+                HorizontalScrollBarVisibility="Never"
+                Margin="0,0,0,10">
+                <HorizontalStackLayout
+                    x:Name="GroupChipsContainer"
+                    Spacing="8"
+                    Padding="20,0" />
+            </ScrollView>
+
             <!-- Lista de ejercicios -->
             <CollectionView
                 x:Name="ExerciseList"
-                Grid.Row="1"
+                Grid.Row="3"
                 ItemsSource="{Binding Exercises}"
                 Opacity="0"
                 Margin="20,0,20,0">
@@ -69,12 +108,12 @@
                             HorizontalOptions="Center" />
                         <Label
                             HorizontalTextAlignment="Center"
-                            Text="Sin ejercicios todavía"
+                            Text="Sin resultados"
                             TextColor="#585B70"
                             FontSize="15" />
                         <Label
                             HorizontalTextAlignment="Center"
-                            Text="Toca + para añadir el primero"
+                            Text="Prueba otra búsqueda u otro filtro"
                             TextColor="#45475A"
                             FontSize="13" />
                     </VerticalStackLayout>
@@ -98,19 +137,38 @@
                                             Text="{Binding Name}"
                                             TextColor="#CDD6F4"
                                             LineBreakMode="TailTruncation" />
-                                        <!-- Chip de grupo muscular con color contextual -->
-                                        <Border
-                                            BackgroundColor="{Binding MuscleGroup, Converter={StaticResource MuscleGroupColor}}"
-                                            Padding="10,4"
-                                            StrokeShape="RoundRectangle 8"
-                                            StrokeThickness="0"
-                                            HorizontalOptions="Start">
-                                            <Label
-                                                FontSize="11"
-                                                FontAttributes="Bold"
-                                                Text="{Binding MuscleGroup}"
-                                                TextColor="#1E1E2E" />
-                                        </Border>
+                                        <!-- Chips: grupo muscular + badge "Propio" en los del usuario -->
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Border
+                                                BackgroundColor="{Binding MuscleGroup, Converter={StaticResource MuscleGroupColor}}"
+                                                Padding="10,4"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="0">
+                                                <Label
+                                                    FontSize="11"
+                                                    FontAttributes="Bold"
+                                                    Text="{Binding MuscleGroup}"
+                                                    TextColor="#1E1E2E" />
+                                            </Border>
+                                            <Border
+                                                BackgroundColor="Transparent"
+                                                Padding="10,4"
+                                                StrokeShape="RoundRectangle 8"
+                                                StrokeThickness="1"
+                                                Stroke="#585B70"
+                                                IsVisible="{Binding IsSystem, Converter={StaticResource InvertedBool}}">
+                                                <Label
+                                                    FontSize="11"
+                                                    FontAttributes="Bold"
+                                                    Text="Propio"
+                                                    TextColor="#9399B2" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <Label
+                                            FontSize="12"
+                                            Text="{Binding Equipment}"
+                                            TextColor="#6C7086"
+                                            IsVisible="{Binding Equipment, Converter={StaticResource StringNotNullOrEmpty}}" />
                                         <Label
                                             FontSize="12"
                                             Text="{Binding Notes}"
@@ -302,6 +360,131 @@
                         FontAttributes="Bold"
                         FontSize="15"
                         TextColor="#F38BA8"
+                        HorizontalOptions="Center" />
+                </Border>
+
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ── Ficha de detalle (solo lectura) ── -->
+        <Border
+            x:Name="DetailSheet"
+            BackgroundColor="#1E1E2E"
+            StrokeShape="RoundRectangle 24,24,0,0"
+            StrokeThickness="0"
+            VerticalOptions="End"
+            TranslationY="800"
+            IsVisible="False">
+            <VerticalStackLayout Padding="20,16,20,36" Spacing="14">
+
+                <BoxView
+                    HeightRequest="4"
+                    WidthRequest="40"
+                    BackgroundColor="#45475A"
+                    CornerRadius="2"
+                    HorizontalOptions="Center" />
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0" ColumnSpacing="12">
+                    <Label
+                        x:Name="DetailName"
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        TextColor="#CDD6F4"
+                        LineBreakMode="WordWrap"
+                        VerticalOptions="Center" />
+                    <Border
+                        Grid.Column="1"
+                        BackgroundColor="#313244"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        StrokeShape="RoundRectangle 18"
+                        StrokeThickness="0"
+                        VerticalOptions="Start">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseDetailTapped" />
+                        </Border.GestureRecognizers>
+                        <mi:MauiIcon
+                            Icon="{mi:Material Close}"
+                            IconColor="#6C7086"
+                            IconSize="18"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- Chips: grupo + equipamiento -->
+                <HorizontalStackLayout Spacing="6">
+                    <Border
+                        x:Name="DetailGroupChip"
+                        Padding="10,4"
+                        StrokeShape="RoundRectangle 8"
+                        StrokeThickness="0">
+                        <Label
+                            x:Name="DetailGroupLabel"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            TextColor="#1E1E2E" />
+                    </Border>
+                    <Border
+                        x:Name="DetailEquipmentChip"
+                        BackgroundColor="#313244"
+                        Padding="10,4"
+                        StrokeShape="RoundRectangle 8"
+                        StrokeThickness="0">
+                        <Label
+                            x:Name="DetailEquipmentLabel"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            TextColor="#BAC2DE" />
+                    </Border>
+                </HorizontalStackLayout>
+
+                <!-- Músculos secundarios -->
+                <VerticalStackLayout x:Name="DetailSecondarySection" Spacing="4">
+                    <Label FontSize="11" Text="MÚSCULOS SECUNDARIOS" TextColor="#6C7086" CharacterSpacing="1" />
+                    <Label
+                        x:Name="DetailSecondaryLabel"
+                        FontSize="14"
+                        TextColor="#BAC2DE" />
+                </VerticalStackLayout>
+
+                <!-- Instrucciones -->
+                <VerticalStackLayout x:Name="DetailInstructionsSection" Spacing="4">
+                    <Label FontSize="11" Text="CÓMO SE HACE" TextColor="#6C7086" CharacterSpacing="1" />
+                    <Label
+                        x:Name="DetailInstructionsLabel"
+                        FontSize="14"
+                        TextColor="#CDD6F4"
+                        LineHeight="1.3"
+                        LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
+                <!-- Notas (solo propios) -->
+                <VerticalStackLayout x:Name="DetailNotesSection" Spacing="4">
+                    <Label FontSize="11" Text="NOTAS" TextColor="#6C7086" CharacterSpacing="1" />
+                    <Label
+                        x:Name="DetailNotesLabel"
+                        FontSize="14"
+                        TextColor="#BAC2DE"
+                        LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
+                <!-- Editar — solo ejercicios propios -->
+                <Border
+                    x:Name="DetailEditButton"
+                    BackgroundColor="#89B4FA"
+                    Padding="0,14"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0"
+                    Margin="0,6,0,0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDetailEditTapped" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="Editar ejercicio"
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        TextColor="#1E1E2E"
                         HorizontalOptions="Center" />
                 </Border>
 

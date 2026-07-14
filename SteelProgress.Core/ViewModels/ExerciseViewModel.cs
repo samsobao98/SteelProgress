@@ -10,8 +10,17 @@ namespace SteelProgress.Core.ViewModels;
 public partial class ExerciseViewModel : ObservableObject
 {
     private readonly ExerciseRepository _repository;
+    private List<Exercise> _allExercises = new();
 
     public ObservableCollection<Exercise> Exercises { get; } = new();
+
+    [ObservableProperty] private string _searchText = string.Empty;
+
+    /// <summary>Grupo muscular activo en el filtro; null = todos.</summary>
+    [ObservableProperty] private string? _selectedGroupFilter;
+
+    partial void OnSearchTextChanged(string value) => ApplyFilter();
+    partial void OnSelectedGroupFilterChanged(string? value) => ApplyFilter();
 
     public IReadOnlyList<string> MuscleGroups { get; } =
     [
@@ -66,9 +75,32 @@ public partial class ExerciseViewModel : ObservableObject
 
     private async Task LoadExercisesAsync()
     {
-        var exercises = await _repository.GetAllAsync();
+        _allExercises = await _repository.GetAllAsync();
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        IEnumerable<Exercise> result = _allExercises;
+
+        if (!string.IsNullOrWhiteSpace(SelectedGroupFilter))
+            result = result.Where(e => e.MuscleGroup == SelectedGroupFilter);
+
+        var search = SearchText.Trim();
+        if (search.Length > 0)
+        {
+            // IgnoreNonSpace: "biceps" encuentra "Bíceps"
+            var compare = System.Globalization.CultureInfo.InvariantCulture.CompareInfo;
+            const System.Globalization.CompareOptions opts =
+                System.Globalization.CompareOptions.IgnoreCase |
+                System.Globalization.CompareOptions.IgnoreNonSpace;
+            result = result.Where(e =>
+                compare.IndexOf(e.Name, search, opts) >= 0 ||
+                compare.IndexOf(e.MuscleGroup, search, opts) >= 0);
+        }
+
         Exercises.Clear();
-        foreach (var exercise in exercises)
+        foreach (var exercise in result)
             Exercises.Add(exercise);
     }
 
@@ -142,6 +174,12 @@ public partial class ExerciseViewModel : ObservableObject
             return;
         }
 
+        if (SelectedExercise.IsSystem)
+        {
+            NotificationService.Error("Los ejercicios de la biblioteca no se pueden editar.");
+            return;
+        }
+
         string name = Name.Trim();
         string muscleGroup = MuscleGroup?.Trim() ?? string.Empty;
         string notes = Notes.Trim();
@@ -180,6 +218,12 @@ public partial class ExerciseViewModel : ObservableObject
         if (SelectedExercise is null)
         {
             NotificationService.Info("Selecciona un ejercicio para eliminar.");
+            return;
+        }
+
+        if (SelectedExercise.IsSystem)
+        {
+            NotificationService.Error("Los ejercicios de la biblioteca no se pueden eliminar.");
             return;
         }
 
