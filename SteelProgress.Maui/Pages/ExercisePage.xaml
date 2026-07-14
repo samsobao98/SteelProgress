@@ -144,8 +144,6 @@
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Scale="0"
-            Opacity="0"
             Shadow="{Shadow Brush='#A6E3A1', Offset='0,4', Radius=12, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />

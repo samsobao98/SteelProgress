@@ -27,21 +27,13 @@ public partial class ExercisePage : ContentPage
         if (IsReduceMotionEnabled())
         {
             ExerciseList.Opacity = 1;
-            FabButton.Opacity = 1;
-            FabButton.Scale = 1;
             return;
         }
 
         ExerciseList.Opacity = 0;
-        FabButton.Opacity = 0;
-        FabButton.Scale = 0;
-
+        // El FAB no se anima: animar Scale/Opacity sobre un elemento con Shadow
+        // deja la sombra rasterizada borrosa en Android (mismo fix que RoutinePage).
         await ExerciseList.FadeToAsync(1, 320, Easing.CubicOut);
-
-        await Task.WhenAll(
-            FabButton.FadeToAsync(1, 260, Easing.CubicOut),
-            FabButton.ScaleToAsync(1.0, 260, Easing.SpringOut));
-        FabButton.Scale = 1;
     }
 
     // ── FAB: abre overlay en modo añadir ──────────────────────────────────
