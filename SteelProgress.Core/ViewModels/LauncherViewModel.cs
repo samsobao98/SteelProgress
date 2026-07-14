@@ -52,7 +52,9 @@ public partial class LauncherViewModel : ObservableObject
     public string DescriptionPreviewText =>
         string.IsNullOrWhiteSpace(NewProfileDescription)
             ? "Tu frase aquí..."
-            : $"\"{NewProfileDescription.Trim()}\"";
+            // NBSP final: en Android la cursiva sobresale del ancho medido y el
+            // recorte se come el último glifo; así se come el espacio invisible.
+            : $"\"{NewProfileDescription.Trim()}\" ";
 
     public event Action? ProfileChosen;
     public event Action? ProfileUpdated;

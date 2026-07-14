@@ -2,8 +2,8 @@
 
 ## LauncherPage — Creación de perfil
 
-- [ ] Comillas finales de la descripción se cortan en el preview (el `MaxLength=55` + `WordWrap` no es suficiente en algunos dispositivos — buscar solución más robusta)
-- [ ] Logo demasiado pequeño — aumentar tamaño (actualmente 114px)
+- [x] Comillas finales de la descripción se cortan en el preview — arreglado con NBSP tras la comilla de cierre + `Padding` en los labels (la cursiva sobresale del ancho medido en Android y el recorte ahora se come el espacio invisible)
+- [x] Logo demasiado pequeño — el contenedor limitaba a 220dp de ancho (el PNG es 500×165, el `HeightRequest` no aplicaba); ampliado a 300dp
 
 ## LauncherPage — Selección de perfil
 

@@ -57,21 +57,21 @@
             Margin="0,56,0,0"
             HeightRequest="128"
             HorizontalOptions="Center"
-            WidthRequest="220">
+            WidthRequest="300">
             <!-- Aura: elipse verde que se expande y desvanece en bucle -->
             <Ellipse
                 x:Name="LogoAura"
                 Fill="#A6E3A1"
-                WidthRequest="114"
-                HeightRequest="114"
+                WidthRequest="128"
+                HeightRequest="128"
                 Opacity="0"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
-            <!-- Logo con spring bounce en la entrada -->
+            <!-- Logo con spring bounce en la entrada (el ancho del Grid manda: 500x165 → ~300x99) -->
             <Image
                 x:Name="LogoImage"
                 Source="logo_icon.png"
-                HeightRequest="114"
+                HeightRequest="128"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
                 Aspect="AspectFit" />
@@ -188,6 +188,7 @@
                         HorizontalTextAlignment="Center"
                         MaxLines="3"
                         LineBreakMode="WordWrap"
+                        Padding="8,0"
                         Margin="24,0">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding HasDescription}" Value="True">
@@ -421,6 +422,7 @@
                             LineBreakMode="WordWrap"
                             MaxLines="2"
                             IsVisible="False"
+                            Padding="8,0"
                             Margin="0,-6,0,0" />
 
                         <VerticalStackLayout Spacing="10" Margin="0,8,0,0">

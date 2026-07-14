@@ -576,7 +576,7 @@ public partial class LauncherPage : ContentPage
 
         if (!string.IsNullOrWhiteSpace(profile.Description))
         {
-            OverlayDescription.Text = $"\"{profile.Description.Trim()}\"";
+            OverlayDescription.Text = $"\"{profile.Description.Trim()}\" ";
             OverlayDescription.IsVisible = true;
         }
         else
@@ -791,7 +791,7 @@ public partial class LauncherPage : ContentPage
                 OverlayName.Text = _overlayProfile.Name;
                 if (!string.IsNullOrWhiteSpace(_overlayProfile.Description))
                 {
-                    OverlayDescription.Text = $"\"{_overlayProfile.Description.Trim()}\"";
+                    OverlayDescription.Text = $"\"{_overlayProfile.Description.Trim()}\" ";
                     OverlayDescription.IsVisible = true;
                 }
                 else
