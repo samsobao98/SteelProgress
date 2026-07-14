@@ -11,7 +11,8 @@ public partial class RoutineView : UserControl
         InitializeComponent();
 
         var routineRepository = new RoutineRepository(App.DbContext);
-        var exerciseRepository = new ExerciseRepository(App.DbContext);
-        DataContext = new RoutineViewModel(routineRepository, exerciseRepository);
+        // NOTA: la gestión de rutinas se rediseñó para MAUI (lista + detalle).
+        // Esta vista WPF es legacy y sus bindings quedaron obsoletos.
+        DataContext = new RoutineViewModel(routineRepository);
     }
 }

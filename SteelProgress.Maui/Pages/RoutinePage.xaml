@@ -3,359 +3,277 @@
     x:Class="SteelProgress.Maui.Pages.RoutinePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
     BackgroundColor="#1E1E2E"
+    Shell.NavBarIsVisible="False"
     Title="Rutinas">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <ContentPage.Resources>
+        <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmpty" />
+    </ContentPage.Resources>
 
-        <!-- Header -->
-        <Border
-            Grid.Row="0"
-            BackgroundColor="#313244"
-            Margin="12,12,12,0"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <VerticalStackLayout Spacing="4">
+    <Grid>
+
+        <!-- Orb decorativo -->
+        <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
+            <Ellipse
+                AbsoluteLayout.LayoutBounds="1, 0, 260, 260"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Fill="#CBA6F7"
+                Opacity="0.05" />
+        </AbsoluteLayout>
+
+        <!-- ── Contenido principal ── -->
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- Mini-header: título + contador -->
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                Padding="20,20,20,12">
                 <Label
                     FontAttributes="Bold"
-                    FontSize="22"
+                    FontSize="26"
                     Text="Rutinas"
-                    TextColor="#CDD6F4" />
-                <Label
-                    FontSize="13"
-                    Text="Organiza tus rutinas, días y ejercicios"
-                    TextColor="#BAC2DE" />
-            </VerticalStackLayout>
-        </Border>
-
-        <!-- Selector de sección -->
-        <Grid
-            Grid.Row="1"
-            ColumnDefinitions="*,*,*"
-            ColumnSpacing="6"
-            Margin="12,10,12,0">
-            <Button
-                x:Name="BtnRutinas"
-                Grid.Column="0"
-                BackgroundColor="#89B4FA"
-                Clicked="OnRutinasClicked"
-                FontSize="13"
-                Text="Rutinas"
-                TextColor="#1E1E2E" />
-            <Button
-                x:Name="BtnDias"
-                Grid.Column="1"
-                BackgroundColor="#45475A"
-                Clicked="OnDiasClicked"
-                FontSize="13"
-                Text="Días"
-                TextColor="#CDD6F4" />
-            <Button
-                x:Name="BtnEjercicios"
-                Grid.Column="2"
-                BackgroundColor="#45475A"
-                Clicked="OnEjerciciosClicked"
-                FontSize="13"
-                Text="Ejercicios"
-                TextColor="#CDD6F4" />
-        </Grid>
-
-        <!-- ===== SECCIÓN RUTINAS ===== -->
-        <CollectionView
-            x:Name="SectionRutinas"
-            Grid.Row="2"
-            ItemsSource="{Binding Routines}"
-            Margin="12,10,12,0"
-            SelectedItem="{Binding SelectedRoutine, Mode=TwoWay}"
-            SelectionMode="Single">
-            <CollectionView.EmptyView>
-                <Label
-                    HorizontalTextAlignment="Center"
-                    Text="No hay rutinas registradas"
-                    TextColor="#585B70"
+                    TextColor="#CDD6F4"
                     VerticalOptions="Center" />
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <Border
+                    Grid.Column="1"
+                    BackgroundColor="#252536"
+                    Padding="12,6"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0"
+                    VerticalOptions="Center">
+                    <Label
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        Text="{Binding Routines.Count}"
+                        TextColor="#6C7086" />
+                </Border>
+            </Grid>
+
+            <!-- Lista de rutinas -->
+            <CollectionView
+                x:Name="RoutineList"
+                Grid.Row="1"
+                ItemsSource="{Binding Routines}"
+                Opacity="0"
+                Margin="20,0,20,0">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="0,60" Spacing="14" HorizontalOptions="Center">
+                        <mi:MauiIcon
+                            Icon="{mi:Material ListAlt}"
+                            IconColor="#313244"
+                            IconSize="52"
+                            HorizontalOptions="Center" />
+                        <Label
+                            HorizontalTextAlignment="Center"
+                            Text="Sin rutinas todavía"
+                            TextColor="#585B70"
+                            FontSize="15" />
+                        <Label
+                            HorizontalTextAlignment="Center"
+                            Text="Toca + para crear la primera"
+                            TextColor="#45475A"
+                            FontSize="13" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="0,0,0,10">
+                            <Border
+                                BackgroundColor="#252536"
+                                Padding="16,14"
+                                StrokeShape="RoundRectangle 14"
+                                StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnRoutineTapped" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                    <!-- Badge con inicial -->
+                                    <Border
+                                        Grid.Column="0"
+                                        BackgroundColor="#CBA6F7"
+                                        HeightRequest="46"
+                                        WidthRequest="46"
+                                        StrokeShape="RoundRectangle 14"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding Initial}"
+                                            FontAttributes="Bold"
+                                            FontSize="20"
+                                            TextColor="#1E1E2E"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout
+                                        Grid.Column="1"
+                                        Spacing="4"
+                                        VerticalOptions="Center">
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="16"
+                                            Text="{Binding Name}"
+                                            TextColor="#CDD6F4"
+                                            LineBreakMode="TailTruncation" />
+                                        <Label
+                                            FontSize="12"
+                                            Text="{Binding SummaryText}"
+                                            TextColor="#89B4FA" />
+                                        <Label
+                                            FontSize="12"
+                                            Text="{Binding Notes}"
+                                            TextColor="#6C7086"
+                                            LineBreakMode="TailTruncation"
+                                            IsVisible="{Binding Notes, Converter={StaticResource StringNotNullOrEmpty}}" />
+                                    </VerticalStackLayout>
+                                    <mi:MauiIcon
+                                        Grid.Column="2"
+                                        Icon="{mi:Material ChevronRight}"
+                                        IconColor="#45475A"
+                                        IconSize="20"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </Grid>
+
+        <!-- ── FAB ── -->
+        <Border
+            x:Name="FabButton"
+            BackgroundColor="#A6E3A1"
+            HeightRequest="56"
+            WidthRequest="56"
+            StrokeShape="RoundRectangle 28"
+            StrokeThickness="0"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,20,24"
+            Shadow="{Shadow Brush='#A6E3A1', Offset='0,4', Radius=12, Opacity=0.35}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnFabTapped" />
+            </Border.GestureRecognizers>
+            <mi:MauiIcon
+                Icon="{mi:Material Add}"
+                IconColor="#1E1E2E"
+                IconSize="28"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
+
+        <!-- ── Overlay backdrop ── -->
+        <BoxView
+            x:Name="OverlayBackdrop"
+            BackgroundColor="#000000"
+            Opacity="0"
+            IsVisible="False"
+            InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackdropTapped" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- ── Bottom sheet: nueva rutina ── -->
+        <Border
+            x:Name="BottomSheet"
+            BackgroundColor="#1E1E2E"
+            StrokeShape="RoundRectangle 24,24,0,0"
+            StrokeThickness="0"
+            VerticalOptions="End"
+            TranslationY="700"
+            IsVisible="False">
+            <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
+
+                <BoxView
+                    HeightRequest="4"
+                    WidthRequest="40"
+                    BackgroundColor="#45475A"
+                    CornerRadius="2"
+                    HorizontalOptions="Center" />
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="20"
+                        Text="Nueva rutina"
+                        TextColor="#CDD6F4"
+                        VerticalOptions="Center" />
                     <Border
+                        Grid.Column="1"
                         BackgroundColor="#313244"
-                        Margin="0,0,0,8"
-                        Padding="14"
-                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        StrokeShape="RoundRectangle 18"
                         StrokeThickness="0">
-                        <VerticalStackLayout Spacing="2">
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="15"
-                                Text="{Binding Name}"
-                                TextColor="#CDD6F4" />
-                            <Label
-                                FontSize="12"
-                                Text="{Binding Notes}"
-                                TextColor="#6C7086" />
-                        </VerticalStackLayout>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseSheetTapped" />
+                        </Border.GestureRecognizers>
+                        <mi:MauiIcon
+                            Icon="{mi:Material Close}"
+                            IconColor="#6C7086"
+                            IconSize="18"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
                     </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                </Grid>
 
-        <!-- ===== SECCIÓN DÍAS ===== -->
-        <Grid
-            x:Name="SectionDias"
-            Grid.Row="2"
-            IsVisible="False"
-            Margin="12,10,12,0"
-            RowDefinitions="Auto,*">
-            <Border
-                Grid.Row="0"
-                BackgroundColor="#313244"
-                Margin="0,0,0,8"
-                Padding="10,8"
-                StrokeShape="RoundRectangle 8"
-                StrokeThickness="0">
-                <Label
-                    FontSize="13"
-                    Text="{Binding SelectedRoutine.Name, StringFormat='Rutina: {0}'}"
-                    TextColor="#89B4FA" />
-            </Border>
-            <CollectionView
-                Grid.Row="1"
-                ItemsSource="{Binding RoutineDays}"
-                SelectedItem="{Binding SelectedRoutineDay, Mode=TwoWay}"
-                SelectionMode="Single">
-                <CollectionView.EmptyView>
-                    <Label
-                        HorizontalTextAlignment="Center"
-                        Text="No hay días en esta rutina"
-                        TextColor="#585B70"
-                        VerticalOptions="Center" />
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border
-                            BackgroundColor="#313244"
-                            Margin="0,0,0,8"
-                            Padding="14"
-                            StrokeShape="RoundRectangle 8"
-                            StrokeThickness="0">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Label
-                                    Grid.Column="0"
-                                    FontAttributes="Bold"
-                                    FontSize="13"
-                                    Margin="0,0,10,0"
-                                    Text="{Binding Order, StringFormat='{0}.'}"
-                                    TextColor="#89B4FA"
-                                    VerticalOptions="Center" />
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="15"
-                                    Text="{Binding Name}"
-                                    TextColor="#CDD6F4"
-                                    VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
-
-        <!-- ===== SECCIÓN EJERCICIOS ===== -->
-        <Grid
-            x:Name="SectionEjercicios"
-            Grid.Row="2"
-            IsVisible="False"
-            Margin="12,10,12,0"
-            RowDefinitions="Auto,*">
-            <Border
-                Grid.Row="0"
-                BackgroundColor="#313244"
-                Margin="0,0,0,8"
-                Padding="10,8"
-                StrokeShape="RoundRectangle 8"
-                StrokeThickness="0">
-                <Label
-                    FontSize="13"
-                    Text="{Binding SelectedRoutineDay.Name, StringFormat='Día: {0}'}"
-                    TextColor="#A6E3A1" />
-            </Border>
-            <CollectionView
-                Grid.Row="1"
-                ItemsSource="{Binding DayExercises}"
-                SelectedItem="{Binding SelectedDayExercise, Mode=TwoWay}"
-                SelectionMode="Single">
-                <CollectionView.EmptyView>
-                    <Label
-                        HorizontalTextAlignment="Center"
-                        Text="No hay ejercicios en este día"
-                        TextColor="#585B70"
-                        VerticalOptions="Center" />
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border
-                            BackgroundColor="#313244"
-                            Margin="0,0,0,8"
-                            Padding="14"
-                            StrokeShape="RoundRectangle 8"
-                            StrokeThickness="0">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Label
-                                    Grid.Column="0"
-                                    FontAttributes="Bold"
-                                    FontSize="13"
-                                    Margin="0,0,10,0"
-                                    Text="{Binding Order, StringFormat='{0}.'}"
-                                    TextColor="#A6E3A1"
-                                    VerticalOptions="Center" />
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="15"
-                                    Text="{Binding Exercise.Name}"
-                                    TextColor="#CDD6F4"
-                                    VerticalOptions="Center" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
-
-        <!-- Formulario Rutinas -->
-        <Border
-            x:Name="FormRutinas"
-            Grid.Row="3"
-            BackgroundColor="#313244"
-            Margin="12"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <VerticalStackLayout Spacing="10">
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label FontSize="12" Text="Nombre" TextColor="#BAC2DE" />
+                <Border
+                    BackgroundColor="#252536"
+                    Padding="16,12"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="11" Text="NOMBRE" TextColor="#6C7086" CharacterSpacing="1" />
                         <Entry
-                            BackgroundColor="#45475A"
-                            Placeholder="Nombre de la rutina"
-                            PlaceholderColor="#585B70"
-                            Text="{Binding Name}"
-                            TextColor="#CDD6F4" />
+                            x:Name="NameEntry"
+                            Text="{Binding NewName}"
+                            TextColor="#CDD6F4"
+                            PlaceholderColor="#45475A"
+                            Placeholder="ej. Push Pull Legs"
+                            BackgroundColor="Transparent"
+                            FontSize="15" />
                     </VerticalStackLayout>
-                    <VerticalStackLayout Grid.Column="1" Spacing="4">
-                        <Label FontSize="12" Text="Notas" TextColor="#BAC2DE" />
+                </Border>
+
+                <Border
+                    BackgroundColor="#252536"
+                    Padding="16,12"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="11" Text="NOTAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
                         <Entry
-                            BackgroundColor="#45475A"
-                            Placeholder="Notas opcionales"
-                            PlaceholderColor="#585B70"
-                            Text="{Binding Notes}"
-                            TextColor="#CDD6F4" />
+                            Text="{Binding NewNotes}"
+                            TextColor="#CDD6F4"
+                            PlaceholderColor="#45475A"
+                            Placeholder="Objetivo, frecuencia..."
+                            BackgroundColor="Transparent"
+                            FontSize="15" />
                     </VerticalStackLayout>
-                </Grid>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                    <Button
-                        Grid.Column="0"
-                        BackgroundColor="#89B4FA"
-                        Command="{Binding AddRoutineCommand}"
-                        Text="Añadir rutina"
-                        TextColor="#1E1E2E" />
-                    <Button
-                        Grid.Column="1"
-                        BackgroundColor="#F38BA8"
-                        Command="{Binding DeleteRoutineCommand}"
-                        Text="Eliminar"
-                        TextColor="#1E1E2E" />
-                </Grid>
-            </VerticalStackLayout>
-        </Border>
+                </Border>
 
-        <!-- Formulario Días -->
-        <Border
-            x:Name="FormDias"
-            Grid.Row="3"
-            BackgroundColor="#313244"
-            IsVisible="False"
-            Margin="12"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <VerticalStackLayout Spacing="10">
-                <VerticalStackLayout Spacing="4">
-                    <Label FontSize="12" Text="Nombre del día" TextColor="#BAC2DE" />
-                    <Entry
-                        BackgroundColor="#45475A"
-                        Placeholder="Ej. Día de pecho"
-                        PlaceholderColor="#585B70"
-                        Text="{Binding DayName}"
-                        TextColor="#CDD6F4" />
-                </VerticalStackLayout>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                    <Button
-                        Grid.Column="0"
-                        BackgroundColor="#89B4FA"
-                        Command="{Binding AddDayCommand}"
-                        Text="Añadir día"
-                        TextColor="#1E1E2E" />
-                    <Button
-                        Grid.Column="1"
-                        BackgroundColor="#F38BA8"
-                        Command="{Binding DeleteDayCommand}"
-                        Text="Eliminar día"
-                        TextColor="#1E1E2E" />
-                </Grid>
-            </VerticalStackLayout>
-        </Border>
+                <Border
+                    BackgroundColor="#A6E3A1"
+                    Padding="0,16"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCreateTapped" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="Crear rutina"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        TextColor="#1E1E2E"
+                        HorizontalOptions="Center" />
+                </Border>
 
-        <!-- Formulario Ejercicios -->
-        <Border
-            x:Name="FormEjercicios"
-            Grid.Row="3"
-            BackgroundColor="#313244"
-            IsVisible="False"
-            Margin="12"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <VerticalStackLayout Spacing="10">
-                <VerticalStackLayout Spacing="4">
-                    <Label FontSize="12" Text="Ejercicio" TextColor="#BAC2DE" />
-                    <Picker
-                        BackgroundColor="#45475A"
-                        ItemDisplayBinding="{Binding Name}"
-                        ItemsSource="{Binding AllExercises}"
-                        SelectedItem="{Binding SelectedExerciseToAdd}"
-                        Title="Selecciona un ejercicio"
-                        TitleColor="#585B70"
-                        TextColor="#CDD6F4" />
-                </VerticalStackLayout>
-                <Grid ColumnDefinitions="*,*,Auto,Auto" ColumnSpacing="6">
-                    <Button
-                        Grid.Column="0"
-                        BackgroundColor="#89B4FA"
-                        Command="{Binding AddExerciseToDayCommand}"
-                        Text="Añadir"
-                        TextColor="#1E1E2E" />
-                    <Button
-                        Grid.Column="1"
-                        BackgroundColor="#F38BA8"
-                        Command="{Binding DeleteExerciseFromDayCommand}"
-                        Text="Eliminar"
-                        TextColor="#1E1E2E" />
-                    <Button
-                        Grid.Column="2"
-                        BackgroundColor="#45475A"
-                        Command="{Binding MoveExerciseUpCommand}"
-                        Text="↑"
-                        TextColor="#CDD6F4"
-                        WidthRequest="48" />
-                    <Button
-                        Grid.Column="3"
-                        BackgroundColor="#45475A"
-                        Command="{Binding MoveExerciseDownCommand}"
-                        Text="↓"
-                        TextColor="#CDD6F4"
-                        WidthRequest="48" />
-                </Grid>
             </VerticalStackLayout>
         </Border>
 

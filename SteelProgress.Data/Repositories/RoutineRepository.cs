@@ -24,9 +24,28 @@ public class RoutineRepository
         return await _context.Routines.OrderBy(r=>r.Name).ToListAsync();
     }
 
+    public async Task<List<RoutineSummary>> GetRoutineSummariesAsync()
+    {
+        return await _context.Routines
+            .OrderBy(r => r.Name)
+            .Select(r => new RoutineSummary
+            {
+                Routine = r,
+                DayCount = r.Days.Count,
+                ExerciseCount = r.Days.SelectMany(d => d.Exercises).Count()
+            })
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Routine routine)
     {
         await _context.Routines.AddAsync(routine);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Routine routine)
+    {
+        _context.Routines.Update(routine);
         await _context.SaveChangesAsync();
     }
 
@@ -38,11 +57,19 @@ public class RoutineRepository
 
     public async Task<List<RoutineDay>> GetDaysByRoutineIdAsync(int routineId)
     {
-        return await _context.RoutineDays.Where(d=>d.RoutineId == routineId).ToListAsync();
+        return await _context.RoutineDays
+            .Where(d => d.RoutineId == routineId)
+            .OrderBy(d => d.Order)
+            .ToListAsync();
     }
     public async Task AddDayAsync(RoutineDay routineDay)
     {
         await _context.RoutineDays.AddAsync(routineDay);
+        await _context.SaveChangesAsync();
+    }
+    public async Task UpdateDayAsync(RoutineDay routineDay)
+    {
+        _context.RoutineDays.Update(routineDay);
         await _context.SaveChangesAsync();
     }
     public async Task DeleteDayAsync(RoutineDay routineDay)
@@ -76,5 +103,22 @@ public class RoutineRepository
     {
         _context.RoutineDayExercises.Update(exercise);
         _context.SaveChanges();
+    }
+
+    public async Task UpdateRoutineDayExerciseAsync(RoutineDayExercise exercise)
+    {
+        _context.RoutineDayExercises.Update(exercise);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>Reasigna Order según la posición en la lista y guarda en bloque.</summary>
+    public async Task ReorderDayExercisesAsync(IList<RoutineDayExercise> ordered)
+    {
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            ordered[i].Order = i + 1;
+            _context.RoutineDayExercises.Update(ordered[i]);
+        }
+        await _context.SaveChangesAsync();
     }
 }

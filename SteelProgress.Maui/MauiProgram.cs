@@ -49,6 +49,7 @@ public static class MauiProgram
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<ExerciseViewModel>();
         builder.Services.AddTransient<RoutineViewModel>();
+        builder.Services.AddTransient<RoutineDetailViewModel>();
         builder.Services.AddTransient<WorkoutViewModel>();
         builder.Services.AddTransient<HistoryViewModel>();
         builder.Services.AddTransient<ProgressViewModel>(sp =>
@@ -59,6 +60,7 @@ public static class MauiProgram
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<ExercisePage>();
         builder.Services.AddTransient<RoutinePage>();
+        builder.Services.AddTransient<RoutineDetailPage>();
         builder.Services.AddTransient<WorkoutPage>();
         builder.Services.AddTransient<HistoryPage>();
         builder.Services.AddTransient<ProgressPage>();

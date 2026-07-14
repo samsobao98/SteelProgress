@@ -1,47 +1,122 @@
+using MauiIcons.Core;
+using Microsoft.Extensions.DependencyInjection;
 using SteelProgress.Core.ViewModels;
+using SteelProgress.Domain.Entities;
 
 namespace SteelProgress.Maui.Pages;
 
 public partial class RoutinePage : ContentPage
 {
     private readonly RoutineViewModel _vm;
+    private readonly IServiceProvider _services;
 
-    public RoutinePage(RoutineViewModel vm)
+    public RoutinePage(RoutineViewModel vm, IServiceProvider services)
     {
         InitializeComponent();
+        _ = new MauiIcon();
+        _services = services;
         BindingContext = _vm = vm;
+        _vm.RoutineCreated += () => _ = HideOverlayAsync();
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await _vm.RefreshAsync();
+        await RunEntryAnimationsAsync();
     }
 
-    private void ShowSection(int section)
+    private async Task RunEntryAnimationsAsync()
     {
-        SectionRutinas.IsVisible    = section == 0;
-        SectionDias.IsVisible       = section == 1;
-        SectionEjercicios.IsVisible = section == 2;
+        if (IsReduceMotionEnabled())
+        {
+            RoutineList.Opacity = 1;
+            return;
+        }
 
-        FormRutinas.IsVisible    = section == 0;
-        FormDias.IsVisible       = section == 1;
-        FormEjercicios.IsVisible = section == 2;
-
-        var active       = Color.FromArgb("#89B4FA");
-        var inactive     = Color.FromArgb("#45475A");
-        var textActive   = Color.FromArgb("#1E1E2E");
-        var textInactive = Color.FromArgb("#CDD6F4");
-
-        BtnRutinas.BackgroundColor    = section == 0 ? active : inactive;
-        BtnRutinas.TextColor          = section == 0 ? textActive : textInactive;
-        BtnDias.BackgroundColor       = section == 1 ? active : inactive;
-        BtnDias.TextColor             = section == 1 ? textActive : textInactive;
-        BtnEjercicios.BackgroundColor = section == 2 ? active : inactive;
-        BtnEjercicios.TextColor       = section == 2 ? textActive : textInactive;
+        RoutineList.Opacity = 0;
+        // El FAB no se anima: animar Scale/Opacity sobre un elemento con Shadow
+        // deja la sombra rasterizada borrosa en Android (el detalle lo hace igual).
+        await RoutineList.FadeToAsync(1, 320, Easing.CubicOut);
     }
 
-    private void OnRutinasClicked(object? sender, EventArgs e)    => ShowSection(0);
-    private void OnDiasClicked(object? sender, EventArgs e)       => ShowSection(1);
-    private void OnEjerciciosClicked(object? sender, EventArgs e) => ShowSection(2);
+    // ── Navegación al detalle ──────────────────────────────────────────────
+
+    private async void OnRoutineTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is not RoutineSummary summary)
+            return;
+
+        var page = _services.GetRequiredService<RoutineDetailPage>();
+        await page.LoadAsync(summary.Routine);
+        await Navigation.PushAsync(page);
+    }
+
+    // ── FAB: abre el sheet de creación ─────────────────────────────────────
+
+    private void OnFabTapped(object? sender, TappedEventArgs e)
+    {
+        _vm.ClearForm();
+        _ = ShowOverlayAsync();
+    }
+
+    private void OnBackdropTapped(object? sender, TappedEventArgs e)
+        => _ = HideOverlayAsync();
+
+    private void OnCloseSheetTapped(object? sender, TappedEventArgs e)
+        => _ = HideOverlayAsync();
+
+    private async void OnCreateTapped(object? sender, TappedEventArgs e)
+    {
+        NameEntry.Unfocus();
+        await _vm.CreateRoutineCommand.ExecuteAsync(null);
+        // El sheet se cierra desde el evento RoutineCreated en caso de éxito.
+    }
+
+    // ── Animaciones del overlay ────────────────────────────────────────────
+
+    private async Task ShowOverlayAsync()
+    {
+        BottomSheet.TranslationY = 700;
+        BottomSheet.IsVisible = true;
+        OverlayBackdrop.Opacity = 0;
+        OverlayBackdrop.IsVisible = true;
+
+        if (IsReduceMotionEnabled())
+        {
+            BottomSheet.TranslationY = 0;
+            OverlayBackdrop.Opacity = 0.6;
+            return;
+        }
+
+        await Task.WhenAll(
+            BottomSheet.TranslateToAsync(0, 0, 320, Easing.CubicOut),
+            OverlayBackdrop.FadeToAsync(0.6, 280, Easing.CubicOut));
+    }
+
+    private async Task HideOverlayAsync()
+    {
+        if (IsReduceMotionEnabled())
+        {
+            BottomSheet.IsVisible = false;
+            OverlayBackdrop.IsVisible = false;
+            return;
+        }
+
+        await Task.WhenAll(
+            BottomSheet.TranslateToAsync(0, 700, 260, Easing.CubicIn),
+            OverlayBackdrop.FadeToAsync(0, 220, Easing.CubicIn));
+
+        BottomSheet.IsVisible = false;
+        OverlayBackdrop.IsVisible = false;
+    }
+
+    private static bool IsReduceMotionEnabled()
+    {
+#if IOS
+        return UIKit.UIAccessibility.IsReduceMotionEnabled;
+#else
+        return false;
+#endif
+    }
 }
