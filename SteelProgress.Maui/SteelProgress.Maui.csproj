@@ -35,6 +35,9 @@
 		<PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.4" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.Material" Version="6.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+		<!-- Referencia explícita solo para pisar la 2.1.11 que arrastra EF Core, con
+		     CVE-2025-6965 (GHSA-2m69-gcr7-jv3q). La 2.1.12+ trae SQLite 3.53.3. -->
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 	</ItemGroup>
