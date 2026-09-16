@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SteelProgress.Core\SteelProgress.Core.csproj" />
     <ProjectReference Include="..\SteelProgress.Data\SteelProgress.Data.csproj" />
     <ProjectReference Include="..\SteelProgress.Domain\SteelProgress.Domain.csproj" />
   </ItemGroup>

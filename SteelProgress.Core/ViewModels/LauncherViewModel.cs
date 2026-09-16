@@ -19,18 +19,30 @@ public partial class LauncherViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotCreating))]
     [NotifyPropertyChangedFor(nameof(CanAddProfile))]
+    [NotifyPropertyChangedFor(nameof(CanShowProfiles))]
     private bool _isCreating;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoading))]
     private bool _isLoaded;
 
+    // Si el arranque falla, el mensaje se queda en pantalla: un spinner eterno
+    // sin explicación es indistinguible de "aún cargando".
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasError))]
+    [NotifyPropertyChangedFor(nameof(CanShowProfiles))]
+    private string? _errorMessage;
+
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
     public bool IsLoading => !IsLoaded;
     public bool IsNotCreating => !IsCreating;
     public bool CanAddProfile => !IsCreating;
+    public bool CanShowProfiles => !IsCreating && !HasError;
     public bool HasProfiles => Profiles.Count > 0;
     public bool IsFirstTimeSetup => !HasProfiles;
-    public string SubtitleText => HasProfiles ? "¿Quién entrena hoy?" : "Crea tu primer perfil";
+    public string SubtitleText => HasError
+        ? "No se pudo cargar"
+        : HasProfiles ? "¿Quién entrena hoy?" : "Crea tu primer perfil";
 
     public IReadOnlyList<string> AvailableColors { get; } = new[]
     {
@@ -107,19 +119,30 @@ public partial class LauncherViewModel : ObservableObject
 
     public async Task LoadAsync(Task migrationTask)
     {
-        await migrationTask;
+        try
+        {
+            await migrationTask;
 
-        using var scope = _sp.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var list = await db.UserProfiles.IgnoreQueryFilters().OrderBy(p => p.Id).ToListAsync();
-        Profiles.Clear();
-        foreach (var p in list)
-            Profiles.Add(p);
+            using var scope = _sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            // La consulta va antes de tocar Profiles: si falla, la lista que ya
+            // se estuviera mostrando se queda como está en vez de vaciarse.
+            var list = await db.UserProfiles.IgnoreQueryFilters().OrderBy(p => p.Id).ToListAsync();
+            Profiles.Clear();
+            foreach (var p in list)
+                Profiles.Add(p);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
 
+        // Pase lo que pase se apaga el spinner, o la pantalla se queda girando
+        // para siempre sin decir por qué.
         IsLoaded = true;
         NotifyProfileDerived();
 
-        if (!HasProfiles)
+        if (!HasError && !HasProfiles)
             IsCreating = true;
     }
 

@@ -102,9 +102,28 @@
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
 
-            <!-- Profile list (shown when loaded and not creating) -->
+            <!-- Startup error (persistent: an alert would be dismissed and leave a blank page) -->
             <VerticalStackLayout
-                IsVisible="{Binding IsNotCreating}"
+                IsVisible="{Binding HasError}"
+                VerticalOptions="Center"
+                Spacing="10"
+                Padding="32,0">
+                <Label
+                    Text="No se pudo iniciar"
+                    FontSize="17"
+                    FontAttributes="Bold"
+                    TextColor="#F38BA8"
+                    HorizontalTextAlignment="Center" />
+                <Label
+                    Text="{Binding ErrorMessage}"
+                    FontSize="13"
+                    TextColor="#BAC2DE"
+                    HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Profile list (shown when loaded, not creating and no error) -->
+            <VerticalStackLayout
+                IsVisible="{Binding CanShowProfiles}"
                 VerticalOptions="Start"
                 Spacing="28"
                 Margin="0,24,0,24">

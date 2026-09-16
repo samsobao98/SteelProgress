@@ -70,24 +70,40 @@ public partial class LauncherPage : ContentPage
         var app = (App)Application.Current!;
         await _vm.LoadAsync(app.MigrationTask);
 
-        if (!_vm.IsCreating && _vm.HasProfiles)
-            BuildCarousel();
+        // OnAppearing es async void: lo que escape de aquí se pierde sin rastro y
+        // deja la página a medio montar. Nada debajo debe poder tumbar el arranque.
+        try
+        {
+            if (!_vm.IsCreating && _vm.HasProfiles)
+                BuildCarousel();
 
-        // Header section fades + slides in
-        await Task.WhenAll(
-            HeaderSection.FadeToAsync(1, 400, Easing.CubicOut),
-            HeaderSection.TranslateToAsync(0, 0, 500, Easing.CubicOut)
-        );
+            // Header section fades + slides in
+            await Task.WhenAll(
+                HeaderSection.FadeToAsync(1, 400, Easing.CubicOut),
+                HeaderSection.TranslateToAsync(0, 0, 500, Easing.CubicOut)
+            );
 
-        // Logo spring bounce
-        await LogoImage.ScaleToAsync(1.18, 320, Easing.CubicOut);
-        await LogoImage.ScaleToAsync(0.94, 120, Easing.CubicIn);
-        await LogoImage.ScaleToAsync(1.0, 100, Easing.CubicOut);
+            // Logo spring bounce
+            await LogoImage.ScaleToAsync(1.18, 320, Easing.CubicOut);
+            await LogoImage.ScaleToAsync(0.94, 120, Easing.CubicIn);
+            await LogoImage.ScaleToAsync(1.0, 100, Easing.CubicOut);
 
-        // Start aura loop after bounce settles
-        _ = LogoAuraLoop();
+            // Start aura loop after bounce settles
+            _ = LogoAuraLoop();
 
-        await SubtitleLabel.FadeToAsync(1, 400, Easing.CubicOut);
+            await SubtitleLabel.FadeToAsync(1, 400, Easing.CubicOut);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LauncherPage.OnAppearing: {ex}");
+
+            // La cabecera se anima desde Opacity=0; si el fallo llega antes de que
+            // termine, hay que dejarla visible o la pantalla se queda en blanco.
+            HeaderSection.Opacity = 1;
+            HeaderSection.TranslationY = 0;
+            LogoImage.Scale = 1.0;
+            SubtitleLabel.Opacity = 1;
+        }
     }
 
     // ── Logo aura ────────────────────────────────────────────────────────
