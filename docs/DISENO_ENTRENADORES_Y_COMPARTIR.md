@@ -84,6 +84,29 @@ Si se activan todos los bloques, la vista simple queda igual que la de entrenado
   * su progreso, con las mismas gráficas que `ProgressPage`, pero sobre sus sesiones.
 * Acción rápida: **"Enviar rutina"** desde la ficha del cliente.
 
+### 4.1. Entrenar en vista entrenador: "¿Quién entrena?"
+
+La pestaña Entreno se mantiene en la vista entrenador, adaptada:
+
+* Al iniciar una sesión, la app pregunta **"¿Quién entrena?"**: **Yo** o uno de los clientes.
+  * Con un cliente, solo se ofrecen sus rutinas y la sesión se guarda **directamente en su ficha** (`ClientId`). Sirve para entrenamientos presenciales: el entrenador apunta la sesión desde su móvil y el cliente no tiene que exportar nada.
+  * Con "Yo", funciona como en la vista simple.
+* Ajuste **"Yo también entreno con este perfil"**:
+  * activado: aparece la opción "Yo", y el historial y el progreso propios se ven desde Inicio;
+  * desactivado: Entreno solo ofrece clientes y desaparece lo personal.
+* Se pregunta al crear un perfil en modo entrenador. Las dos formas de trabajar son válidas:
+  * **un solo perfil** para entrenar y llevar clientes (ajuste activado);
+  * **dos perfiles**: uno de entrenador solo con clientes (ajuste desactivado) y otro personal en vista simple.
+* Con dos perfiles, los ejercicios propios (y sus vídeos) son de cada perfil. Para no crearlos dos veces, hace falta **copiar ejercicios entre perfiles del mismo móvil**, reutilizando el paquete `exercises` sin pasar por un archivo.
+
+### 4.2. Barra de pestañas según la vista
+
+| Vista simple | Vista entrenador |
+|---|---|
+| Inicio · Ejercicios · Rutinas · Entreno · Historial | Inicio · **Clientes** · Ejercicios · Rutinas · Entreno |
+
+En vista entrenador, el historial de cada cliente está en su ficha y el propio (si el perfil también entrena) se abre desde Inicio.
+
 ---
 
 ## 5. Modelo de datos
@@ -239,7 +262,7 @@ El deportista que va por libre usa lo mismo para hacer copias de seguridad o com
 | **`SettingsPage`** (nueva) | Vista simple / entrenador, bloques de la vista simple, límites de vídeo |
 | **`ImportPreviewPage`** (nueva) | Vista previa y confirmación de cualquier `.steel` |
 
-La barra de pestañas tiene hoy 5 pestañas (Inicio, Ejercicios, Rutinas, Entreno, Historial). **Clientes** sería una sexta solo en vista entrenador, o un acceso desde Inicio para no saturar la barra (a decidir). **Ajustes** va desde Inicio, no en la barra.
+La barra de pestañas cambia según la vista (§4.2): en vista entrenador, **Clientes** ocupa el sitio de Historial. **Ajustes** va desde Inicio, no en la barra. `WorkoutPage` añade el paso "¿Quién entrena?" en vista entrenador (§4.1).
 
 ---
 
@@ -253,7 +276,7 @@ Cada fase es usable por sí sola.
 | **2. Ajustes y vistas** | `SettingsPage`, vista simple/entrenador, bloques. Prescripción avanzada en `RoutinePage` y su visualización en `WorkoutPage` | Personalización completa de rutinas |
 | **3. Multimedia** | `ExerciseMedia`, importar desde galería, ver vídeo/GIF en la ficha y durante el entreno | Ejercicios propios con vídeo |
 | **4. Exportar e importar rutinas** | Paquete `.steel` tipo `routine` y `exercises`, con/sin vídeos, menú compartir, abrir archivo, vista previa | Se pueden pasar rutinas entre móviles |
-| **5. Clientes** | `Client`, `ClientsPage`, rutinas por cliente, "Enviar rutina" | Entrenador organizado por clientes |
+| **5. Clientes** | `Client`, `ClientsPage`, rutinas por cliente, "Enviar rutina", "¿Quién entrena?" y sesiones presenciales, copiar ejercicios entre perfiles | Entrenador organizado por clientes |
 | **6. Devolución de sesiones** | Paquete `sessions`, "Enviar a mi entrenador", importar en la ficha del cliente, progreso del cliente | Circuito completo entrenador ↔ cliente |
 | 7. Versiones de rutinas | Actualizar una rutina recibida sin perder el historial | Seguimiento a largo plazo |
 | Después | Escritorio con las mismas funciones; envío dentro de la app con servidor; series prescritas una a una | — |
@@ -267,7 +290,7 @@ Recomendación: **1 → 2 → 3 → 4** primero; con eso la app ya se diferencia
 | # | Decisión | Opciones | Recomendación |
 |---|---|---|---|
 | D1 | Reproductor de vídeo | `CommunityToolkit.Maui.MediaElement` · Abrir el vídeo con el reproductor del sistema | `MediaElement`: el vídeo se ve dentro de la ficha y durante el entreno |
-| D2 | Pestaña Clientes | Sexta pestaña en vista entrenador · Acceso desde Inicio | Pestaña: es la pantalla principal del entrenador |
+| ~~D2~~ | ~~Pestaña Clientes~~ | **Decidido (2026-10-27):** pestaña en vista entrenador, en lugar de Historial; Entreno se mantiene con "¿Quién entrena?" y el ajuste "Yo también entreno" | — |
 | D3 | Prescripción | Por ejercicio · Serie a serie | Por ejercicio en la fase 2; serie a serie más adelante |
 | D4 | Límite de tamaño de vídeo | 25 / 50 / 100 MB | 50 MB y aviso al exportar |
 | D5 | Ejercicios importados | Editables · Solo lectura con opción de duplicar | Editables, marcando que vienen de otro autor |
