@@ -3,8 +3,13 @@
     x:Class="SteelProgress.Maui.Pages.WorkoutPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
     BackgroundColor="#1E1E2E"
     Title="Entreno">
+
+    <ContentPage.Resources>
+        <conv:ExerciseThumbnailConverter x:Key="ExerciseThumb" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto,Auto">
 
@@ -142,11 +147,25 @@
                         SelectionMode="Single">
                         <CollectionView.Header>
                             <VerticalStackLayout Spacing="6" Margin="0,0,0,8">
-                                <Label
-                                    FontAttributes="Bold"
-                                    FontSize="15"
-                                    Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
-                                    TextColor="#CDD6F4" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="15"
+                                        VerticalOptions="Center"
+                                        Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
+                                        TextColor="#CDD6F4" />
+                                    <!-- Ver el vídeo o la imagen del ejercicio sin salir del entreno -->
+                                    <Border
+                                        Grid.Column="1"
+                                        Style="{StaticResource SpChipStyle}"
+                                        Padding="12,6"
+                                        IsVisible="{Binding SelectedWorkoutExercise.Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnShowMediaTapped" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="▶ Ver cómo se hace" FontSize="13" TextColor="{StaticResource SpSteel2}" />
+                                    </Border>
+                                </Grid>
                                 <!-- Lo que pide la rutina para este ejercicio -->
                                 <Border
                                     Style="{StaticResource SpChipStyle}"

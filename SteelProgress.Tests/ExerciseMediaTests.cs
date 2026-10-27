@@ -196,6 +196,35 @@ public class ExerciseMediaTests : IDisposable
     private static Task<bool> AlwaysYes(string title, string message) => Task.FromResult(true);
 
     [Fact]
+    public async Task WorkoutSessionLoadsExerciseMediaForTheVideoButton()
+    {
+        var vm = ViewModel();
+        vm.Name = "Press banca";
+        vm.MuscleGroup = "Pecho";
+        await vm.AddMediaAsync(Bytes(100), "clip.mp4");
+        await vm.AddExerciseCommand.ExecuteAsync(null);
+
+        int dayId;
+        using (var db = CreateContext())
+        {
+            var day = new RoutineDay { Name = "Torso A", Order = 1 };
+            day.Exercises.Add(new RoutineDayExercise { ExerciseId = db.Exercises.Single().Id, Order = 1 });
+            var routine = new Routine { Name = "Torso / Pierna", UserId = 1 };
+            routine.Days.Add(day);
+            db.Routines.Add(routine);
+            db.SaveChanges();
+            dayId = day.Id;
+        }
+
+        var repo = new WorkoutRepository(CreateContext());
+        var created = await repo.CreateSessionFromRoutineDayAsync(dayId);
+        var session = await new WorkoutRepository(CreateContext()).GetSessionByIdAsync(created.Id);
+
+        var media = session!.Exercises.Single().Exercise!.Media.Single();
+        Assert.Equal(MediaKind.Video, media.Kind);
+    }
+
+    [Fact]
     public async Task OtherProfilesDoNotSeeMedia()
     {
         var vm = ViewModel();
