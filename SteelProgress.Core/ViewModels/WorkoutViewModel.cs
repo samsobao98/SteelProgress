@@ -47,6 +47,7 @@ public partial class WorkoutViewModel : ObservableObject
             _selectedWorkoutExercise = value;
             OnPropertyChanged();
             LoadSelectedExerciseSets();
+            _ = LoadPrescriptionAsync();
         }
     }
 
@@ -78,6 +79,49 @@ public partial class WorkoutViewModel : ObservableObject
         var days = await _routineRepository.GetDaysByRoutineIdAsync(SelectedRoutine.Id);
         foreach (var day in days)
             RoutineDays.Add(day);
+    }
+
+    // Lo que pide la rutina para el ejercicio seleccionado ("4 × 6–8 · RPE 8 · 1:30") y su nota
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPrescription))]
+    private string _prescriptionText = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPrescriptionNotes))]
+    private string _prescriptionNotes = "";
+
+    private readonly SemaphoreSlim _prescriptionLock = new(1, 1);
+
+    public bool HasPrescription => PrescriptionText.Length > 0;
+    public bool HasPrescriptionNotes => PrescriptionNotes.Length > 0;
+
+    public async Task LoadPrescriptionAsync()
+    {
+        var exercise = SelectedWorkoutExercise;
+        if (exercise is null || CurrentSession is null)
+        {
+            PrescriptionText = "";
+            PrescriptionNotes = "";
+            return;
+        }
+
+        RoutineDayExercise? prescription;
+        // Tocar varios ejercicios seguidos no puede usar el mismo DbContext a la vez
+        await _prescriptionLock.WaitAsync();
+        try
+        {
+            prescription = await _routineRepository.GetPrescriptionAsync(CurrentSession.RoutineDayId, exercise.ExerciseId);
+        }
+        finally
+        {
+            _prescriptionLock.Release();
+        }
+
+        // Si mientras tanto se eligió otro ejercicio, este resultado ya no vale
+        if (!ReferenceEquals(exercise, SelectedWorkoutExercise)) return;
+
+        PrescriptionText = prescription is null ? "" : PrescriptionFormatter.Format(prescription);
+        PrescriptionNotes = prescription?.Notes ?? "";
     }
 
     private void LoadSelectedExerciseSets()

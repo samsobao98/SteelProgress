@@ -47,11 +47,33 @@ public partial class RoutineViewModel : ObservableObject
         }
     }
 
-    public RoutineViewModel(RoutineRepository repository, ExerciseRepository exerciseRepository)
+    public PrescriptionEditorViewModel Editor { get; }
+
+    // viewOptions es opcional para que la app de escritorio, que crea el ViewModel a mano, siga compilando
+    public RoutineViewModel(RoutineRepository repository, ExerciseRepository exerciseRepository, ViewOptionsService? viewOptions = null)
     {
         _repository = repository;
         _exerciseRepository = exerciseRepository;
+        Editor = new PrescriptionEditorViewModel(repository, viewOptions ?? new ViewOptionsService());
+        Editor.Saved += async () =>
+        {
+            var previousId = SelectedDayExercise?.Id;
+            await LoadDayExercisesAsync();
+            SelectedDayExercise = DayExercises.FirstOrDefault(e => e.Id == previousId);
+        };
         _ = InitializeAsync();
+    }
+
+    [RelayCommand]
+    private void EditPrescription()
+    {
+        if (SelectedDayExercise is null)
+        {
+            NotificationService.Error("Selecciona un ejercicio.");
+            return;
+        }
+
+        Editor.Open(SelectedDayExercise);
     }
 
     public Task RefreshAsync() => InitializeAsync();

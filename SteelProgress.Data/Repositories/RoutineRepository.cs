@@ -72,6 +72,15 @@ public class RoutineRepository
         await _context.SaveChangesAsync();
     }
 
+    // Lo prescrito para un ejercicio dentro de un día (si se repite, el primero por orden)
+    public async Task<RoutineDayExercise?> GetPrescriptionAsync(int routineDayId, int exerciseId)
+    {
+        return await _context.RoutineDayExercises
+            .Where(rde => rde.RoutineDayId == routineDayId && rde.ExerciseId == exerciseId)
+            .OrderBy(rde => rde.Order)
+            .FirstOrDefaultAsync();
+    }
+
     public void UpdateRoutineDayExercise(RoutineDayExercise exercise)
     {
         _context.RoutineDayExercises.Update(exercise);
