@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    x:DataType="vm:SettingsViewModel"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False">
+
+    <!-- Primera pantalla hecha con el sistema de diseño (Resources/Styles/Tokens.xaml) -->
+    <Grid>
+        <Ellipse
+            Fill="{StaticResource SpSteel3}"
+            Opacity="0.06"
+            WidthRequest="280"
+            HeightRequest="280"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="0,-90,-110,0"
+            InputTransparent="True" />
+
+        <ScrollView>
+            <VerticalStackLayout x:Name="PageContent" Padding="20,12,20,32" Spacing="0">
+
+                <!-- Volver -->
+                <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBackTapped" />
+                    </HorizontalStackLayout.GestureRecognizers>
+                    <Label Text="‹" FontSize="22" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                    <Label Text="Inicio" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <Label Text="Ajustes" Style="{StaticResource SpTitle}" Margin="0,8,0,0" />
+                <Label Text="{Binding ProfileName, StringFormat='Perfil: {0}'}" Style="{StaticResource SpSecondary}" />
+
+                <!-- ── Modo de uso ── -->
+                <Label Text="Modo de uso" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
+                <Border Style="{StaticResource SpCardStyle}">
+                    <VerticalStackLayout Spacing="12">
+                        <Border BackgroundColor="{StaticResource SpCardHi}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                            <Border x:Name="SimpleOption" Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetSimpleCommand}" Tapped="OnOptionTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Simple" HorizontalOptions="Center" FontFamily="OpenSansSemibold" FontSize="14" />
+                            </Border>
+                            <Border x:Name="TrainerOption" Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetTrainerCommand}" Tapped="OnOptionTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Entrenador" HorizontalOptions="Center" FontFamily="OpenSansSemibold" FontSize="14" />
+                            </Border>
+                        </Grid>
+                        </Border>
+                        <Label Text="{Binding ModeDescription}" Style="{StaticResource SpSecondary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ── Bloques de la vista simple ── -->
+                <Label Text="Mostrar también en vista simple" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
+                <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsTrainer}" Value="True">
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Intensidad" Style="{StaticResource SpBody}" />
+                                <Label Text="RPE / RIR y % de 1RM" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding ShowIntensity}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Tempo y descanso" Style="{StaticResource SpBody}" />
+                                <Label Text="Tempo y descanso entre series" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding ShowTempoAndRest}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Estructura avanzada" Style="{StaticResource SpBody}" />
+                                <Label Text="Superseries y series de calentamiento" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding ShowAdvancedStructure}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Rangos de repeticiones" Style="{StaticResource SpBody}" />
+                                <Label Text="8–12 en lugar de un número fijo" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding ShowRepRanges}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Notas detalladas" Style="{StaticResource SpBody}" />
+                                <Label Text="Notas por serie" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding ShowDetailedNotes}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+                <Label Text="En vista entrenador todas las opciones están siempre visibles."
+                       Style="{StaticResource SpSecondary}" FontSize="12" Margin="4,8,0,0"
+                       IsVisible="{Binding IsTrainer}" />
+
+                <!-- ── Vista entrenador ── -->
+                <Label Text="Vista entrenador" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
+                <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsSimple}" Value="True">
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Yo también entreno con este perfil" Style="{StaticResource SpBody}" />
+                            <Label Text="Muestra «Yo» en Entreno y tu historial" Style="{StaticResource SpSecondary}" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding TrainsSelf}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

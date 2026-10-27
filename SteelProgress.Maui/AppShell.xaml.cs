@@ -17,6 +17,7 @@ public partial class AppShell : Shell
         HistoryContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<HistoryPage>());
 
         Routing.RegisterRoute("ProgressPage", typeof(ProgressPage));
+        Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
 
         // Wire static service delegates — AppShell lives for app lifetime, so one subscription is correct
         ConfirmDialogService.OnConfirmationRequested += (title, msg) =>

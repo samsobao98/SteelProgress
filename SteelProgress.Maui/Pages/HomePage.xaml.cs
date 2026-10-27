@@ -74,6 +74,13 @@ public partial class HomePage : ContentPage
 #endif
     }
 
+    private async void OnSettingsTapped(object? sender, TappedEventArgs e)
+    {
+        await SettingsButton.ScaleToAsync(0.92, 70, Easing.CubicIn);
+        await SettingsButton.ScaleToAsync(1.0, 120, Easing.SpringOut);
+        await Shell.Current.GoToAsync("SettingsPage");
+    }
+
     private async void OnWorkoutCtaTapped(object? sender, TappedEventArgs e)
     {
         await CtaSection.ScaleToAsync(0.97, 80, Easing.CubicIn);
