@@ -31,6 +31,7 @@ public static class MauiProgram
             });
 
         builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        builder.Services.AddSingleton<ViewOptionsService>();
 
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "steelprogress.db");
         builder.Services.AddDbContext<AppDbContext>(
