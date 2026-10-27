@@ -65,11 +65,73 @@ public partial class ExercisePage : ContentPage
 
     // ── Cierre del overlay ────────────────────────────────────────────────
 
+    // Cerrar sin guardar: ClearForm borra los vídeos elegidos para un ejercicio nuevo que no se guardó
     private void OnBackdropTapped(object? sender, TappedEventArgs e)
-        => _ = HideOverlayAsync();
+        => _ = CancelOverlayAsync();
 
     private void OnCloseSheetTapped(object? sender, TappedEventArgs e)
-        => _ = HideOverlayAsync();
+        => _ = CancelOverlayAsync();
+
+    private async Task CancelOverlayAsync()
+    {
+        await HideOverlayAsync();
+        _vm.ClearForm();
+    }
+
+    // ── Vídeos e imágenes ─────────────────────────────────────────────────
+
+    private async void OnAddMediaClicked(object? sender, EventArgs e)
+    {
+        const string photo = "Foto o GIF de la galería";
+        const string video = "Vídeo de la galería";
+        const string record = "Grabar vídeo";
+
+        var options = MediaPicker.Default.IsCaptureSupported ? new[] { photo, video, record } : new[] { photo, video };
+        var choice = await DisplayActionSheetAsync("Añadir vídeo o imagen", "Cancelar", null, options);
+
+        try
+        {
+            // De la galería se pueden elegir varios a la vez
+            IEnumerable<FileResult?> files = choice switch
+            {
+                photo => await MediaPicker.Default.PickPhotosAsync() ?? [],
+                video => await MediaPicker.Default.PickVideosAsync() ?? [],
+                record => await MediaPicker.Default.CaptureVideoAsync() is { } recorded ? [recorded] : [],
+                _ => []
+            };
+
+            foreach (var file in files)
+            {
+                if (file is null) continue;
+                await using var stream = await file.OpenReadAsync();
+                await _vm.AddMediaAsync(stream, file.FileName);
+            }
+        }
+        catch (PermissionException)
+        {
+            await DisplayAlertAsync("Permiso necesario", "Da permiso a SteelProgress para acceder a tus fotos y vídeos.", "OK");
+        }
+    }
+
+    private async void OnRemoveMediaTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is ExerciseMedia media)
+            await _vm.RemoveMediaCommand.ExecuteAsync(media);
+    }
+
+    // Por ahora el vídeo se abre con el reproductor del móvil (reproductor propio: decisión D1 pendiente)
+    private async void OnMediaTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is not ExerciseMedia media) return;
+        if (_vm.GetMediaPath(media) is not string path || !File.Exists(path)) return;
+
+        if (sender is VisualElement element)
+        {
+            await element.ScaleToAsync(0.95, 70, Easing.CubicIn);
+            await element.ScaleToAsync(1.0, 120, Easing.SpringOut);
+        }
+        await Launcher.Default.OpenAsync(new OpenFileRequest(media.Kind == MediaKind.Video ? "Vídeo" : "Imagen", new ReadOnlyFile(path)));
+    }
 
     // ── Guardar (añadir o actualizar) ─────────────────────────────────────
 

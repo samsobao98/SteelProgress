@@ -3,4 +3,17 @@
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- Vídeos e imágenes de los ejercicios: la galería usa el selector de Android (sin permiso en Android 13+);
+	     en versiones antiguas hace falta leer el almacenamiento, y la cámara para grabar un vídeo -->
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<queries>
+		<intent>
+			<action android:name="android.media.action.VIDEO_CAPTURE" />
+		</intent>
+		<intent>
+			<action android:name="android.media.action.IMAGE_CAPTURE" />
+		</intent>
+	</queries>
 </manifest>

@@ -33,6 +33,11 @@ public static class MauiProgram
         builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<ViewOptionsService>();
 
+        // Vídeos e imágenes de los ejercicios, en el almacenamiento privado de la app
+        builder.Services.AddSingleton<IMediaStorage>(_ =>
+            new FileMediaStorage(Path.Combine(FileSystem.AppDataDirectory, "media")));
+        builder.Services.AddSingleton<ExerciseMediaService>();
+
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "steelprogress.db");
         builder.Services.AddDbContext<AppDbContext>(
             (sp, opt) =>
