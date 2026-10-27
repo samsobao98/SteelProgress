@@ -93,22 +93,22 @@
     </Style>
 
     <!-- ── Superficies ── -->
-    <Style x:Key="SpCard" TargetType="Border">
+    <Style x:Key="SpCardStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource SpCard}" />
         <Setter Property="StrokeThickness" Value="0" />
         <Setter Property="StrokeShape" Value="RoundRectangle 14" />
         <Setter Property="Padding" Value="16" />
     </Style>
-    <Style x:Key="SpCardHi" TargetType="Border" BasedOn="{StaticResource SpCard}">
+    <Style x:Key="SpCardHiStyle" TargetType="Border" BasedOn="{StaticResource SpCardStyle}">
         <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
     </Style>
-    <Style x:Key="SpSheet" TargetType="Border">
+    <Style x:Key="SpSheetStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource SpSheet}" />
         <Setter Property="StrokeThickness" Value="0" />
         <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
         <Setter Property="Padding" Value="20,12,20,28" />
     </Style>
-    <Style x:Key="SpChip" TargetType="Border">
+    <Style x:Key="SpChipStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
         <Setter Property="StrokeThickness" Value="0" />
         <Setter Property="StrokeShape" Value="RoundRectangle 12" />
