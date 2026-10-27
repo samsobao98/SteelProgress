@@ -33,6 +33,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<ViewOptionsService>();
+        builder.Services.AddSingleton<ClientContextService>();
 
         // Vídeos e imágenes de los ejercicios, en el almacenamiento privado de la app
         builder.Services.AddSingleton<IMediaStorage>(_ =>
@@ -59,6 +60,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ExerciseRepository>();
         builder.Services.AddTransient<RoutineRepository>();
         builder.Services.AddTransient<WorkoutRepository>();
+        builder.Services.AddTransient<ClientRepository>();
 
         // ViewModels
         builder.Services.AddTransient<HomeViewModel>();
@@ -70,6 +72,7 @@ public static class MauiProgram
             new ProgressViewModel(sp.GetRequiredService<AppDbContext>()));
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<ImportViewModel>();
+        builder.Services.AddTransient<ClientsViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
@@ -81,6 +84,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ProgressPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<ImportPreviewPage>();
+        builder.Services.AddTransient<ClientsPage>();
 
         // Shell and launcher live for the app lifetime
         builder.Services.AddSingleton<AppShell>();

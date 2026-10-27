@@ -14,9 +14,26 @@ public partial class WorkoutPage : ContentPage
         BindingContext = _vm = vm;
     }
 
+    private Core.Services.ClientContextService? _clientContext;
+
+    // Al entrar o salir de un cliente, la pantalla vuelve a cargar sus datos
+    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        _clientContext ??= Handler?.MauiContext?.Services.GetService<Core.Services.ClientContextService>();
+        if (_clientContext is not null)
+        {
+            _clientContext.Changed -= OnClientChanged;
+            _clientContext.Changed += OnClientChanged;
+        }
         await _vm.RefreshAsync();
     }
 

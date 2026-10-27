@@ -3,6 +3,7 @@
     x:Class="SteelProgress.Maui.Pages.RoutinePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
     xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
     BackgroundColor="#1E1E2E"
     Title="Rutinas">
@@ -32,6 +33,8 @@
                     FontSize="13"
                     Text="Organiza tus rutinas, días y ejercicios"
                     TextColor="#BAC2DE" />
+                <!-- Con un cliente activo, estos datos son los suyos -->
+                <controls:ActiveClientBanner Margin="0,8,0,0" />
             </VerticalStackLayout>
         </Border>
 

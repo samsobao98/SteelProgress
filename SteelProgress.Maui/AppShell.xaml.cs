@@ -15,6 +15,18 @@ public partial class AppShell : Shell
         RoutineContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<RoutinePage>());
         WorkoutContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<WorkoutPage>());
         HistoryContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<HistoryPage>());
+        ClientsContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ClientsPage>());
+
+        // Barra según la vista: en vista entrenador aparece Clientes y, si el perfil no entrena, se quita Historial
+        var viewOptions = services.GetRequiredService<ViewOptionsService>();
+        void ApplyTabs() => MainThread.BeginInvokeOnMainThread(() =>
+        {
+            var o = viewOptions.Current;
+            ClientsTab.IsVisible = o.ShowClients;
+            HistoryTab.IsVisible = o.ShowOwnTraining;
+        });
+        viewOptions.Changed += ApplyTabs;
+        ApplyTabs();
 
         Routing.RegisterRoute("ProgressPage", typeof(ProgressPage));
         Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
