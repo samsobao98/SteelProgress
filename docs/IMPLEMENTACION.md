@@ -3,9 +3,9 @@
 Cada fase está en **su propia rama**, encadenada a la anterior. Si una falla, las anteriores siguen sirviendo.
 
 ```
-maui ── diseno-entrenador ── fase1-base-datos ── fase2-ajustes ── fase3-multimedia ── fase4-compartir
-        (diseño y maquetas)   (BD + tokens)       (Ajustes,        (vídeos e           (exportar e
-                                                   vistas,          imágenes)           importar .steel)
+maui ── diseno-entrenador ── fase1-base-datos ── fase2-ajustes ── fase3-multimedia ── fase4-compartir ── fase5-clientes
+        (diseño y maquetas)   (BD + tokens)       (Ajustes,        (vídeos e           (exportar e         (clientes del
+                                                   vistas,          imágenes)           importar .steel)    entrenador)
                                                    prescripción)
 ```
 
@@ -15,7 +15,7 @@ Para probar una fase: `git checkout <rama>`, compilar y ejecutar en el móvil. L
 
 En la nube no hay SDK de Android, así que:
 
-* **Pruebas automáticas** (`SteelProgress.Tests`, 77): migraciones sobre una base de datos con datos antiguos, lógica de vistas, ajustes, prescripción y multimedia. Se ejecutan con `dotnet test SteelProgress.Tests`.
+* **Pruebas automáticas** (`SteelProgress.Tests`, 85): migraciones sobre una base de datos con datos antiguos, lógica de vistas, ajustes, prescripción y multimedia. Se ejecutan con `dotnet test SteelProgress.Tests`.
 * **Compilación de la app móvil** como `net10.0` (sin Android) para validar todo el C# y el XAML de `SteelProgress.Maui`. Detectó y corrigió claves de recursos duplicadas que habrían roto la compilación.
 * **Enlaces de datos** de las pantallas nuevas comprobados con bindings tipados.
 * **Recursos** (`StaticResource`) de todas las pantallas comprobados con un script: un recurso que falta no lo detecta el compilador y haría fallar la pantalla al abrirse.
@@ -85,6 +85,31 @@ Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la
 4. Cambiar algo de la rutina original, subir su versión (de momento no hay botón: se hará en la fase 7) y volver a compartir para probar «Actualizar».
 5. Tocar el `.steel` desde WhatsApp o un gestor de archivos → «Abrir con SteelProgress».
 6. Un archivo que no sea `.steel`: debe avisar.
+
+## Fase 5 — `fase5-clientes`
+
+**Qué hace**
+* Migración `AddClients`: tabla de clientes (cuelgan del perfil del entrenador), y rutinas y sesiones con `ClientId`; las sesiones registradas por el entrenador con el cliente delante quedan marcadas como **presenciales**.
+* **Cliente activo**: en lugar de duplicar pantallas, el entrenador «entra» en un cliente y **Rutinas, Entreno e Historial** pasan a mostrar y guardar los datos de ese cliente. Un aviso «Trabajando con Marta · Salir» lo indica y, al salir, todo vuelve a tus datos. Durante un entreno no se puede salir.
+* Tus estadísticas de Inicio no cuentan las sesiones de clientes.
+* **Pestaña Clientes** (solo en vista entrenador): lista con objetivo, rutina, sesiones de la semana y aviso en rojo si lleva 7 días o más sin entrenar. Al tocar uno: entrenar con él, ver sus rutinas, ver su historial, editar o eliminar (borra sus rutinas y sesiones, no las tuyas).
+* En vista entrenador, **Historial** solo aparece si el perfil «también entrena» (Ajustes).
+* **Importar** con un cliente activo crea la rutina para ese cliente.
+
+**Probar**
+1. Ajustes → Entrenador: aparece la pestaña Clientes (y desaparece Historial si «Yo también entreno» está apagado).
+2. Clientes → «+ Cliente» → nombre, objetivo, color → Guardar.
+3. Tocar el cliente → «Rutinas de…»: la lista sale vacía y con el aviso arriba. Crear una rutina para él. «Salir»: vuelven tus rutinas.
+4. Tocar el cliente → «Entrenar con…» → hacer un entreno. Ver «Historial de…» y comprobar que no aparece en tu historial ni en tus números de Inicio.
+5. Volver a Clientes: el cliente muestra «1 esta semana».
+6. Cambiar de perfil con un cliente activo: debe salir del cliente.
+
+**Aún no está (para siguientes pasos)**
+* «Enviar rutina» directo desde la ficha del cliente (hoy: entrar en el cliente → Rutinas → Compartir).
+* Ficha de cliente completa de la maqueta (pestañas Sesiones/Rutinas/Progreso/Notas, adherencia, récords).
+* Copiar ejercicios entre perfiles del mismo móvil.
+* En vista entrenador sin «Yo también entreno», la pestaña Entreno aún permite entrenos propios si no hay cliente activo.
+* Fase 6: devolver sesiones al entrenador (paquete `sessions`) y fase 7: detección automática de cambios y versión al reenviar.
 
 ---
 
