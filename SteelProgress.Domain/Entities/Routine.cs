@@ -6,8 +6,15 @@ public class Routine
     public int UserId { get; set; }
     public UserProfile? UserProfile { get; set; }
 
+    public Guid Uid { get; set; } = Guid.NewGuid();
+
     public string Name { get; set; } = string.Empty;
     public string? Notes { get; set; }
+
+    // Autoría y versión: quién la creó, de qué rutina original viene y qué versión es
+    public string? AuthorName { get; set; }
+    public Guid? SourceUid { get; set; }
+    public int Version { get; set; } = 1;
 
     public ICollection<RoutineDay> Days { get; set; } = new List<RoutineDay>();
 }

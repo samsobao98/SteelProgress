@@ -4,6 +4,8 @@ public class RoutineDay
 {
     public int Id { get; set; }
 
+    public Guid Uid { get; set; } = Guid.NewGuid();
+
     public int RoutineId { get; set; }
 
     public string Name { get; set; } = string.Empty;

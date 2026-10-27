@@ -52,6 +52,18 @@ public class AppDbContext : DbContext
             .IsRequired();
         modelBuilder.Entity<WorkoutSession>()
             .HasQueryFilter(s => _currentUserService == null || s.UserId == _currentUserService.CurrentUserId);
+
+        // Igual que en la migración AddUserProfiles, para que el modelo no pida reconstruir la tabla
+        modelBuilder.Entity<UserProfile>()
+            .Property(p => p.AvatarColor)
+            .HasDefaultValue("#89B4FA");
+
+        // Uid: identidad estable para exportar/importar sin duplicar
+        modelBuilder.Entity<Exercise>().HasIndex(e => e.Uid).IsUnique();
+        modelBuilder.Entity<Routine>().HasIndex(r => r.Uid).IsUnique();
+        modelBuilder.Entity<RoutineDay>().HasIndex(d => d.Uid).IsUnique();
+        modelBuilder.Entity<RoutineDayExercise>().HasIndex(rde => rde.Uid).IsUnique();
+        modelBuilder.Entity<WorkoutSession>().HasIndex(ws => ws.Uid).IsUnique();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
