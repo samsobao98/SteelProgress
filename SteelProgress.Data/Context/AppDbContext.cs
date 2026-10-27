@@ -60,8 +60,10 @@ public class AppDbContext : DbContext
             .HasDefaultValue("#89B4FA");
 
         // Uid: identidad estable para exportar/importar sin duplicar
-        modelBuilder.Entity<Exercise>().HasIndex(e => e.Uid).IsUnique();
-        modelBuilder.Entity<Routine>().HasIndex(r => r.Uid).IsUnique();
+        // Ejercicios y rutinas: únicos por perfil, porque dos perfiles del mismo móvil pueden importar
+        // el mismo ejercicio o la misma rutina y cada uno debe poder reconocerlo como suyo
+        modelBuilder.Entity<Exercise>().HasIndex(e => new { e.UserId, e.Uid }).IsUnique();
+        modelBuilder.Entity<Routine>().HasIndex(r => new { r.UserId, r.Uid }).IsUnique();
         modelBuilder.Entity<RoutineDay>().HasIndex(d => d.Uid).IsUnique();
         modelBuilder.Entity<RoutineDayExercise>().HasIndex(rde => rde.Uid).IsUnique();
         modelBuilder.Entity<WorkoutSession>().HasIndex(ws => ws.Uid).IsUnique();
@@ -72,7 +74,7 @@ public class AppDbContext : DbContext
             .WithMany(e => e.Media)
             .HasForeignKey(m => m.ExerciseId)
             .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<ExerciseMedia>().HasIndex(m => m.Uid).IsUnique();
+        modelBuilder.Entity<ExerciseMedia>().HasIndex(m => new { m.ExerciseId, m.Uid }).IsUnique();
         // Mismo filtro que su ejercicio, para no ver la multimedia de otros perfiles
         modelBuilder.Entity<ExerciseMedia>()
             .HasQueryFilter(m => _currentUserService == null || m.Exercise!.UserId == null || m.Exercise.UserId == _currentUserService.CurrentUserId);

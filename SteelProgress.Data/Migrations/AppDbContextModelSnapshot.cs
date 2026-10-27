@@ -48,10 +48,8 @@ namespace SteelProgress.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Uid")
+                    b.HasIndex("UserId", "Uid")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Exercises");
                 });
@@ -86,9 +84,7 @@ namespace SteelProgress.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExerciseId");
-
-                    b.HasIndex("Uid")
+                    b.HasIndex("ExerciseId", "Uid")
                         .IsUnique();
 
                     b.ToTable("ExerciseMedia");
@@ -124,10 +120,8 @@ namespace SteelProgress.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Uid")
+                    b.HasIndex("UserId", "Uid")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Routines");
                 });
