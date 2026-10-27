@@ -25,6 +25,9 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                // Números y títulos del sistema de diseño (Resources/Styles/Tokens.xaml)
+                fonts.AddFont("SpaceGrotesk-Medium.ttf", "SpaceGroteskMedium");
+                fonts.AddFont("SpaceGrotesk-Bold.ttf", "SpaceGroteskBold");
             });
 
         builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
