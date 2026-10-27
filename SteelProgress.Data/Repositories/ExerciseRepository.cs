@@ -21,7 +21,36 @@ public class ExerciseRepository //Se encarga de trabajar con la tabla Exercise
     public async Task<List<Exercise>> GetAllAsync()
     {
         return await _context.Exercises
+            .Include(e => e.Media.OrderBy(m => m.Order))
             .OrderBy(e => e.Name)
+            .ToListAsync();
+    }
+
+    // ── Vídeos e imágenes ─────────────────────────────────────────────────
+
+    public async Task AddMediaAsync(int exerciseId, ExerciseMedia media)
+    {
+        media.ExerciseId = exerciseId;
+        media.Order = await _context.ExerciseMedia.CountAsync(m => m.ExerciseId == exerciseId);
+        await _context.ExerciseMedia.AddAsync(media);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RemoveMediaAsync(ExerciseMedia media)
+    {
+        var entity = await _context.ExerciseMedia.FindAsync(media.Id);
+        if (entity is null) return;
+        // Si sigue en la lista del ejercicio cargado, EF lo "resucita" al guardar en vez de borrarlo
+        entity.Exercise?.Media.Remove(entity);
+        _context.ExerciseMedia.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<string>> GetMediaFileNamesAsync(int exerciseId)
+    {
+        return await _context.ExerciseMedia
+            .Where(m => m.ExerciseId == exerciseId)
+            .Select(m => m.FileName)
             .ToListAsync();
     }
 

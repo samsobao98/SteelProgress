@@ -10,6 +10,15 @@ namespace SteelProgress.Core.ViewModels;
 public partial class ExerciseViewModel : ObservableObject
 {
     private readonly ExerciseRepository _repository;
+    private readonly ExerciseMediaService? _media;
+
+    // Vídeos e imágenes del ejercicio que se está creando o editando.
+    // Al crear, se copian a la app al elegirlos y se asocian al guardar; si se cancela, se borran.
+    public ObservableCollection<ExerciseMedia> Media { get; } = new();
+
+    public bool MediaEnabled => _media is not null;
+
+    [ObservableProperty] private bool _isImportingMedia;
 
     public ObservableCollection<Exercise> Exercises { get; } = new();
 
@@ -56,9 +65,11 @@ public partial class ExerciseViewModel : ObservableObject
         }
     }
 
-    public ExerciseViewModel(ExerciseRepository repository)
+    // media es opcional para que la app de escritorio, que crea el ViewModel a mano, siga compilando
+    public ExerciseViewModel(ExerciseRepository repository, ExerciseMediaService? media = null)
     {
         _repository = repository;
+        _media = media;
         _ = LoadExercisesAsync();
     }
 
@@ -74,6 +85,7 @@ public partial class ExerciseViewModel : ObservableObject
 
     public void ClearForm()
     {
+        DiscardPendingMedia();
         Name = string.Empty;
         Notes = string.Empty;
         MuscleGroup = null;
@@ -82,6 +94,8 @@ public partial class ExerciseViewModel : ObservableObject
 
     private void LoadSelectedExerciseIntoForm()
     {
+        DiscardPendingMedia();
+
         if (SelectedExercise is null)
         {
             Name = string.Empty;
@@ -89,6 +103,9 @@ public partial class ExerciseViewModel : ObservableObject
             Notes = string.Empty;
             return;
         }
+
+        foreach (var m in SelectedExercise.Media.OrderBy(m => m.Order))
+            Media.Add(m);
 
         Name = SelectedExercise.Name;
         MuscleGroup = SelectedExercise.MuscleGroup;
@@ -126,8 +143,14 @@ public partial class ExerciseViewModel : ObservableObject
             MuscleGroup = muscleGroup,
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes
         };
+        for (var i = 0; i < Media.Count; i++)
+        {
+            Media[i].Order = i;
+            exercise.Media.Add(Media[i]);
+        }
 
         await _repository.AddAsync(exercise);
+        Media.Clear(); // ya guardados: que ClearForm no los borre
         await LoadExercisesAsync();
         ClearForm();
         NotificationService.Success("Ejercicio añadido correctamente.");
@@ -189,8 +212,64 @@ public partial class ExerciseViewModel : ObservableObject
         if (!confirmed)
             return;
 
+        var files = _media is null ? new List<string>() : await _repository.GetMediaFileNamesAsync(SelectedExercise.Id);
         await _repository.DeleteAsync(SelectedExercise);
+        _media?.DeleteFiles(files);
+        Media.Clear();
         await LoadExercisesAsync();
         ClearForm();
+    }
+
+    // ── Vídeos e imágenes ─────────────────────────────────────────────────
+
+    // La página abre la galería y pasa aquí el archivo elegido
+    public async Task AddMediaAsync(Stream source, string originalFileName)
+    {
+        if (_media is null) return;
+
+        IsImportingMedia = true;
+        try
+        {
+            var media = await _media.StoreAsync(source, originalFileName);
+            if (SelectedExercise is not null)
+            {
+                await _repository.AddMediaAsync(SelectedExercise.Id, media);
+                SelectedExercise.Media.Add(media);
+            }
+            Media.Add(media);
+        }
+        catch (MediaImportException ex)
+        {
+            NotificationService.Error(ex.Message);
+        }
+        finally
+        {
+            IsImportingMedia = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveMedia(ExerciseMedia? media)
+    {
+        if (media is null || _media is null) return;
+
+        if (SelectedExercise is not null)
+        {
+            await _repository.RemoveMediaAsync(media);
+            SelectedExercise.Media.Remove(media);
+        }
+        _media.DeleteFile(media);
+        Media.Remove(media);
+    }
+
+    public string? GetMediaPath(ExerciseMedia media) => _media?.Storage.GetFullPath(media.FileName);
+
+    // Archivos elegidos para un ejercicio nuevo que no llegó a guardarse
+    private void DiscardPendingMedia()
+    {
+        if (_media is null) return;
+        foreach (var m in Media.Where(m => m.Id == 0).ToList())
+            _media.DeleteFile(m);
+        Media.Clear();
     }
 }

@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<WorkoutSession> WorkoutSessions { get; set; }
     public DbSet<WorkoutExercise> WorkoutExercises { get; set; }
     public DbSet<WorkoutSet> WorkoutSets { get; set; }
+    public DbSet<ExerciseMedia> ExerciseMedia { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null)
         : base(options)
@@ -64,6 +65,17 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<RoutineDay>().HasIndex(d => d.Uid).IsUnique();
         modelBuilder.Entity<RoutineDayExercise>().HasIndex(rde => rde.Uid).IsUnique();
         modelBuilder.Entity<WorkoutSession>().HasIndex(ws => ws.Uid).IsUnique();
+
+        // Al borrar un ejercicio se borran sus vídeos e imágenes (los archivos los borra ExerciseMediaService)
+        modelBuilder.Entity<ExerciseMedia>()
+            .HasOne(m => m.Exercise)
+            .WithMany(e => e.Media)
+            .HasForeignKey(m => m.ExerciseId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ExerciseMedia>().HasIndex(m => m.Uid).IsUnique();
+        // Mismo filtro que su ejercicio, para no ver la multimedia de otros perfiles
+        modelBuilder.Entity<ExerciseMedia>()
+            .HasQueryFilter(m => _currentUserService == null || m.Exercise!.UserId == null || m.Exercise.UserId == _currentUserService.CurrentUserId);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

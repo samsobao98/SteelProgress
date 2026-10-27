@@ -56,6 +56,44 @@ namespace SteelProgress.Data.Migrations
                     b.ToTable("Exercises");
                 });
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.ExerciseMedia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("Uid")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.HasIndex("Uid")
+                        .IsUnique();
+
+                    b.ToTable("ExerciseMedia");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Routine", b =>
                 {
                     b.Property<int>("Id")
@@ -326,6 +364,17 @@ namespace SteelProgress.Data.Migrations
                     b.Navigation("UserProfile");
                 });
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.ExerciseMedia", b =>
+                {
+                    b.HasOne("SteelProgress.Domain.Entities.Exercise", "Exercise")
+                        .WithMany("Media")
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Routine", b =>
                 {
                     b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
@@ -414,6 +463,11 @@ namespace SteelProgress.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("WorkoutExercise");
+                });
+
+            modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>
+                {
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Routine", b =>

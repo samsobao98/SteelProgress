@@ -21,5 +21,7 @@ namespace SteelProgress.Domain.Entities
         // Material (barra, mancuernas, polea...) e instrucciones de ejecución
         public string? Equipment { get; set; }
         public string? Instructions { get; set; }
+
+        public ICollection<ExerciseMedia> Media { get; set; } = new List<ExerciseMedia>();
     }
 }
