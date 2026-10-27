@@ -141,12 +141,36 @@
                         SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
                         SelectionMode="Single">
                         <CollectionView.Header>
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="15"
-                                Margin="0,0,0,8"
-                                Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
-                                TextColor="#CDD6F4" />
+                            <VerticalStackLayout Spacing="6" Margin="0,0,0,8">
+                                <Label
+                                    FontAttributes="Bold"
+                                    FontSize="15"
+                                    Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
+                                    TextColor="#CDD6F4" />
+                                <!-- Lo que pide la rutina para este ejercicio -->
+                                <Border
+                                    Style="{StaticResource SpChipStyle}"
+                                    HorizontalOptions="Start"
+                                    IsVisible="{Binding HasPrescription}">
+                                    <Label
+                                        FontFamily="SpaceGroteskMedium"
+                                        FontSize="13"
+                                        Text="{Binding PrescriptionText, StringFormat='Objetivo: {0}'}"
+                                        TextColor="{StaticResource SpText}" />
+                                </Border>
+                                <!-- Nota del entrenador o del propio usuario -->
+                                <Border
+                                    BackgroundColor="#1AF9E2AF"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,8"
+                                    IsVisible="{Binding HasPrescriptionNotes}">
+                                    <Label
+                                        FontSize="13"
+                                        Text="{Binding PrescriptionNotes}"
+                                        TextColor="{StaticResource SpText2}" />
+                                </Border>
+                            </VerticalStackLayout>
                         </CollectionView.Header>
                         <CollectionView.EmptyView>
                             <Label
