@@ -17,6 +17,45 @@ namespace SteelProgress.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.25");
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AvatarColor")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Goal")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Uid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Uid")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Clients");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>
                 {
                     b.Property<int>("Id")
@@ -99,6 +138,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("AuthorName")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -119,6 +161,8 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("UserId", "Uid")
                         .IsUnique();
@@ -281,6 +325,9 @@ namespace SteelProgress.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
@@ -291,6 +338,9 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsComplete")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsInPerson")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
@@ -306,6 +356,8 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("RoutineDayId");
 
@@ -348,6 +400,17 @@ namespace SteelProgress.Data.Migrations
                     b.ToTable("WorkoutSets");
                 });
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>
+                {
+                    b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserProfile");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>
                 {
                     b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
@@ -371,11 +434,18 @@ namespace SteelProgress.Data.Migrations
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Routine", b =>
                 {
+                    b.HasOne("SteelProgress.Domain.Entities.Client", "Client")
+                        .WithMany("Routines")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
                         .WithMany("Routines")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
 
                     b.Navigation("UserProfile");
                 });
@@ -431,6 +501,11 @@ namespace SteelProgress.Data.Migrations
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.WorkoutSession", b =>
                 {
+                    b.HasOne("SteelProgress.Domain.Entities.Client", "Client")
+                        .WithMany("WorkoutSessions")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("SteelProgress.Domain.Entities.RoutineDay", "RoutineDay")
                         .WithMany()
                         .HasForeignKey("RoutineDayId")
@@ -442,6 +517,8 @@ namespace SteelProgress.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
 
                     b.Navigation("RoutineDay");
 
@@ -457,6 +534,13 @@ namespace SteelProgress.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("WorkoutExercise");
+                });
+
+            modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>
+                {
+                    b.Navigation("Routines");
+
+                    b.Navigation("WorkoutSessions");
                 });
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>

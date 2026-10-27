@@ -13,6 +13,13 @@ public class WorkoutSession
     public int UserId { get; set; }
     public UserProfile? UserProfile { get; set; }
 
+    // Sesión de un cliente (null = entreno propio)
+    public int? ClientId { get; set; }
+    public Client? Client { get; set; }
+
+    // Registrada por el entrenador desde su móvil, con el cliente delante
+    public bool IsInPerson { get; set; }
+
     public DateTime Date { get; set; }
 
     public int? DurationMinutes { get; set; }

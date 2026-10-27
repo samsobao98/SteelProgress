@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<WorkoutExercise> WorkoutExercises { get; set; }
     public DbSet<WorkoutSet> WorkoutSets { get; set; }
     public DbSet<ExerciseMedia> ExerciseMedia { get; set; }
+    public DbSet<Client> Clients { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null)
         : base(options)
@@ -42,8 +43,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
+        // Con un cliente activo se ven sus rutinas y sus sesiones; sin cliente, las propias
         modelBuilder.Entity<Routine>()
-            .HasQueryFilter(r => _currentUserService == null || r.UserId == _currentUserService.CurrentUserId);
+            .HasQueryFilter(r => _currentUserService == null
+                || (r.UserId == _currentUserService.CurrentUserId && r.ClientId == _currentUserService.CurrentClientId));
 
         modelBuilder.Entity<WorkoutSession>()
             .HasOne(ws => ws.UserProfile)
@@ -52,7 +55,28 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
         modelBuilder.Entity<WorkoutSession>()
-            .HasQueryFilter(s => _currentUserService == null || s.UserId == _currentUserService.CurrentUserId);
+            .HasQueryFilter(s => _currentUserService == null
+                || (s.UserId == _currentUserService.CurrentUserId && s.ClientId == _currentUserService.CurrentClientId));
+
+        // Clientes del entrenador: al borrar un cliente se borran sus rutinas y sus sesiones
+        modelBuilder.Entity<Client>()
+            .HasOne(c => c.UserProfile)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Client>()
+            .HasQueryFilter(c => _currentUserService == null || c.UserId == _currentUserService.CurrentUserId);
+        modelBuilder.Entity<Client>().HasIndex(c => c.Uid).IsUnique();
+        modelBuilder.Entity<Routine>()
+            .HasOne(r => r.Client)
+            .WithMany(c => c.Routines)
+            .HasForeignKey(r => r.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WorkoutSession>()
+            .HasOne(s => s.Client)
+            .WithMany(c => c.WorkoutSessions)
+            .HasForeignKey(s => s.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Igual que en la migración AddUserProfiles, para que el modelo no pida reconstruir la tabla
         modelBuilder.Entity<UserProfile>()
@@ -88,12 +112,27 @@ public class AppDbContext : DbContext
             {
                 if (entry.State != EntityState.Added) continue;
 
+                var clientId = _currentUserService.CurrentClientId;
+
                 if (entry.Entity is Exercise ex && ex.UserId == null)
                     ex.UserId = userId;
                 else if (entry.Entity is Routine r && r.UserId == 0)
+                {
                     r.UserId = userId;
+                    r.ClientId ??= clientId;
+                }
                 else if (entry.Entity is WorkoutSession ws && ws.UserId == 0)
+                {
                     ws.UserId = userId;
+                    if (ws.ClientId is null && clientId is not null)
+                    {
+                        // Entreno con un cliente desde el móvil del entrenador
+                        ws.ClientId = clientId;
+                        ws.IsInPerson = true;
+                    }
+                }
+                else if (entry.Entity is Client c && c.UserId == 0)
+                    c.UserId = userId;
             }
         }
 
