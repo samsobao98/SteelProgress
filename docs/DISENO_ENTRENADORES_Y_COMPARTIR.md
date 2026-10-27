@@ -86,14 +86,14 @@ Si se activan todos los bloques, la vista simple queda igual que la de entrenado
 
 ### 4.1. Entrenar en vista entrenador: "¿Quién entrena?"
 
-La pestaña Entreno se mantiene en la vista entrenador, adaptada:
+La pestaña Entreno se mantiene en la vista entrenador, convertida en **"Sesión con cliente"**:
 
-* Al iniciar una sesión, la app pregunta **"¿Quién entrena?"**: **Yo** o uno de los clientes.
-  * Con un cliente, solo se ofrecen sus rutinas y la sesión se guarda **directamente en su ficha** (`ClientId`). Sirve para entrenamientos presenciales: el entrenador apunta la sesión desde su móvil y el cliente no tiene que exportar nada.
-  * Con "Yo", funciona como en la vista simple.
-* Ajuste **"Yo también entreno con este perfil"**:
-  * activado: aparece la opción "Yo", y el historial y el progreso propios se ven desde Inicio;
-  * desactivado: Entreno solo ofrece clientes y desaparece lo personal.
+* Muestra directamente la lista de clientes, con la rutina y el día que les toca. Elegir al cliente hace falta siempre, así que **no es un paso añadido**.
+  * Solo se ofrecen las rutinas de ese cliente y la sesión se guarda **directamente en su ficha** (`ClientId`). Sirve para entrenamientos presenciales: el entrenador apunta la sesión desde su móvil y el cliente no tiene que exportar nada.
+* Ajuste **"Yo también entreno con este perfil"**, **desactivado por defecto** en perfiles de entrenador:
+  * desactivado: solo clientes; lo personal no aparece;
+  * activado: **"Yo" aparece como primera opción de la misma lista** (sin pantalla extra) y el historial y el progreso propios se ven desde Inicio. Cubre a quien entrena y prepara rutinas a uno o dos amigos, o al entrenador que prueba una rutina antes de enviarla.
+* **Cambiar de perfil tiene que ser rápido** (tocando el avatar en Inicio), para que usar dos perfiles no sea un engorro.
 * Se pregunta al crear un perfil en modo entrenador. Las dos formas de trabajar son válidas:
   * **un solo perfil** para entrenar y llevar clientes (ajuste activado);
   * **dos perfiles**: uno de entrenador solo con clientes (ajuste desactivado) y otro personal en vista simple.
