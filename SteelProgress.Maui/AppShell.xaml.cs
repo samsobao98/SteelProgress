@@ -18,6 +18,7 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute("ProgressPage", typeof(ProgressPage));
         Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
+        Routing.RegisterRoute(nameof(ImportPreviewPage), typeof(ImportPreviewPage));
 
         // Wire static service delegates — AppShell lives for app lifetime, so one subscription is correct
         ConfirmDialogService.OnConfirmationRequested += (title, msg) =>

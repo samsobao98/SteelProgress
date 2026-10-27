@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using SteelProgress.Core.Services;
+using SteelProgress.Core.Sharing;
 using SteelProgress.Domain.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Context;
@@ -38,6 +39,11 @@ public static class MauiProgram
             new FileMediaStorage(Path.Combine(FileSystem.AppDataDirectory, "media")));
         builder.Services.AddSingleton<ExerciseMediaService>();
 
+        // Compartir rutinas (.steel)
+        builder.Services.AddTransient<PackageExporter>();
+        builder.Services.AddTransient<PackageImporter>();
+        builder.Services.AddTransient<RoutineSharingService>();
+
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "steelprogress.db");
         builder.Services.AddDbContext<AppDbContext>(
             (sp, opt) =>
@@ -63,6 +69,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ProgressViewModel>(sp =>
             new ProgressViewModel(sp.GetRequiredService<AppDbContext>()));
         builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
@@ -73,6 +80,7 @@ public static class MauiProgram
         builder.Services.AddTransient<HistoryPage>();
         builder.Services.AddTransient<ProgressPage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<ImportPreviewPage>();
 
         // Shell and launcher live for the app lifetime
         builder.Services.AddSingleton<AppShell>();

@@ -279,6 +279,22 @@
                         Text="Eliminar"
                         TextColor="#1E1E2E" />
                 </Grid>
+                <!-- Compartir la rutina seleccionada o importar un .steel -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Button
+                        x:Name="ShareButton"
+                        Grid.Column="0"
+                        Style="{StaticResource SpPrimaryButton}"
+                        Padding="12,10"
+                        Text="↗ Compartir"
+                        Clicked="OnShareClicked" />
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource SpSecondaryButton}"
+                        Padding="12,10"
+                        Text="↓ Importar"
+                        Clicked="OnImportClicked" />
+                </Grid>
             </VerticalStackLayout>
         </Border>
 
