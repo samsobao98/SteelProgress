@@ -103,9 +103,9 @@ La pestaña Entreno se mantiene en la vista entrenador, convertida en **"Sesión
 
 | Vista simple | Vista entrenador |
 |---|---|
-| Inicio · Ejercicios · Rutinas · Entreno · Historial | Inicio · **Clientes** · Ejercicios · Rutinas · Entreno |
+| Inicio · Ejercicios · Rutinas · Entreno · Progreso | Inicio · **Clientes** · Ejercicios · Rutinas · Entreno |
 
-En vista entrenador, el historial de cada cliente está en su ficha y el propio (si el perfil también entrena) se abre desde Inicio.
+Progreso incluye el historial (§12.2). En vista entrenador, el historial y el progreso de cada cliente están en su ficha, y los propios (si el perfil también entrena) se abren desde Inicio.
 
 ---
 
@@ -153,6 +153,9 @@ Hoy todas las entidades usan `int Id` autonumérico, que cambia de un móvil a o
 * `ClientId` (nullable): sesiones de un cliente importadas por el entrenador.
 * `SourceRoutineUid`: de qué rutina venía.
 * `Notes`, `DurationMinutes`.
+* `Feeling` (1–5, "¿Cómo te has sentido?" de la pantalla de fin de entreno).
+* `IsComplete` (falso si se guardó con series sin hacer).
+* `IsInPerson`: sesión presencial registrada por el entrenador desde su móvil.
 
 **`WorkoutSet`**
 * `Rpe` (registrado), `IsWarmup`, `Notes`.
@@ -165,6 +168,10 @@ Hoy todas las entidades usan `int Id` autonumérico, que cambia de un móvil a o
 **`Client`**
 * `Id`, `Uid`, `TrainerProfileId` (el `UserProfile` del entrenador), `Name`, `AvatarColor`, `Goal`, `Notes`, `CreatedAt`.
 * Filtro por perfil actual, igual que `Routine` y `WorkoutSession` en `AppDbContext`.
+
+**`RoutineDelivery`** (lo que se ha enviado a cada cliente)
+* `Id`, `ClientId`, `RoutineUid`, `Version`, `SentAt`, `Snapshot` (JSON de la rutina tal como se envió), `SentMediaUids` (vídeos que ya tiene el cliente).
+* Permite detectar los cambios respecto a lo que tiene el cliente y enviar solo los vídeos nuevos (§6.4).
 
 ### 5.4. Notas técnicas
 
@@ -181,7 +188,8 @@ Hoy todas las entidades usan `int Id` autonumérico, que cambia de un móvil a o
 Un archivo `.steel` es un **ZIP** con:
 
 ```
-manifest.json      tipo de paquete, versión del formato, autor, fecha, si incluye vídeos
+manifest.json      tipo de paquete, versión del formato, autor, fecha, si incluye vídeos,
+                   mensaje del entrenador y resumen de cambios (si es una actualización)
 data.json          rutinas / ejercicios / sesiones en JSON, con sus Uid
 media/             vídeos e imágenes (solo si se exportó "con vídeos")
 ```
@@ -224,6 +232,20 @@ Abre el archivo → elige cliente → importar
 ```
 
 El deportista que va por libre usa lo mismo para hacer copias de seguridad o compartir rutinas con amigos.
+
+### 6.4. Versiones: detectar cambios y enviar solo lo nuevo
+
+Aprobado por Samuel el 2026-10-27 (maquetas, bloque 6).
+
+* **Detección de cambios.** Al enviar una rutina a un cliente, la app compara la rutina actual con el `Snapshot` de la última `RoutineDelivery` a ese cliente y genera un resumen legible:
+  * ejercicios añadidos, quitados o sustituidos ("Pierna B cambia prensa por hack squat");
+  * cambios de prescripción (series, repeticiones, RPE, descanso: "+1 serie en remo");
+  * días añadidos, quitados o renombrados.
+* Si hay cambios, la versión sube sola (v3 → v4) y el panel de envío muestra el resumen.
+* **Mensaje del entrenador** opcional, que viaja en el manifiesto y el cliente ve al importar.
+* **Solo vídeos nuevos.** Con `SentMediaUids` la app sabe qué vídeos tiene ya el cliente y ofrece enviar solo los nuevos o cambiados, mostrando el tamaño de cada opción.
+* **Al importar (cliente):** la vista previa muestra "Actualización v3 → v4", los ejercicios y vídeos nuevos, el mensaje y "Tu historial se conserva". Opciones: actualizar o guardar como copia.
+* **Al recibir sesiones (entrenador):** se reconoce al cliente por la `RoutineDelivery` de esa rutina; las sesiones ya importadas se marcan y no se duplican.
 
 ---
 
@@ -298,7 +320,46 @@ Recomendación: **1 → 2 → 3 → 4** primero; con eso la app ya se diferencia
 
 ---
 
-## 12. Fuera de alcance de esta versión
+## 12. Guía visual
+
+Maquetas aprobadas por Samuel el 2026-10-27 en `docs/maquetas/` (no son la app real; abrir los `.html` en el navegador, son interactivos):
+
+* `propuesta_diseno.html` — propuesta de rediseño completa, con «antes» y «después»:
+  0. Sistema de diseño · 1. Rutinas · 2. Entreno (registro, descanso, fin de entreno) · 3. Progreso · 4. Ejercicios (biblioteca, ficha, crear con vídeo) · 5. Inicio, elegir entreno y cambiar de perfil · 6. Entrenador (ficha de cliente, enviar, importar rutina, recibir sesiones).
+* `vistas_y_clientes.html` — primeras maquetas: Ajustes (vista simple y bloques), entreno con rutina de un entrenador, Clientes y sesión con cliente.
+* `img/` — capturas de las mismas.
+
+### 12.1. Sistema de diseño
+
+* **Tokens únicos** (colores, espaciado 4/8/12/16/24/32, radios 8/14/20, tipografía) definidos una vez en `Resources/Styles` y usados en todas las pantallas. Hoy los colores están escritos a mano en cada página y no coinciden (`#252536` en Inicio, `#313244` en Rutinas).
+* **Color de marca: degradado acero** `#89B4FA → #B4BEFE → #CBA6F7`, solo para el botón principal, anillos de progreso y momentos importantes.
+* **Colores con significado fijo:** hecho `#A6E3A1`, intensidad `#FAB387`, descanso `#94E2D5`, récord `#F9E2AF`, peligro `#F38BA8`.
+* **Tipografía:** Space Grotesk (cifras de ancho fijo) para números y títulos; Open Sans para el texto.
+* **Placa biselada** para tarjetas protagonistas (rutina activa, «Hoy toca», serie actual).
+* **Respuesta al tocar:** escala 0,96 con rebote (150 ms) en todo lo pulsable y vibración suave en acciones importantes. Animaciones de 150–300 ms que nunca frenan.
+
+### 12.2. Decisiones de interfaz
+
+* **Rutinas:** navegación en profundidad (rutina → días → ejercicios), crear con botón flotante y panel inferior, eliminar deslizando con deshacer, reordenar arrastrando. Sin formularios fijos.
+* **Entreno:** números grandes con + / −, peso sugerido de la última vez, serie marcada con animación, insignia de récord, descanso en anillo, botón «Terminar» discreto y pantalla de fin con resumen, «¿Cómo te has sentido?», nota y aviso de series sin hacer.
+* **Progreso** absorbe Historial: la barra de la vista simple queda en Inicio · Ejercicios · Rutinas · Entreno · Progreso; la de la vista entrenador, según §4.2.
+* **Inicio:** tarjeta «Hoy toca» con el día siguiente de la rutina activa, tira de la semana, racha y récords; avatar para cambiar de perfil y engranaje para Ajustes.
+* **Ejercicios:** miniatura del vídeo, filtros (incluido «Propios»), procedencia visible, ficha con vídeo a sangre, mejor marca, 1RM estimado y evolución.
+* **Entreno libre** (sin rutina): propuesto en las maquetas, opcional y fuera de las fases actuales.
+
+### 12.3. Orden recomendado del rediseño
+
+1. Sistema de diseño (base para todo).
+2. Entreno.
+3. Rutinas.
+4. Progreso (con Historial) e Inicio.
+5. Respuesta táctil y animaciones en toda la app.
+
+Encaja con las fases de §10: hacer el sistema de diseño antes de la fase 2 para que Ajustes, Clientes y las demás pantallas nuevas nazcan con el estilo final.
+
+---
+
+## 13. Fuera de alcance de esta versión
 
 * Cuentas, servidor y envío dentro de la app.
 * Pagos o suscripciones para entrenadores.

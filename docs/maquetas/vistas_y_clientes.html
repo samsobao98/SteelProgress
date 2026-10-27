@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Maquetas SteelProgress</title>
+<style>
+  :root{
+    --base:#1E1E2E; --mantle:#181825; --s0:#313244; --s1:#45475A; --s2:#585B70;
+    --ov:#6C7086; --text:#CDD6F4; --sub:#BAC2DE; --blue:#89B4FA; --green:#A6E3A1;
+    --red:#F38BA8; --peach:#FAB387; --mauve:#CBA6F7; --yellow:#F9E2AF; --teal:#94E2D5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0f0f17;font-family:"Open Sans","Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
+       display:flex;gap:40px;padding:40px;align-items:flex-start}
+  .phone{width:412px;height:880px;background:var(--base);border-radius:28px;overflow:hidden;
+         position:relative;display:flex;flex-direction:column;box-shadow:0 0 0 10px #232334}
+  .status{height:28px;display:flex;justify-content:space-between;padding:6px 18px;font-size:12px;color:var(--sub)}
+  .content{flex:1;overflow:hidden;padding:0 12px}
+  .card{background:var(--s0);border-radius:10px;padding:16px;margin-top:12px}
+  .h1{font-size:22px;font-weight:700}
+  .muted{font-size:13px;color:var(--sub);margin-top:4px}
+  .label{font-size:12px;color:var(--sub);margin-bottom:6px}
+  .section-title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ov);margin:18px 4px 6px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--s1);border-radius:10px;padding:4px}
+  .seg div{text-align:center;padding:10px 0;border-radius:8px;font-size:14px;font-weight:600;color:var(--sub)}
+  .seg .on{background:var(--blue);color:var(--base)}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--s1)}
+  .row:first-child{border-top:none;padding-top:0}
+  .row .t{font-size:15px}
+  .row .d{font-size:12px;color:var(--ov);margin-top:2px}
+  .sw{width:44px;height:24px;border-radius:12px;background:var(--s2);position:relative;flex:none;margin-left:12px}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--sub)}
+  .sw.on{background:var(--green)} .sw.on::after{left:23px;background:var(--base)}
+  .tabbar{height:62px;background:var(--base);border-top:1px solid var(--s0);display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--s2)}
+  .tabbar div{text-align:center} .tabbar .ico{font-size:18px;display:block;margin-bottom:2px}
+  .tabbar .act{color:var(--text)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+  .chips{display:flex;gap:8px;overflow:hidden;margin-top:12px}
+  .chip{background:var(--s0);border-radius:8px;padding:8px 12px;font-size:13px;white-space:nowrap}
+  .chip.sel{background:var(--blue);color:var(--base);font-weight:600}
+  .video{height:150px;border-radius:10px;margin-top:12px;position:relative;overflow:hidden;
+         background:linear-gradient(135deg,#2a2b3d,#3b3d55)}
+  .video .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(205,214,244,.9);
+               display:flex;align-items:center;justify-content:center;color:var(--base);font-size:20px}
+  .video .tag{position:absolute;left:10px;bottom:10px;font-size:11px;background:rgba(30,30,46,.85);padding:3px 8px;border-radius:6px;color:var(--sub)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .stat{background:var(--s1);border-radius:8px;padding:8px;text-align:center}
+  .stat .k{font-size:11px;color:var(--ov)} .stat .v{font-size:15px;font-weight:700;margin-top:2px}
+  .note{background:rgba(249,226,175,.10);border-left:3px solid var(--yellow);border-radius:6px;padding:10px 12px;margin-top:12px;font-size:13px;color:var(--sub)}
+  .note b{color:var(--yellow)}
+  .set{display:grid;grid-template-columns:40px 1fr 1fr 1fr;gap:6px;align-items:center;font-size:14px;padding:8px 0;border-top:1px solid var(--s1)}
+  .set.head{font-size:11px;color:var(--ov);border-top:none;padding-bottom:4px}
+  .set .n{color:var(--ov);font-weight:700}
+  .set .done{color:var(--green)}
+  .inp{background:var(--s1);border-radius:6px;padding:6px 8px;text-align:center}
+  .btn{border-radius:10px;padding:14px;text-align:center;font-weight:700;font-size:15px}
+  .rest{display:flex;align-items:center;justify-content:space-between;background:var(--s1);border-radius:10px;padding:10px 14px;margin-top:12px}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--base);flex:none}
+  .client{display:flex;gap:12px;align-items:center;background:var(--s0);border-radius:10px;padding:12px;margin-top:8px}
+  .client .info{flex:1}
+  .client .name{font-size:15px;font-weight:600}
+  .client .meta{font-size:12px;color:var(--ov);margin-top:2px}
+  .caption{font-size:13px;color:#8a8fa8;text-align:center;margin-top:14px}
+  .wrap{display:flex;flex-direction:column}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. AJUSTES ============ -->
+<div class="wrap">
+<div class="phone" id="ajustes">
+  <div class="status"><span>9:41</span><span>▂▄▆ 82%</span></div>
+  <div class="content">
+    <div class="card">
+      <div class="h1">Ajustes</div>
+      <div class="muted">Perfil: Samuel</div>
+    </div>
+
+    <div class="section-title">Modo de uso</div>
+    <div class="card" style="margin-top:0">
+      <div class="seg"><div class="on">Simple</div><div>Entrenador</div></div>
+      <div class="muted" style="margin-top:10px">Solo lo necesario para entrenar y editar rutinas de forma sencilla. Los datos que tenga una rutina se ven siempre.</div>
+    </div>
+
+    <div class="section-title">Mostrar también en vista simple</div>
+    <div class="card" style="margin-top:0">
+      <div class="row"><div><div class="t">Intensidad</div><div class="d">RPE / RIR y % de 1RM</div></div><div class="sw on"></div></div>
+      <div class="row"><div><div class="t">Tempo y descanso</div><div class="d">Tempo y descanso entre series</div></div><div class="sw on"></div></div>
+      <div class="row"><div><div class="t">Estructura avanzada</div><div class="d">Superseries y series de calentamiento</div></div><div class="sw"></div></div>
+      <div class="row"><div><div class="t">Rangos de repeticiones</div><div class="d">8–12 en lugar de un número fijo</div></div><div class="sw"></div></div>
+      <div class="row"><div><div class="t">Notas detalladas</div><div class="d">Notas por serie</div></div><div class="sw"></div></div>
+    </div>
+
+    <div class="section-title">Vídeos</div>
+    <div class="card" style="margin-top:0">
+      <div class="row"><div><div class="t">Tamaño máximo por vídeo</div><div class="d">Se avisa al superar el límite</div></div><div style="color:var(--blue);font-weight:600">50 MB ›</div></div>
+    </div>
+
+    <div class="section-title">Vista entrenador</div>
+    <div class="card" style="margin-top:0;opacity:.55">
+      <div class="row"><div><div class="t">Yo también entreno con este perfil</div><div class="d">Muestra «Yo» en Entreno y tu historial</div></div><div class="sw"></div></div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="act"><span class="ico">⌂</span>Inicio</div><div><span class="ico">≡</span>Ejercicios</div>
+    <div><span class="ico">▤</span>Rutinas</div><div><span class="ico">▶</span>Entreno</div><div><span class="ico">↺</span>Historial</div>
+  </div>
+</div>
+<div class="caption">1 · Ajustes: vista simple con dos bloques extra activados</div>
+</div>
+
+<!-- ============ 2. ENTRENO CON PRESCRIPCIÓN ============ -->
+<div class="wrap">
+<div class="phone" id="entreno">
+  <div class="status"><span>9:41</span><span>▂▄▆ 82%</span></div>
+  <div class="content">
+    <div class="card" style="padding:12px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:17px;font-weight:700">Torso A · Semana 3</div>
+        <div class="muted" style="margin-top:2px">De tu entrenador: <span style="color:var(--mauve)">Laura Pérez</span></div></div>
+        <span class="pill" style="background:var(--green);color:var(--base)">● 32:10</span>
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip sel">A1 Press banca</div><div class="chip">A2 Remo con barra</div><div class="chip">Press militar</div>
+    </div>
+
+    <div class="video"><div class="play">▶</div><div class="tag">Vídeo de Laura · 0:24</div></div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:17px;font-weight:700">Press banca</div>
+        <span class="pill" style="background:rgba(203,166,247,.18);color:var(--mauve)">Superserie A</span>
+      </div>
+      <div class="grid3">
+        <div class="stat"><div class="k">Objetivo</div><div class="v">4 × 6–8</div></div>
+        <div class="stat"><div class="k">RPE</div><div class="v" style="color:var(--peach)">8</div></div>
+        <div class="stat"><div class="k">Tempo</div><div class="v">3-1-1-0</div></div>
+      </div>
+      <div class="note"><b>Nota de Laura:</b> escápulas atrás y pausa de 1 s en el pecho. Si pasas de 8 reps, sube 2,5 kg.</div>
+
+      <div style="margin-top:12px">
+        <div class="set head"><div>Serie</div><div>Kg</div><div>Reps</div><div>RPE</div></div>
+        <div class="set"><div class="n">1</div><div class="done">70</div><div class="done">8</div><div class="done">7</div></div>
+        <div class="set"><div class="n">2</div><div class="done">72,5</div><div class="done">7</div><div class="done">8</div></div>
+        <div class="set"><div class="n" style="color:var(--blue)">3</div><div class="inp">72,5</div><div class="inp">—</div><div class="inp">—</div></div>
+      </div>
+    </div>
+
+    <div class="rest"><span style="font-size:13px;color:var(--sub)">Descanso → luego A2 Remo</span><span style="font-size:20px;font-weight:700;color:var(--teal)">1:24</span></div>
+    <div class="btn" style="background:var(--blue);color:var(--base);margin-top:12px">Guardar serie</div>
+  </div>
+  <div class="tabbar">
+    <div><span class="ico">⌂</span>Inicio</div><div><span class="ico">≡</span>Ejercicios</div>
+    <div><span class="ico">▤</span>Rutinas</div><div class="act"><span class="ico">▶</span>Entreno</div><div><span class="ico">↺</span>Historial</div>
+  </div>
+</div>
+<div class="caption">2 · Entreno del cliente: rutina recibida con vídeo, prescripción y nota</div>
+</div>
+
+<!-- ============ 3. CLIENTES (VISTA ENTRENADOR) ============ -->
+<div class="wrap">
+<div class="phone" id="clientes">
+  <div class="status"><span>9:41</span><span>▂▄▆ 82%</span></div>
+  <div class="content">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="h1">Clientes</div><div class="muted">8 activos · 3 sesiones nuevas</div></div>
+        <div class="btn" style="background:var(--blue);color:var(--base);padding:10px 14px;font-size:14px">+ Cliente</div>
+      </div>
+    </div>
+
+    <div class="client" style="margin-top:12px">
+      <div class="avatar" style="background:var(--peach)">M</div>
+      <div class="info"><div class="name">Marta Gil</div><div class="meta">Hipertrofia · Torso/Pierna v3</div></div>
+      <span class="pill" style="background:var(--green);color:var(--base)">2 nuevas</span>
+    </div>
+    <div class="client">
+      <div class="avatar" style="background:var(--teal)">J</div>
+      <div class="info"><div class="name">Javier Ruiz</div><div class="meta">Fuerza · Última sesión hace 2 días</div></div>
+      <span class="pill" style="background:var(--green);color:var(--base)">1 nueva</span>
+    </div>
+    <div class="client">
+      <div class="avatar" style="background:var(--mauve)">A</div>
+      <div class="info"><div class="name">Ana Torres</div><div class="meta">Recomposición · Sin sesiones esta semana</div></div>
+      <span class="pill" style="background:rgba(243,139,168,.18);color:var(--red)">7 días</span>
+    </div>
+    <div class="client">
+      <div class="avatar" style="background:var(--yellow)">D</div>
+      <div class="info"><div class="name">David Lago</div><div class="meta">Principiante · Full body 3 días</div></div>
+      <span style="color:var(--ov)">›</span>
+    </div>
+
+    <div class="section-title">Marta Gil · resumen</div>
+    <div class="card" style="margin-top:0">
+      <div class="grid3" style="margin-top:0">
+        <div class="stat"><div class="k">Sesiones</div><div class="v">24</div></div>
+        <div class="stat"><div class="k">Banca</div><div class="v" style="color:var(--green)">+7,5 kg</div></div>
+        <div class="stat"><div class="k">Adherencia</div><div class="v">92%</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+        <div class="btn" style="background:var(--blue);color:var(--base);font-size:14px">Enviar rutina</div>
+        <div class="btn" style="background:var(--s1);color:var(--text);font-size:14px">Ver progreso</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div><span class="ico">⌂</span>Inicio</div><div class="act"><span class="ico">☺</span>Clientes</div><div><span class="ico">≡</span>Ejercicios</div>
+    <div><span class="ico">▤</span>Rutinas</div><div><span class="ico">▶</span>Entreno</div>
+  </div>
+</div>
+<div class="caption">3 · Vista entrenador: clientes con sesiones devueltas</div>
+</div>
+
+<!-- ============ 4. ¿QUIÉN ENTRENA? (VISTA ENTRENADOR) ============ -->
+<div class="wrap">
+<div class="phone" id="quien">
+  <div class="status"><span>9:41</span><span>▂▄▆ 82%</span></div>
+  <div class="content">
+    <div class="card">
+      <div class="h1">Sesión con cliente</div>
+      <div class="muted">Elige con quién entrenas. Se guarda en su ficha.</div>
+    </div>
+
+    <div class="client" style="margin-top:12px;border:1px dashed var(--s2);background:transparent">
+      <div class="avatar" style="background:var(--blue)">Yo</div>
+      <div class="info"><div class="name">Yo</div><div class="meta">Solo si «Yo también entreno» está activado</div></div>
+      <span style="color:var(--ov)">›</span>
+    </div>
+
+    <div class="section-title">Clientes</div>
+    <div class="client" style="margin-top:0;background:var(--s1)">
+      <div class="avatar" style="background:var(--peach)">M</div>
+      <div class="info"><div class="name">Marta Gil</div><div class="meta">Torso/Pierna v3 · toca Pierna B</div></div>
+      <span class="pill" style="background:rgba(166,227,161,.18);color:var(--green)">Hoy 18:00</span>
+    </div>
+    <div class="client">
+      <div class="avatar" style="background:var(--teal)">J</div>
+      <div class="info"><div class="name">Javier Ruiz</div><div class="meta">Fuerza 5×5 · toca Día 2</div></div>
+      <span style="color:var(--ov)">›</span>
+    </div>
+    <div class="client">
+      <div class="avatar" style="background:var(--yellow)">D</div>
+      <div class="info"><div class="name">David Lago</div><div class="meta">Full body 3 días · toca Día A</div></div>
+      <span style="color:var(--ov)">›</span>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="label">Rutina de Marta</div>
+      <div class="inp" style="text-align:left;padding:12px">Torso/Pierna v3 — Pierna B</div>
+      <div class="muted" style="margin-top:10px">La sesión se guardará en la ficha de Marta. No hace falta que ella te envíe nada.</div>
+      <div class="btn" style="background:var(--green);color:var(--base);margin-top:12px">Iniciar con Marta</div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div><span class="ico">⌂</span>Inicio</div><div><span class="ico">☺</span>Clientes</div><div><span class="ico">≡</span>Ejercicios</div>
+    <div><span class="ico">▤</span>Rutinas</div><div class="act"><span class="ico">▶</span>Entreno</div>
+  </div>
+</div>
+<div class="caption">4 · Vista entrenador: sesión presencial con un cliente</div>
+</div>
+
+</body>
+</html>
