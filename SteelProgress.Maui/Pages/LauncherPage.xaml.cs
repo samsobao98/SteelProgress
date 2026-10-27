@@ -44,6 +44,8 @@ public partial class LauncherPage : ContentPage
             shell.Opacity = 0;
             Application.Current!.Windows[0].Page = shell;
             _ = shell.FadeToAsync(1, 420, Easing.CubicOut);
+            // Si se abrió un .steel desde otra app antes de elegir perfil
+            MainThread.BeginInvokeOnMainThread(() => _ = Services.PendingImport.TryOpenAsync());
         };
         vm.ProfileUpdated += OnProfileUpdated;
         ConfirmDeleteCommand = new Command<UserProfile>(async p => await ConfirmAndDeleteAsync(p));
