@@ -138,7 +138,12 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .Select(x => new PreviousSet(x.Weight, x.Reps))
             .ToList();
 
-        return new ExerciseHistory(last, sets.Max(x => EstimatedOneRepMax(x.Weight, x.Reps)));
+        var bestRepsByWeight = sets
+            .GroupBy(x => x.Weight)
+            .Select(g => new PreviousSet(g.Key, g.Max(x => x.Reps)))
+            .ToList();
+
+        return new ExerciseHistory(last, bestRepsByWeight);
     }
 
     // Volumen (kg × reps, sin calentamiento) de la última vez que se entrenó este día
@@ -176,7 +181,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .ToDictionaryAsync(x => x.DayId, x => x.Last);
     }
 
-    // Fórmula de Epley; con 1 repetición es el propio peso
+    // 1RM estimado (Epley; con 1 repetición es el propio peso). Orientativo: no decide los récords
     public static double EstimatedOneRepMax(double weight, int reps) =>
         reps <= 1 ? weight : weight * (1 + reps / 30.0);
 
@@ -189,8 +194,11 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
 
 public sealed record PreviousSet(double Weight, int Reps);
 
-// Lo que se sabe de un ejercicio antes de la sesión actual
-public sealed record ExerciseHistory(IReadOnlyList<PreviousSet> LastSessionSets, double? BestEstimatedOneRepMax)
+// Lo que se sabe de un ejercicio antes de la sesión actual: las series de la última vez
+// y, para los récords, el máximo de repeticiones que se ha hecho con cada peso
+public sealed record ExerciseHistory(IReadOnlyList<PreviousSet> LastSessionSets, IReadOnlyList<PreviousSet> BestRepsByWeight)
 {
-    public static ExerciseHistory Empty { get; } = new(Array.Empty<PreviousSet>(), null);
+    public static ExerciseHistory Empty { get; } = new(Array.Empty<PreviousSet>(), Array.Empty<PreviousSet>());
+
+    public bool HasData => BestRepsByWeight.Count > 0;
 }

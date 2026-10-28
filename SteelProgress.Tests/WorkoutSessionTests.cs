@@ -166,7 +166,7 @@ public class WorkoutSessionTests : IDisposable
 
         Assert.Equal((60.0, 8), (vm.Weight, vm.Reps));
         await DoSetAsync(vm, 62.5, 8);
-        Assert.True(vm.ExerciseStates[0].Sets[0].IsRecord); // récord frente a lo suyo, no frente a Pablo
+        Assert.Equal(RecordKind.Weight, vm.ExerciseStates[0].Sets[0].Record); // frente a lo suyo, no frente a Pablo
     }
 
     [Fact]
@@ -195,11 +195,54 @@ public class WorkoutSessionTests : IDisposable
         var records = new List<bool>();
         vm.SetCompleted += records.Add;
 
-        await DoSetAsync(vm, 72.5, 8); // 1RM estimado 91,8 > 89,4
-        await DoSetAsync(vm, 70, 8);   // por debajo
+        await DoSetAsync(vm, 72.5, 8); // con 72,5 kg nunca había pasado de 7
+        await DoSetAsync(vm, 70, 8);   // igual que la última vez
 
         Assert.Equal(new[] { true, false }, records);
-        Assert.Equal(new[] { true, false }, vm.ExerciseStates[0].Sets.Select(s => s.IsRecord));
+        Assert.Equal(new[] { RecordKind.Reps, RecordKind.None }, vm.ExerciseStates[0].Sets.Select(s => s.Record));
+        Assert.Equal("★ Récord de reps", vm.ExerciseStates[0].Sets[0].RecordText);
+    }
+
+    [Theory]
+    [InlineData(102.5, 3, RecordKind.Weight)] // más kilos que nunca, aunque sean pocas reps
+    [InlineData(100, 6, RecordKind.Reps)]     // con 100 kg nunca había pasado de 5
+    [InlineData(100, 5, RecordKind.None)]     // igual que el mejor
+    [InlineData(97.5, 5, RecordKind.None)]    // menos peso y las mismas reps: no
+    [InlineData(95, 7, RecordKind.None)]      // con 95 kg ya había hecho 8
+    [InlineData(95, 9, RecordKind.Reps)]
+    public async Task RecordIsByWeightOrByRepsAtThatWeight(double weight, int reps, RecordKind expected)
+    {
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddDays(-5), (95, 8));
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddDays(-2), (100, 5));
+        var vm = await StartedVmAsync();
+
+        await DoSetAsync(vm, weight, reps);
+
+        Assert.Equal(expected, vm.ExerciseStates[0].Sets[0].Record);
+    }
+
+    [Fact]
+    public async Task EarlierSetsOfTodayRaiseTheBar()
+    {
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddDays(-2), (100, 5));
+        var vm = await StartedVmAsync();
+
+        await DoSetAsync(vm, 102.5, 3);
+        vm.SelectExercise(vm.ExerciseStates[0]);
+        await DoSetAsync(vm, 102.5, 3);
+
+        Assert.Equal(new[] { RecordKind.Weight, RecordKind.None }, vm.ExerciseStates[0].Sets.Select(s => s.Record));
+    }
+
+    [Fact]
+    public async Task BodyweightExerciseCountsRepRecords()
+    {
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddDays(-2), (0, 12));
+        var vm = await StartedVmAsync();
+
+        await DoSetAsync(vm, 0, 13);
+
+        Assert.Equal(RecordKind.Reps, vm.ExerciseStates[0].Sets[0].Record);
     }
 
     [Fact]

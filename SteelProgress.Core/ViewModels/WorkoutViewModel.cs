@@ -248,7 +248,7 @@ public partial class WorkoutViewModel : ObservableObject
             var state = new WorkoutExerciseState(entry, prescription, history, i + 1);
 
             foreach (var set in entry.Sets.OrderBy(s => s.Id))
-                state.Sets.Add(new DoneSet(set, state.Sets.Count + 1, false));
+                state.Sets.Add(new DoneSet(set, state.Sets.Count + 1));
             RecomputeRecords(state);
 
             ExerciseStates.Add(state);
@@ -378,7 +378,7 @@ public partial class WorkoutViewModel : ObservableObject
             _completingSet = false;
         }
 
-        var done = new DoneSet(set, state.Sets.Count + 1, false);
+        var done = new DoneSet(set, state.Sets.Count + 1);
         state.Sets.Add(done);
         RecomputeRecords(state);
         state.NotifyProgress();
@@ -414,7 +414,7 @@ public partial class WorkoutViewModel : ObservableObject
         state.Sets.Remove(done);
 
         // Renumerar: las series se muestran como 1, 2, 3...
-        var renumbered = state.Sets.Select((d, i) => new DoneSet(d.Set, i + 1, false)).ToList();
+        var renumbered = state.Sets.Select((d, i) => new DoneSet(d.Set, i + 1)).ToList();
         state.Sets.Clear();
         foreach (var d in renumbered) state.Sets.Add(d);
 
@@ -435,16 +435,29 @@ public partial class WorkoutViewModel : ObservableObject
         return null;
     }
 
-    // Récord: supera el 1RM estimado de todo el historial previo y de las series anteriores de hoy.
-    // Sin historial no hay récord (el primer entreno marcaría todas las series).
+    // Récord frente a todo el historial previo y a las series anteriores de hoy:
+    // de peso si se levantan más kilos que nunca, de reps si se hacen más repeticiones
+    // que nunca con ese peso o más. Sin historial no hay récord (el primer entreno
+    // marcaría todas las series).
     internal static void RecomputeRecords(WorkoutExerciseState state)
     {
-        var best = state.History.BestEstimatedOneRepMax;
+        const double eps = 0.001;
+        var seen = state.History.BestRepsByWeight.ToList();
+
         foreach (var done in state.Sets)
         {
-            var e1rm = done.EstimatedOneRepMax;
-            done.IsRecord = best is double b && done.Set.Weight > 0 && e1rm > b + 0.001;
-            if (best is not null && e1rm > best) best = e1rm;
+            var (weight, reps) = (done.Set.Weight, done.Set.Reps);
+            if (seen.Count == 0)
+                done.Record = RecordKind.None;
+            else if (weight > seen.Max(s => s.Weight) + eps)
+                done.Record = RecordKind.Weight;
+            else if (reps > seen.Where(s => s.Weight >= weight - eps).Max(s => s.Reps))
+                done.Record = RecordKind.Reps;
+            else
+                done.Record = RecordKind.None;
+
+            if (state.History.HasData)
+                seen.Add(new PreviousSet(weight, reps));
         }
     }
 
@@ -616,7 +629,7 @@ public partial class WorkoutViewModel : ObservableObject
         var records = ExerciseStates
             .SelectMany(e => e.Sets.Where(d => d.IsRecord).Select(d => (e.Name, d)))
             .GroupBy(x => x.Name)
-            .Select(g => g.OrderByDescending(x => x.d.EstimatedOneRepMax).First())
+            .Select(g => g.OrderByDescending(x => x.d.Record == RecordKind.Weight).ThenByDescending(x => x.d.Set.Weight).ThenByDescending(x => x.d.Set.Reps).First())
             .ToList();
         RecordCount = records.Count;
         RecordsText = string.Join(" · ", records.Select(r => $"{r.Name} {WorkoutExerciseState.FormatKg(r.d.Set.Weight)} × {r.d.Set.Reps}"));

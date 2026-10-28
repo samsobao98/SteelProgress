@@ -152,7 +152,10 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 * **Preparar** («¿Qué entrenas hoy?»): rutinas en chips, días en tarjetas con «Hace N días» y vista previa del día con lo prescrito.
 * **Registrando**: ejercicio N de M con barra de progreso (tocar un tramo cambia de ejercicio), cronómetro y «Terminar» discreto arriba. Chips de objetivo, intensidad y vídeo. Números grandes con − / + (2,5 kg y 1 rep por pulsación; tocar el número para escribirlo). Empieza con lo de la última vez (misma serie) o, si no hay, con lo prescrito.
 * **Cada serie se guarda al marcarla** (antes solo al finalizar): si la app se cierra, las series no se pierden. Tocar una serie hecha permite borrarla.
-* **Récord**: la serie supera el 1RM estimado (Epley) de todo tu historial anterior de ese ejercicio y de las series previas de hoy. Sin historial no hay récord. Vibra y muestra «★ Récord».
+* **Récords**, frente a todo tu historial de ese ejercicio y las series previas de hoy (sin historial no hay récord); vibra y muestra la insignia:
+  * **★ Récord de peso**: más kilos que nunca, con cualquier número de repeticiones.
+  * **★ Récord de reps**: más repeticiones que nunca con ese peso o más (también sirve para ejercicios sin peso).
+  * No se usa el 1RM estimado: con fórmulas como Epley, bajar peso y hacer una rep más podía contar como récord y subir peso no siempre. El 1RM estimado queda para la gráfica de Progreso (`WorkoutRepository.EstimatedOneRepMax`).
 * **Descanso**: anillo con cuenta atrás (lo prescrito o 90 s), −15 s / +15 s / Saltar, qué viene después y volumen de hoy frente a la última vez que hiciste ese día. Vibra al acabar.
 * **Finalizar**: se abre al pulsar «Terminar» o solo al hacer la última serie. Duración, volumen, series, récords, «¿Cómo te has sentido?», nota y aviso de series sin hacer (se guarda como incompleto). Seguir entrenando o Descartar.
 * El historial (sugerencias, récords, volumen) es solo del perfil y cliente activos.

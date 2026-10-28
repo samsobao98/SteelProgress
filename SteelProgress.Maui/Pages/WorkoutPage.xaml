@@ -236,7 +236,7 @@
                                         </Border>
                                         <Label Grid.Column="1" Text="{Binding Text}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
                                         <Border Grid.Column="2" BackgroundColor="{StaticResource SpRecord}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,3" VerticalOptions="Center" IsVisible="{Binding IsRecord}">
-                                            <Label Text="★ Récord" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
+                                            <Label Text="{Binding RecordText}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
                                         </Border>
                                     </Grid>
                                 </Border>

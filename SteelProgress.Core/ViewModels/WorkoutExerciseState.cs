@@ -71,13 +71,14 @@ public partial class WorkoutExerciseState : ObservableObject
         }
     }
 
-    /// <summary>"La última vez: 70 kg × 7" (la mejor serie de la última sesión).</summary>
+    /// <summary>"La última vez: 72,5 kg × 7" (la serie más pesada de la última sesión).</summary>
     public string LastTimeText
     {
         get
         {
             var best = History.LastSessionSets
-                .OrderByDescending(s => WorkoutRepository.EstimatedOneRepMax(s.Weight, s.Reps))
+                .OrderByDescending(s => s.Weight)
+                .ThenByDescending(s => s.Reps)
                 .FirstOrDefault();
             return best is null ? "" : $"La última vez: {FormatSet(best.Weight, best.Reps)}";
         }
@@ -109,22 +110,39 @@ public partial class WorkoutExerciseState : ObservableObject
     public static string FormatKg(double weight) => weight.ToString("0.##", Es);
 }
 
+public enum RecordKind
+{
+    None,
+    /// <summary>Más kilos que nunca en el ejercicio.</summary>
+    Weight,
+    /// <summary>Más repeticiones que nunca con ese peso o más.</summary>
+    Reps
+}
+
 /// <summary>Serie registrada hoy, con su insignia de récord.</summary>
 public partial class DoneSet : ObservableObject
 {
     public WorkoutSet Set { get; }
     public int Number { get; }
 
-    [ObservableProperty] private bool _isRecord;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRecord), nameof(RecordText))]
+    private RecordKind _record;
 
-    public DoneSet(WorkoutSet set, int number, bool isRecord)
+    public DoneSet(WorkoutSet set, int number)
     {
         Set = set;
         Number = number;
-        _isRecord = isRecord;
     }
+
+    public bool IsRecord => Record != RecordKind.None;
+    public string RecordText => Record switch
+    {
+        RecordKind.Weight => "★ Récord de peso",
+        RecordKind.Reps => "★ Récord de reps",
+        _ => ""
+    };
 
     public string Text => WorkoutExerciseState.FormatSet(Set.Weight, Set.Reps);
     public string RpeText => Set.Rpe is double rpe ? $"RPE {rpe.ToString("0.##", WorkoutExerciseState.Es)}" : "";
-    public double EstimatedOneRepMax => WorkoutRepository.EstimatedOneRepMax(Set.Weight, Set.Reps);
 }
