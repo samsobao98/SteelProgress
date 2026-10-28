@@ -39,6 +39,12 @@ public partial class RoutineDetailViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(SubtitleText))]
     private string? _routineNotes;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MarkActiveText))]
+    private bool _isMarkedActive;
+
+    public string MarkActiveText => IsMarkedActive ? "● Activa, elegida por ti · Quitar" : "Marcar como activa";
+
     // ── Overlay "nuevo día" ────────────────────────────────────────────────
     [ObservableProperty] private string _newDayName = string.Empty;
 
@@ -97,6 +103,7 @@ public partial class RoutineDetailViewModel : ObservableObject
         Routine = routine;
         RoutineName = routine.Name;
         RoutineNotes = routine.Notes;
+        IsMarkedActive = routine.IsMarkedActive;
         Picker.Load(await _exerciseRepository.GetAllAsync());
         await LoadDaysAsync();
     });
@@ -257,6 +264,22 @@ public partial class RoutineDetailViewModel : ObservableObject
         RoutineName = Routine.Name;
         RoutineNotes = Routine.Notes;
     });
+
+    /// <summary>
+    /// Marca esta rutina como la activa (desmarca la que lo fuera) o quita la marca, y entonces
+    /// vuelve a ser activa la última entrenada.
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleMarkedActive()
+    {
+        var mark = !IsMarkedActive;
+        await LockedAsync(() => _repository.SetMarkedActiveAsync(mark ? Routine.Id : null));
+        Routine.IsMarkedActive = mark;
+        IsMarkedActive = mark;
+        NotificationService.Info(mark
+            ? $"«{Routine.Name}» es ahora tu rutina activa."
+            : "Sin rutina elegida: la activa será la última que entrenes.");
+    }
 
     /// <summary>Entrenos de la rutina que se borrarían con ella (para avisar antes).</summary>
     public Task<int> CountSessionsOfRoutineAsync() => LockedAsync(() => _repository.CountSessionsOfRoutineAsync(Routine.Id));

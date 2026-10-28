@@ -70,6 +70,19 @@ public class RoutineRepository
     public Task<int> CountSessionsOfDayAsync(int routineDayId) =>
         _context.WorkoutSessions.CountAsync(s => s.RoutineDayId == routineDayId);
 
+    // Marca una rutina como activa y desmarca las demás del perfil o cliente actual
+    // (el filtro de consultas limita Routines a ese ámbito). null = ninguna, vuelve a ser automática
+    public async Task SetMarkedActiveAsync(int? routineId)
+    {
+        var routines = await _context.Routines.Where(r => r.IsMarkedActive || r.Id == routineId).ToListAsync();
+        foreach (var routine in routines)
+            routine.IsMarkedActive = routine.Id == routineId;
+        await _context.SaveChangesAsync();
+    }
+
+    public Task<int?> GetMarkedActiveRoutineIdAsync() =>
+        _context.Routines.Where(r => r.IsMarkedActive).Select(r => (int?)r.Id).FirstOrDefaultAsync();
+
     // Guarda el orden elegido a mano (o null en todas para volver al automático)
     public async Task SetSortOrderAsync(IReadOnlyList<Routine> ordered, bool manual)
     {

@@ -176,7 +176,8 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 
 **Qué hace**
 * **Lista**:
-  * La **rutina activa** (la última que has entrenado) va en una placa con su semana: un tramo por día, «Esta semana: 2 de 4» y «Toca: Pierna B». El resto, en tarjetas con insignia («5×5», «FB») y «última vez hace 3 semanas».
+  * La **rutina activa** va en una placa con su semana. Es la que marques con «Marcar como activa» dentro de la rutina («● ACTIVA · ELEGIDA»); si no marcas ninguna, la última que has entrenado. Cada cliente tiene la suya. Migración `AddRoutineMarkedActive`.
+  * La placa muestra su semana: un tramo por día, «Esta semana: 2 de 4» y «Toca: Pierna B». El resto, en tarjetas con insignia («5×5», «FB») y «última vez hace 3 semanas».
   * **Orden**: automático (activa primero y el resto por última vez entrenada) o a mano con «Ordenar» → arrastrar → «Hecho». «Volver al orden automático» deshace el orden manual. Con orden manual, las rutinas nuevas o importadas van al final. Migración `AddRoutineSortOrder`.
   * **Eliminar deslizando** a la izquierda, con «Deshacer» durante 5 s. El borrado real ocurre al caducar el aviso o al salir de la pantalla.
 * **Detalle**: título con notas y nº de días, días en chips (el activo con el degradado acero), ejercicios con su superserie (A1) o posición y lo prescrito. Los que no tienen series indicadas muestran «+ Añadir series y reps», porque en Entreno sin objetivo no se sabe cuándo está hecho.
@@ -186,6 +187,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 
 **Probar**
 1. Rutinas: la última entrenada sale arriba en la placa con su semana y el día que toca.
+1. Entrar en otra rutina → «Marcar como activa» → volver: sale en la placa como «ACTIVA · ELEGIDA» y Entreno la propone. «Quitar» vuelve a la última entrenada.
 2. «Ordenar» → «Ordenar a mano» → arrastrar → «Hecho»; salir y volver: se mantiene. Crear una rutina: va al final. «Volver al orden automático».
 3. Deslizar una rutina a la izquierda → Eliminar (si tiene entrenos, avisa cuántos) → «Deshacer». Repetir sin deshacer y cambiar de pestaña: ya no está.
 4. Entrar en una rutina → + → buscar «biceps», filtrar por grupo, marcar varios → «Añadir N ejercicios». Deben salir en ese orden y con «+ Añadir series y reps».

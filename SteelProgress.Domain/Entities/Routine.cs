@@ -23,5 +23,9 @@ public class Routine
     // Orden elegido a mano en la lista (null = orden automático: activa primero, luego por última vez entrenada)
     public int? SortOrder { get; set; }
 
+    // Marcada a mano como rutina activa (como mucho una por perfil o cliente). Sin ninguna marcada,
+    // la activa es la última entrenada
+    public bool IsMarkedActive { get; set; }
+
     public ICollection<RoutineDay> Days { get; set; } = new List<RoutineDay>();
 }

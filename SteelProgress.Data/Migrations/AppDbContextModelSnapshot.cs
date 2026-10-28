@@ -147,6 +147,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<int?>("ClientId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsMarkedActive")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");

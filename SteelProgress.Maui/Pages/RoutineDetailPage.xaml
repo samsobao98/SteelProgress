@@ -82,6 +82,20 @@
             <VerticalStackLayout Grid.Row="1" Padding="20,4,20,0">
                 <Label Text="{Binding RoutineName}" Style="{StaticResource SpTitle}" LineBreakMode="TailTruncation" />
                 <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
+                <!-- Elegir esta como rutina activa (o quitar la marca) -->
+                <Border x:Name="MarkActiveButton" HorizontalOptions="Start" Margin="0,10,0,0" Padding="12,6" StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{StaticResource SpCard}" StrokeThickness="1" Stroke="#34354A">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsMarkedActive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="#29B4BEFE" />
+                            <Setter Property="StrokeThickness" Value="0" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMarkActiveTapped" />
+                    </Border.GestureRecognizers>
+                    <Label Text="{Binding MarkActiveText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel2}" />
+                </Border>
             </VerticalStackLayout>
 
             <!-- ── Chips de días ── -->

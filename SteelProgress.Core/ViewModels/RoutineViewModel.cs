@@ -71,7 +71,9 @@ public partial class RoutineViewModel : ObservableObject
         if (PendingDelete is { } pending)
             summaries.RemoveAll(s => s.Routine.Id == pending.Routine.Id);
 
-        var active = summaries.Where(s => s.LastTrained is not null).MaxBy(s => s.LastTrained);
+        // La marcada a mano; si no hay, la última entrenada
+        var active = summaries.FirstOrDefault(s => s.Routine.IsMarkedActive)
+                     ?? summaries.Where(s => s.LastTrained is not null).MaxBy(s => s.LastTrained);
 
         RoutineListItem? activeItem = null;
         if (active is not null)

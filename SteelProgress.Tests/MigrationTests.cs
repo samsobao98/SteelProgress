@@ -86,6 +86,7 @@ public class MigrationTests : IDisposable
 
         Assert.All(check.Routines, r => Assert.Equal(1, r.Version));
         Assert.All(check.Routines, r => Assert.Null(r.SortOrder)); // orden automático hasta que se ordene a mano
+        Assert.All(check.Routines, r => Assert.False(r.IsMarkedActive)); // activa automática hasta que se elija
         Assert.All(check.WorkoutSessions, s => Assert.True(s.IsComplete));
 
         var profile = check.UserProfiles.Single();

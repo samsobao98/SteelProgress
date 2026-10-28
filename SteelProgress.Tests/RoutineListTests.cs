@@ -110,6 +110,68 @@ public class RoutineListTests : IDisposable
     }
 
     [Fact]
+    public async Task MarkedRoutineIsActiveEvenIfAnotherWasTrainedLater()
+    {
+        var plan = AddRoutine("Programa nuevo", "Día 1", "Día 2");
+        var old = AddRoutine("Antigua", "Día 1");
+        await TrainAsync(old, "Día 1", Today.AddDays(-1));
+
+        // Como en la app: la lista y el detalle comparten el mismo DbContext
+        var shared = Db();
+        var vm = new RoutineViewModel(new RoutineRepository(shared), _clock);
+        await vm.RefreshAsync();
+        var detail = new RoutineDetailViewModel(new RoutineRepository(shared), new ExerciseRepository(shared));
+        await detail.InitializeAsync(vm.Items.Single(i => i.Name == "Programa nuevo").Routine);
+        await detail.ToggleMarkedActiveCommand.ExecuteAsync(null);
+        Assert.True(detail.IsMarkedActive);
+
+        await vm.RefreshAsync();
+        Assert.Equal("Programa nuevo", vm.Items[0].Name);
+        Assert.True(vm.Items[0].IsActive);
+        Assert.Equal("● ACTIVA · ELEGIDA", vm.Items[0].ActiveLabel);
+        Assert.Equal("Día 1", vm.Items[0].NextDayName);
+        Assert.False(vm.Items[1].IsActive);
+
+        // Quitar la marca: vuelve a ser activa la última entrenada
+        await detail.ToggleMarkedActiveCommand.ExecuteAsync(null);
+        await vm.RefreshAsync();
+        Assert.Equal("Antigua", vm.Items[0].Name);
+        Assert.Equal("● ACTIVA", vm.Items[0].ActiveLabel);
+    }
+
+    [Fact]
+    public async Task MarkingAnotherRoutineUnmarksThePreviousOne()
+    {
+        var a = AddRoutine("A", "Día");
+        var b = AddRoutine("B", "Día");
+        var repo = new RoutineRepository(Db());
+
+        await repo.SetMarkedActiveAsync(a.Id);
+        await repo.SetMarkedActiveAsync(b.Id);
+
+        using var db = Db();
+        Assert.Equal(new[] { "B" }, db.Routines.Where(r => r.IsMarkedActive).Select(r => r.Name).ToArray());
+    }
+
+    [Fact]
+    public async Task AClientsMarkedRoutineDoesNotTouchYours()
+    {
+        var mine = AddRoutine("Mía", "Día");
+        await new RoutineRepository(Db()).SetMarkedActiveAsync(mine.Id);
+
+        var client = new Client { Name = "Marta" };
+        await new ClientRepository(Db()).AddAsync(client);
+        _user.SetCurrentClient(client.Id);
+        var hers = new Routine { Name = "De Marta" };
+        await new RoutineRepository(Db()).AddAsync(hers);
+        await new RoutineRepository(Db()).SetMarkedActiveAsync(hers.Id);
+        _user.SetCurrentClient(null);
+
+        using var db = Db();
+        Assert.True(db.Routines.Single(r => r.Id == mine.Id).IsMarkedActive);
+    }
+
+    [Fact]
     public async Task SundayBelongsToThePreviousWeek()
     {
         var tp = AddRoutine("Torso / Pierna", "Torso A", "Pierna A");

@@ -316,6 +316,13 @@ public partial class RoutineDetailPage : ContentPage
         _ = ShowSheetAsync(AddDaySheet);
     }
 
+    private async void OnMarkActiveTapped(object? sender, TappedEventArgs e)
+    {
+        if (_vm.ToggleMarkedActiveCommand.IsRunning) return;
+        await PressAsync(MarkActiveButton);
+        await _vm.ToggleMarkedActiveCommand.ExecuteAsync(null);
+    }
+
     private void OnEditRoutineTapped(object? sender, TappedEventArgs e)
         => _ = ShowSheetAsync(EditRoutineSheet);
 

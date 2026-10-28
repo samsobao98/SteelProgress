@@ -36,7 +36,7 @@
                         <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="Auto,*">
                                 <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4">
-                                    <Label Text="● ACTIVA" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
+                                    <Label Text="{Binding ActiveLabel}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
                                 </Border>
                                 <mi:MauiIcon Grid.Column="1" Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22"
                                              HorizontalOptions="End" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />

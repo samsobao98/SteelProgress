@@ -13,6 +13,9 @@ public partial class RoutineListItem
 
     public bool IsActive { get; }
 
+    /// <summary>"● ACTIVA" o, si la eligió el usuario, "● ACTIVA · ELEGIDA".</summary>
+    public string ActiveLabel => Routine.IsMarkedActive ? "● ACTIVA · ELEGIDA" : "● ACTIVA";
+
     /// <summary>Días de la rutina en orden y si se han hecho esta semana (solo la activa).</summary>
     public IReadOnlyList<WeekDayMark> Week { get; }
     public string WeekText { get; }

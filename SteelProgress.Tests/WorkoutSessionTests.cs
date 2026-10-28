@@ -528,6 +528,24 @@ public class WorkoutSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task PrepareProposesTheMarkedRoutine()
+    {
+        int planRoutine;
+        using (var db = Db())
+        {
+            var planDay = AddDay(db, 1, (_benchId, 3, 5, null));
+            planRoutine = db.RoutineDays.Single(d => d.Id == planDay).RoutineId;
+        }
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddHours(-3), (60, 8)); // la otra es la última entrenada
+        await new RoutineRepository(Db()).SetMarkedActiveAsync(planRoutine);
+
+        var vm = Vm();
+        await vm.RefreshAsync();
+
+        Assert.Equal(planRoutine, vm.SelectedRoutine!.Id);
+    }
+
+    [Fact]
     public async Task AfterAWorkoutItProposesTheNextDay()
     {
         int nextDay;

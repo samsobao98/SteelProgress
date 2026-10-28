@@ -89,7 +89,9 @@ public partial class WorkoutViewModel : ObservableObject
         try
         {
             routines = await _routineRepository.GetAllAsync();
-            activeId = await _workoutRepository.GetLastTrainedRoutineIdAsync();
+            // La marcada a mano; si no hay, la última entrenada
+            activeId = await _routineRepository.GetMarkedActiveRoutineIdAsync()
+                       ?? await _workoutRepository.GetLastTrainedRoutineIdAsync();
         }
         finally { _dbLock.Release(); }
 
