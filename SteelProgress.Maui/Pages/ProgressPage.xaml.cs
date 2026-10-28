@@ -32,6 +32,16 @@ public partial class ProgressPage : ContentPage
         CalendarView.Drawable = _calendar;
         BuildLegend();
         _vm.PropertyChanged += OnVmPropertyChanged;
+        SizeChanged += (_, _) => FitDetail();
+        DetailHeader.SizeChanged += (_, _) => FitDetail();
+    }
+
+    // El panel crece con la sesión hasta el 85 % de la pantalla; a partir de ahí se desplaza la lista
+    private void FitDetail()
+    {
+        if (Height <= 0) return;
+        var padding = DetailSheet.Padding.VerticalThickness + DetailScroll.Margin.VerticalThickness;
+        DetailScroll.MaximumHeightRequest = Math.Max(160, Height * 0.85 - DetailHeader.Height - padding);
     }
 
     private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
@@ -160,6 +170,7 @@ public partial class ProgressPage : ContentPage
     private async Task ShowDetailAsync()
     {
         DetailSheet.BindingContext = _vm.SessionDetail;
+        FitDetail();
         DetailLayer.IsVisible = true;
         DetailSheet.TranslationY = 400;
         await Task.WhenAll(

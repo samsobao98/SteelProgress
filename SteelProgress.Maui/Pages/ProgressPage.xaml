@@ -343,9 +343,10 @@
                 </BoxView.GestureRecognizers>
             </BoxView>
             <!-- BindingContext: la sesión abierta (se pone al abrir, así no se vacía mientras se cierra) -->
-            <Border x:Name="DetailSheet" Style="{StaticResource SpSheetStyle}" VerticalOptions="End" MaximumHeightRequest="620">
-                <Grid RowDefinitions="Auto,*">
-                    <VerticalStackLayout Spacing="0">
+            <!-- Alto según el contenido; la lista se desplaza si no cabe (DetailScroll.MaximumHeightRequest, en código) -->
+            <Border x:Name="DetailSheet" Style="{StaticResource SpSheetStyle}" VerticalOptions="End">
+                <VerticalStackLayout Spacing="0">
+                    <VerticalStackLayout x:Name="DetailHeader" Spacing="0">
                         <BoxView WidthRequest="36" HeightRequest="4" CornerRadius="2" Color="{StaticResource SpText4}" HorizontalOptions="Center" Margin="0,0,0,14" />
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Spacing="0">
@@ -369,7 +370,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <ScrollView Grid.Row="1" Margin="0,12,0,0">
+                    <ScrollView x:Name="DetailScroll" Margin="0,12,0,0">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Exercises}" Spacing="0">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate>
@@ -394,7 +395,7 @@
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </ScrollView>
-                </Grid>
+                </VerticalStackLayout>
             </Border>
         </Grid>
     </Grid>
