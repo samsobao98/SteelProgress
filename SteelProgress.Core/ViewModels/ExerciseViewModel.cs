@@ -31,23 +31,7 @@ public partial class ExerciseViewModel : ObservableObject
     partial void OnSearchTextChanged(string value) => ApplyFilter();
     partial void OnSelectedGroupFilterChanged(string? value) => ApplyFilter();
 
-    public IReadOnlyList<string> MuscleGroups { get; } =
-    [
-        "Pecho",
-        "Espalda",
-        "Hombros",
-        "Bíceps",
-        "Tríceps",
-        "Antebrazo",
-        "Abdominales",
-        "Lumbares",
-        "Cuádriceps",
-        "Isquiotibiales",
-        "Glúteos",
-        "Gemelos",
-        "Cardio",
-        "Cuerpo completo",
-    ];
+    public IReadOnlyList<string> MuscleGroups => ExerciseCatalog.MuscleGroups;
 
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string? _muscleGroup;
@@ -92,23 +76,7 @@ public partial class ExerciseViewModel : ObservableObject
 
     private void ApplyFilter()
     {
-        IEnumerable<Exercise> result = _allExercises;
-
-        if (!string.IsNullOrWhiteSpace(SelectedGroupFilter))
-            result = result.Where(e => e.MuscleGroup == SelectedGroupFilter);
-
-        var search = SearchText.Trim();
-        if (search.Length > 0)
-        {
-            // IgnoreNonSpace: "biceps" encuentra "Bíceps"
-            var compare = System.Globalization.CultureInfo.InvariantCulture.CompareInfo;
-            const System.Globalization.CompareOptions opts =
-                System.Globalization.CompareOptions.IgnoreCase |
-                System.Globalization.CompareOptions.IgnoreNonSpace;
-            result = result.Where(e =>
-                compare.IndexOf(e.Name, search, opts) >= 0 ||
-                compare.IndexOf(e.MuscleGroup, search, opts) >= 0);
-        }
+        var result = ExerciseCatalog.Filter(_allExercises, SelectedGroupFilter, SearchText);
 
         Exercises.Clear();
         foreach (var exercise in result)

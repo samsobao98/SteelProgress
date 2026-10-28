@@ -20,5 +20,8 @@ public class Routine
     public Guid? SourceUid { get; set; }
     public int Version { get; set; } = 1;
 
+    // Orden elegido a mano en la lista (null = orden automático: activa primero, luego por última vez entrenada)
+    public int? SortOrder { get; set; }
+
     public ICollection<RoutineDay> Days { get; set; } = new List<RoutineDay>();
 }

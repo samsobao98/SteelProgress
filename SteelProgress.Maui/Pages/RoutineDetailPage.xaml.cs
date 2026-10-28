@@ -12,7 +12,8 @@ public partial class RoutineDetailPage : ContentPage
 {
     private readonly RoutineDetailViewModel _vm;
     private readonly RoutineSharingService _sharing;
-    private readonly List<(RoutineDay day, Border chip)> _dayChips = new();
+    private readonly List<(RoutineDay day, Border chip, Label label)> _dayChips = new();
+    private readonly List<(string? group, Border chip, Label label)> _groupChips = new();
     private Border? _activeSheet;
 
     public RoutineDetailPage(RoutineDetailViewModel vm, RoutineSharingService sharing)
@@ -23,8 +24,12 @@ public partial class RoutineDetailPage : ContentPage
         _sharing = sharing;
 
         _vm.DaysChanged += BuildDayChips;
+        _vm.ExercisesChanged += OnExercisesChanged;
         _vm.RoutineDeleted += OnRoutineDeleted;
         _vm.PropertyChanged += OnVmPropertyChanged;
+        _vm.Picker.PropertyChanged += OnPickerPropertyChanged;
+
+        BuildGroupChips();
     }
 
     public Task LoadAsync(Routine routine) => _vm.InitializeAsync(routine);
@@ -35,10 +40,26 @@ public partial class RoutineDetailPage : ContentPage
             MainThread.BeginInvokeOnMainThread(StyleDayChips);
     }
 
+    private void OnPickerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ExercisePickerViewModel.GroupFilter))
+            StyleGroupChips();
+    }
+
+    // Las etiquetas 1, 2, 3… salen de Order, que cambia al reordenar sin avisar a la vista
+    private void OnExercisesChanged() => MainThread.BeginInvokeOnMainThread(() =>
+    {
+        ExerciseList.ItemsSource = null;
+        ExerciseList.ItemsSource = _vm.DayExercises;
+    });
+
     private async void OnBackTapped(object? sender, TappedEventArgs e)
         => await Navigation.PopAsync();
 
     // ── Chips de días ──────────────────────────────────────────────────────
+
+    private static Brush SteelBrush =>
+        Application.Current?.Resources.TryGetValue("SpSteelBrush", out var b) == true ? (Brush)b : new SolidColorBrush(Color.FromArgb("#B4BEFE"));
 
     private void BuildDayChips()
     {
@@ -52,13 +73,11 @@ public partial class RoutineDetailPage : ContentPage
             {
                 Text = day.Name,
                 FontSize = 14,
-                FontAttributes = FontAttributes.Bold,
-                TextColor = Color.FromArgb("#CDD6F4"),
+                FontFamily = "OpenSansSemibold",
                 VerticalOptions = LayoutOptions.Center
             };
             var chip = new Border
             {
-                BackgroundColor = Color.FromArgb("#313244"),
                 Padding = new Thickness(16, 9),
                 StrokeThickness = 0,
                 StrokeShape = new RoundRectangle { CornerRadius = 12 },
@@ -68,27 +87,27 @@ public partial class RoutineDetailPage : ContentPage
             tap.Tapped += (_, _) => OnDayChipTapped(captured);
             chip.GestureRecognizers.Add(tap);
 
-            _dayChips.Add((captured, chip));
+            _dayChips.Add((captured, chip, label));
             DayChipsContainer.Children.Add(chip);
         }
 
         // Chip "+" para añadir un día
-        var addLabel = new Label
-        {
-            Text = "+",
-            FontSize = 18,
-            FontAttributes = FontAttributes.Bold,
-            TextColor = Color.FromArgb("#A6E3A1"),
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center
-        };
         var addChip = new Border
         {
             BackgroundColor = Color.FromArgb("#252536"),
             Padding = new Thickness(16, 9),
-            StrokeThickness = 0,
+            StrokeThickness = 1,
+            Stroke = new SolidColorBrush(Color.FromArgb("#34354A")),
             StrokeShape = new RoundRectangle { CornerRadius = 12 },
-            Content = addLabel
+            Content = new Label
+            {
+                Text = _vm.Days.Count == 0 ? "+ Añadir día" : "+",
+                FontSize = _vm.Days.Count == 0 ? 14 : 18,
+                FontFamily = "OpenSansSemibold",
+                TextColor = Color.FromArgb("#B4BEFE"),
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            }
         };
         var addTap = new TapGestureRecognizer();
         addTap.Tapped += OnAddDayChipTapped;
@@ -100,12 +119,11 @@ public partial class RoutineDetailPage : ContentPage
 
     private void StyleDayChips()
     {
-        foreach (var (day, chip) in _dayChips)
+        foreach (var (day, chip, label) in _dayChips)
         {
             var selected = _vm.SelectedDay is not null && day.Id == _vm.SelectedDay.Id;
-            chip.BackgroundColor = Color.FromArgb(selected ? "#CBA6F7" : "#313244");
-            if (chip.Content is Label l)
-                l.TextColor = Color.FromArgb(selected ? "#1E1E2E" : "#CDD6F4");
+            chip.Background = selected ? SteelBrush : new SolidColorBrush(Color.FromArgb("#252536"));
+            label.TextColor = Color.FromArgb(selected ? "#1B1B2B" : "#CDD6F4");
         }
     }
 
@@ -132,8 +150,16 @@ public partial class RoutineDetailPage : ContentPage
         }
         else if (action == "Eliminar día")
         {
+            // Borrar un día borra también sus entrenos del historial
+            var sessions = await _vm.CountSessionsOfDayAsync(day);
+            var history = sessions switch
+            {
+                0 => "",
+                1 => " y su entreno del historial",
+                _ => $" y sus {sessions} entrenos del historial"
+            };
             var ok = await DisplayAlertAsync("Eliminar día",
-                $"¿Eliminar \"{day.Name}\" y todos sus ejercicios?", "Eliminar", "Cancelar");
+                $"¿Eliminar «{day.Name}» con sus ejercicios{history}?", "Eliminar", "Cancelar");
             if (ok)
                 await _vm.DeleteDayAsync(day);
         }
@@ -152,25 +178,32 @@ public partial class RoutineDetailPage : ContentPage
             return;
 
         var title = rde.Exercise?.Name ?? "Ejercicio";
-        var action = await DisplayActionSheetAsync(title, "Cancelar", "Eliminar", "Editar series, reps e intensidad");
+        var action = await DisplayActionSheetAsync(title, "Cancelar", "Quitar del día", "Editar series, reps e intensidad");
 
         if (action == "Editar series, reps e intensidad")
         {
             _vm.EditPrescription(rde);
         }
-        else if (action == "Eliminar")
+        else if (action == "Quitar del día")
         {
-            var ok = await DisplayAlertAsync("Eliminar ejercicio",
-                $"¿Quitar \"{title}\" de este día?", "Eliminar", "Cancelar");
+            var ok = await DisplayAlertAsync("Quitar ejercicio",
+                $"¿Quitar «{title}» de este día?", "Quitar", "Cancelar");
             if (ok)
                 await _vm.DeleteExerciseAsync(rde);
         }
+    }
+
+    private void OnAddTargetsTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is RoutineDayExercise rde)
+            _vm.EditPrescription(rde);
     }
 
     // ── Compartir (.steel) ─────────────────────────────────────────────────
 
     private async void OnShareTapped(object? sender, TappedEventArgs e)
     {
+        await PressAsync(ShareButton);
         var routine = _vm.Routine;
         var estimate = await _sharing.EstimateAsync(routine.Id);
         bool includeMedia = false;
@@ -208,7 +241,52 @@ public partial class RoutineDetailPage : ContentPage
         }
     }
 
-    // ── Sheets: abrir ──────────────────────────────────────────────────────
+    // ── Panel «Añadir ejercicio» ───────────────────────────────────────────
+
+    private void BuildGroupChips()
+    {
+        AddGroupChip(null, "Todos");
+        foreach (var group in _vm.Picker.MuscleGroups)
+            AddGroupChip(group, group);
+        StyleGroupChips();
+    }
+
+    private void AddGroupChip(string? group, string text)
+    {
+        var label = new Label { Text = text, FontSize = 12, FontFamily = "OpenSansSemibold", VerticalOptions = LayoutOptions.Center };
+        var chip = new Border
+        {
+            Padding = new Thickness(11, 5),
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
+            Content = label
+        };
+        var tap = new TapGestureRecognizer();
+        tap.Tapped += (_, _) => _vm.Picker.GroupFilter = group;
+        chip.GestureRecognizers.Add(tap);
+
+        _groupChips.Add((group, chip, label));
+        GroupChipsContainer.Children.Add(chip);
+    }
+
+    private void StyleGroupChips()
+    {
+        foreach (var (group, chip, label) in _groupChips)
+        {
+            var selected = group == _vm.Picker.GroupFilter;
+            chip.BackgroundColor = Color.FromArgb(selected ? "#2689B4FA" : "#2C2D42");
+            label.TextColor = Color.FromArgb(selected ? "#89B4FA" : "#A6ADC8");
+        }
+    }
+
+    private void OnPickerItemTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is ExercisePickerItem item)
+        {
+            _ = PressAsync(sender as VisualElement);
+            _vm.Picker.ToggleCommand.Execute(item);
+        }
+    }
 
     private async void OnAddExerciseTapped(object? sender, TappedEventArgs e)
     {
@@ -217,8 +295,20 @@ public partial class RoutineDetailPage : ContentPage
             await DisplayAlertAsync("Sin día", "Crea o selecciona un día antes de añadir ejercicios.", "Entendido");
             return;
         }
+        _vm.Picker.Reset();
         await ShowSheetAsync(AddExerciseSheet);
     }
+
+    private async void OnConfirmAddExerciseTapped(object? sender, TappedEventArgs e)
+    {
+        if (!_vm.Picker.HasSelection || _vm.AddSelectedExercisesCommand.IsRunning) return;
+        SearchEntry.Unfocus();
+        await PressAsync(sender as VisualElement);
+        await _vm.AddSelectedExercisesCommand.ExecuteAsync(null);
+        await HideSheetAsync();
+    }
+
+    // ── Sheets: abrir ──────────────────────────────────────────────────────
 
     private void OnAddDayChipTapped(object? sender, TappedEventArgs e)
     {
@@ -231,15 +321,9 @@ public partial class RoutineDetailPage : ContentPage
 
     // ── Sheets: confirmar ──────────────────────────────────────────────────
 
-    private async void OnConfirmAddExerciseTapped(object? sender, TappedEventArgs e)
-    {
-        await _vm.AddExerciseToDayCommand.ExecuteAsync(null);
-        if (_vm.SelectedExerciseToAdd is null) // éxito → VM limpió la selección
-            await HideSheetAsync();
-    }
-
     private async void OnConfirmAddDayTapped(object? sender, TappedEventArgs e)
     {
+        if (_vm.AddDayCommand.IsRunning) return;
         DayNameEntry.Unfocus();
         await _vm.AddDayCommand.ExecuteAsync(null);
         if (string.IsNullOrEmpty(_vm.NewDayName)) // éxito → VM limpió el nombre
@@ -258,8 +342,16 @@ public partial class RoutineDetailPage : ContentPage
 
     private async void OnDeleteRoutineTapped(object? sender, TappedEventArgs e)
     {
+        // Borrar una rutina borra también su historial de entrenos
+        var sessions = await _vm.CountSessionsOfRoutineAsync();
+        var history = sessions switch
+        {
+            0 => "",
+            1 => " Se borrará también su entreno del historial.",
+            _ => $" Se borrarán también sus {sessions} entrenos del historial."
+        };
         var ok = await DisplayAlertAsync("Eliminar rutina",
-            $"¿Eliminar \"{_vm.RoutineName}\" con todos sus días y ejercicios?", "Eliminar", "Cancelar");
+            $"¿Eliminar «{_vm.RoutineName}» con todos sus días y ejercicios?{history}", "Eliminar", "Cancelar");
         if (ok)
             await _vm.DeleteRoutineAsync();
     }
@@ -281,7 +373,7 @@ public partial class RoutineDetailPage : ContentPage
     private async Task ShowSheetAsync(Border sheet)
     {
         _activeSheet = sheet;
-        sheet.TranslationY = 700;
+        sheet.TranslationY = 800;
         sheet.IsVisible = true;
         OverlayBackdrop.Opacity = 0;
         OverlayBackdrop.IsVisible = true;
@@ -289,19 +381,20 @@ public partial class RoutineDetailPage : ContentPage
         if (IsReduceMotionEnabled())
         {
             sheet.TranslationY = 0;
-            OverlayBackdrop.Opacity = 0.6;
+            OverlayBackdrop.Opacity = 0.55;
             return;
         }
 
         await Task.WhenAll(
             sheet.TranslateToAsync(0, 0, 320, Easing.CubicOut),
-            OverlayBackdrop.FadeToAsync(0.6, 280, Easing.CubicOut));
+            OverlayBackdrop.FadeToAsync(0.55, 280, Easing.CubicOut));
     }
 
     private async Task HideSheetAsync()
     {
         var sheet = _activeSheet;
         if (sheet is null) return;
+        SearchEntry.Unfocus();
 
         if (IsReduceMotionEnabled())
         {
@@ -312,12 +405,20 @@ public partial class RoutineDetailPage : ContentPage
         }
 
         await Task.WhenAll(
-            sheet.TranslateToAsync(0, 700, 260, Easing.CubicIn),
+            sheet.TranslateToAsync(0, 800, 260, Easing.CubicIn),
             OverlayBackdrop.FadeToAsync(0, 220, Easing.CubicIn));
 
         sheet.IsVisible = false;
         OverlayBackdrop.IsVisible = false;
         _activeSheet = null;
+    }
+
+    // Escala 0,96 con rebote (guía visual §12.1)
+    private static async Task PressAsync(VisualElement? element)
+    {
+        if (element is null || IsReduceMotionEnabled()) return;
+        await element.ScaleToAsync(0.96, 60, Easing.CubicIn);
+        await element.ScaleToAsync(1.0, 150, Easing.SpringOut);
     }
 
     private static bool IsReduceMotionEnabled()

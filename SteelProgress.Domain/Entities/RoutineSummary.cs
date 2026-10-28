@@ -10,6 +10,9 @@ public class RoutineSummary
     public int DayCount { get; set; }
     public int ExerciseCount { get; set; }
 
+    /// <summary>Última sesión con alguna serie (null = nunca entrenada).</summary>
+    public DateTime? LastTrained { get; set; }
+
     public string Name => Routine.Name;
     public string? Notes => Routine.Notes;
     public string Initial =>

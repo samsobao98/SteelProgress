@@ -5,13 +5,40 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
-    BackgroundColor="#1E1E2E"
+    BackgroundColor="{StaticResource SpBg}"
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
-        <converters:MuscleGroupColorConverter x:Key="MuscleGroupColor" />
         <converters:PrescriptionTextConverter x:Key="PrescriptionText" />
         <converters:StringNotNullOrEmptyConverter x:Key="NotEmpty" />
+        <converters:RoutineRowLabelConverter x:Key="RowLabel" />
+        <converters:ExerciseThumbnailConverter x:Key="ExerciseThumb" />
+        <converters:InvertedBoolConverter x:Key="Not" />
+        <converters:IsNullConverter x:Key="IsNull" />
+
+        <Style x:Key="IconButton" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{StaticResource SpCard}" />
+            <Setter Property="HeightRequest" Value="40" />
+            <Setter Property="WidthRequest" Value="40" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="SheetField" TargetType="Border" BasedOn="{StaticResource SpCardStyle}">
+            <Setter Property="Padding" Value="16,12" />
+        </Style>
+        <Style x:Key="SheetPrimary" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource SpSteelBrush}" />
+            <Setter Property="Padding" Value="0,16" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="StrokeThickness" Value="0" />
+        </Style>
+        <Style x:Key="SheetPrimaryLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextColor" Value="{StaticResource SpOnAccent}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
     </ContentPage.Resources>
 
     <Grid>
@@ -25,180 +52,90 @@
                 Opacity="0.05" />
         </AbsoluteLayout>
 
-        <Grid RowDefinitions="Auto,Auto,*">
+        <Grid RowDefinitions="Auto,Auto,Auto,*">
 
-            <!-- ── Header: volver + nombre + compartir + editar ── -->
-            <Grid
-                Grid.Row="0"
-                ColumnDefinitions="Auto,*,Auto,Auto"
-                ColumnSpacing="10"
-                Padding="14,18,14,8">
-                <Border
-                    Grid.Column="0"
-                    BackgroundColor="#252536"
-                    HeightRequest="40"
-                    WidthRequest="40"
-                    StrokeShape="RoundRectangle 12"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
-                    <Border.GestureRecognizers>
+            <!-- ── Barra: volver + compartir + editar ── -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="14,14,14,0">
+                <HorizontalStackLayout Spacing="6" VerticalOptions="Center" Padding="6,8">
+                    <HorizontalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnBackTapped" />
-                    </Border.GestureRecognizers>
-                    <mi:MauiIcon
-                        Icon="{mi:Material ArrowBack}"
-                        IconColor="#CDD6F4"
-                        IconSize="22"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
-                </Border>
-                <Label
-                    Grid.Column="1"
-                    Text="{Binding RoutineName}"
-                    FontAttributes="Bold"
-                    FontSize="22"
-                    TextColor="#CDD6F4"
-                    LineBreakMode="TailTruncation"
-                    VerticalOptions="Center" />
+                    </HorizontalStackLayout.GestureRecognizers>
+                    <Label Text="‹" FontSize="24" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                    <Label Text="Rutinas" Style="{StaticResource SpBody}" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
                 <!-- Compartir la rutina como archivo .steel -->
-                <Border
-                    x:Name="ShareButton"
-                    Grid.Column="2"
-                    BackgroundColor="#252536"
-                    HeightRequest="40"
-                    WidthRequest="40"
-                    StrokeShape="RoundRectangle 12"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
+                <Border x:Name="ShareButton" Grid.Column="1" Style="{StaticResource IconButton}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnShareTapped" />
                     </Border.GestureRecognizers>
-                    <mi:MauiIcon
-                        Icon="{mi:Material Share}"
-                        IconColor="#CDD6F4"
-                        IconSize="20"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
+                    <mi:MauiIcon Icon="{mi:Material Share}" IconColor="{StaticResource SpText}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
-                <Border
-                    Grid.Column="3"
-                    BackgroundColor="#252536"
-                    HeightRequest="40"
-                    WidthRequest="40"
-                    StrokeShape="RoundRectangle 12"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
+                <Border Grid.Column="2" Style="{StaticResource IconButton}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnEditRoutineTapped" />
                     </Border.GestureRecognizers>
-                    <mi:MauiIcon
-                        Icon="{mi:Material Edit}"
-                        IconColor="#CDD6F4"
-                        IconSize="20"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
+                    <mi:MauiIcon Icon="{mi:Material Edit}" IconColor="{StaticResource SpText}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
             </Grid>
 
+            <!-- ── Título ── -->
+            <VerticalStackLayout Grid.Row="1" Padding="20,4,20,0">
+                <Label Text="{Binding RoutineName}" Style="{StaticResource SpTitle}" LineBreakMode="TailTruncation" />
+                <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
+            </VerticalStackLayout>
+
             <!-- ── Chips de días ── -->
-            <ScrollView
-                Grid.Row="1"
-                Orientation="Horizontal"
-                HorizontalScrollBarVisibility="Never"
-                Padding="14,4,14,12">
+            <ScrollView Grid.Row="2" Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Padding="20,16,20,12">
                 <HorizontalStackLayout x:Name="DayChipsContainer" Spacing="8" />
             </ScrollView>
 
             <!-- ── Lista de ejercicios del día (reordenable) ── -->
             <CollectionView
                 x:Name="ExerciseList"
-                Grid.Row="2"
+                Grid.Row="3"
                 ItemsSource="{Binding DayExercises}"
                 CanReorderItems="True"
                 ReorderCompleted="OnReorderCompleted"
-                Margin="14,0,14,0">
+                Margin="20,0,20,0">
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="96" Color="Transparent" />
+                </CollectionView.Footer>
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="0,50" Spacing="14" HorizontalOptions="Center">
-                        <mi:MauiIcon
-                            Icon="{mi:Material FitnessCenter}"
-                            IconColor="#313244"
-                            IconSize="48"
-                            HorizontalOptions="Center" />
-                        <Label
-                            x:Name="EmptyLabel"
-                            HorizontalTextAlignment="Center"
-                            Text="Sin ejercicios en este día"
-                            TextColor="#585B70"
-                            FontSize="15" />
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="Toca + para añadir el primero"
-                            TextColor="#45475A"
-                            FontSize="13" />
+                        <mi:MauiIcon Icon="{mi:Material FitnessCenter}" IconColor="{StaticResource SpCardHi}" IconSize="48" HorizontalOptions="Center" />
+                        <Label x:Name="EmptyLabel" HorizontalTextAlignment="Center" Text="Sin ejercicios en este día" Style="{StaticResource SpBody}" TextColor="{StaticResource SpText3}" />
+                        <Label HorizontalTextAlignment="Center" Text="Toca + para añadir el primero" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText4}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="0,0,0,10">
-                            <Border
-                                BackgroundColor="#252536"
-                                Padding="14,12"
-                                StrokeShape="RoundRectangle 14"
-                                StrokeThickness="0">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                    <!-- Handle de arrastre -->
-                                    <mi:MauiIcon
-                                        Grid.Column="0"
-                                        Icon="{mi:Material DragHandle}"
-                                        IconColor="#45475A"
-                                        IconSize="22"
-                                        VerticalOptions="Center" />
-                                    <VerticalStackLayout
-                                        Grid.Column="1"
-                                        Spacing="6"
-                                        VerticalOptions="Center">
-                                        <Label
-                                            FontAttributes="Bold"
-                                            FontSize="15"
-                                            Text="{Binding Exercise.Name}"
-                                            TextColor="#CDD6F4"
-                                            LineBreakMode="TailTruncation" />
+                        <Grid Padding="0,0,0,8">
+                            <Border Style="{StaticResource SpCardStyle}" Padding="14,12">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                    <!-- Superserie (A1) o posición -->
+                                    <Label Grid.Column="0" Text="{Binding ., Converter={StaticResource RowLabel}}" FontFamily="SpaceGroteskBold" FontSize="15"
+                                           TextColor="{StaticResource SpSteel2}" WidthRequest="26" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding Exercise.Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                         <!-- Lo prescrito: "4 × 6–8 · RPE 8 · 1:30" -->
-                                        <Label
-                                            FontFamily="SpaceGroteskMedium"
-                                            FontSize="13"
-                                            Text="{Binding ., Converter={StaticResource PrescriptionText}}"
-                                            TextColor="{StaticResource SpOk}"
-                                            IsVisible="{Binding ., Converter={StaticResource PrescriptionText}, ConverterParameter=visible}" />
-                                        <Border
-                                            BackgroundColor="{Binding Exercise.MuscleGroup, Converter={StaticResource MuscleGroupColor}}"
-                                            Padding="9,3"
-                                            StrokeShape="RoundRectangle 7"
-                                            StrokeThickness="0"
-                                            HorizontalOptions="Start">
-                                            <Label
-                                                FontSize="11"
-                                                FontAttributes="Bold"
-                                                Text="{Binding Exercise.MuscleGroup}"
-                                                TextColor="#1E1E2E" />
-                                        </Border>
+                                        <Label Text="{Binding ., Converter={StaticResource PrescriptionText}}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}"
+                                               IsVisible="{Binding ., Converter={StaticResource PrescriptionText}, ConverterParameter=visible}" />
+                                        <!-- Sin objetivo: en Entreno no sabría cuándo está hecho -->
+                                        <Label Text="+ Añadir series y reps" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpSteel2}"
+                                               IsVisible="{Binding TargetSets, Converter={StaticResource IsNull}}">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnAddTargetsTapped" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
                                     </VerticalStackLayout>
+                                    <!-- Handle de arrastre -->
+                                    <mi:MauiIcon Grid.Column="2" Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" VerticalOptions="Center" />
                                     <!-- Menú ⋮ -->
-                                    <Border
-                                        Grid.Column="2"
-                                        BackgroundColor="Transparent"
-                                        HeightRequest="36"
-                                        WidthRequest="30"
-                                        StrokeThickness="0"
-                                        VerticalOptions="Center">
+                                    <Border Grid.Column="3" BackgroundColor="Transparent" HeightRequest="36" WidthRequest="30" StrokeThickness="0" VerticalOptions="Center">
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="OnExerciseMenuTapped" />
                                         </Border.GestureRecognizers>
-                                        <mi:MauiIcon
-                                            Icon="{mi:Material MoreVert}"
-                                            IconColor="#6C7086"
-                                            IconSize="20"
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center" />
+                                        <mi:MauiIcon Icon="{mi:Material MoreVert}" IconColor="{StaticResource SpText3}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -210,32 +147,28 @@
         </Grid>
 
         <!-- ── FAB: añadir ejercicio ── -->
+        <!-- Sin animar: Scale/Opacity sobre un elemento con Shadow deja la sombra borrosa en Android -->
         <Border
             x:Name="FabButton"
-            BackgroundColor="#A6E3A1"
-            HeightRequest="56"
-            WidthRequest="56"
-            StrokeShape="RoundRectangle 28"
+            Background="{StaticResource SpSteelBrush}"
+            HeightRequest="58"
+            WidthRequest="58"
+            StrokeShape="RoundRectangle 18"
             StrokeThickness="0"
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Shadow="{Shadow Brush='#A6E3A1', Offset='0,4', Radius=12, Opacity=0.35}">
+            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnAddExerciseTapped" />
             </Border.GestureRecognizers>
-            <mi:MauiIcon
-                Icon="{mi:Material Add}"
-                IconColor="#1E1E2E"
-                IconSize="28"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
+            <mi:MauiIcon Icon="{mi:Material Add}" IconColor="{StaticResource SpOnAccent}" IconSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
         </Border>
 
         <!-- ── Overlay backdrop compartido ── -->
         <BoxView
             x:Name="OverlayBackdrop"
-            BackgroundColor="#000000"
+            BackgroundColor="#0A0A10"
             Opacity="0"
             IsVisible="False"
             InputTransparent="False">
@@ -244,120 +177,123 @@
             </BoxView.GestureRecognizers>
         </BoxView>
 
-        <!-- ── Sheet: añadir ejercicio ── -->
+        <!-- ── Sheet: añadir ejercicios (buscador, grupos y selección múltiple) ── -->
         <Border
             x:Name="AddExerciseSheet"
-            BackgroundColor="#1E1E2E"
-            StrokeShape="RoundRectangle 24,24,0,0"
-            StrokeThickness="0"
+            Style="{StaticResource SpSheetStyle}"
             VerticalOptions="End"
-            TranslationY="700"
+            HeightRequest="640"
+            TranslationY="800"
             IsVisible="False">
-            <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
-                <BoxView HeightRequest="4" WidthRequest="40" BackgroundColor="#45475A" CornerRadius="2" HorizontalOptions="Center" />
-                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                    <Label FontAttributes="Bold" FontSize="20" Text="Añadir ejercicio" TextColor="#CDD6F4" VerticalOptions="Center" />
-                    <Border Grid.Column="1" BackgroundColor="#313244" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="12">
+                <BoxView HeightRequest="4" WidthRequest="40" Color="{StaticResource SpText4}" CornerRadius="2" HorizontalOptions="Center" />
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+                    <Label Text="{Binding AddSheetTitle}" Style="{StaticResource SpHeading}" FontSize="18" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource SpCardHi}" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnCloseSheetTapped" />
                         </Border.GestureRecognizers>
-                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="#6C7086" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="{StaticResource SpText3}" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
-
-                <Border BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="EJERCICIO" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Picker
-                            ItemsSource="{Binding AllExercises}"
-                            ItemDisplayBinding="{Binding Name}"
-                            SelectedItem="{Binding SelectedExerciseToAdd, Mode=TwoWay}"
-                            Title="Seleccionar..."
-                            TitleColor="#45475A"
-                            TextColor="#CDD6F4"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
-                    </VerticalStackLayout>
+                <Border Grid.Row="2" BackgroundColor="{StaticResource SpBg}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,2">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <mi:MauiIcon Icon="{mi:Material Search}" IconColor="{StaticResource SpText3}" IconSize="20" VerticalOptions="Center" />
+                        <Entry x:Name="SearchEntry" Grid.Column="1" Text="{Binding Picker.SearchText}" Placeholder="Buscar ejercicio…" FontSize="15"
+                               TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText3}" BackgroundColor="Transparent" />
+                    </Grid>
                 </Border>
-
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Border Grid.Column="0" BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
-                        <VerticalStackLayout Spacing="4">
-                            <Label FontSize="11" Text="SERIES" TextColor="#6C7086" CharacterSpacing="1" />
-                            <Entry
-                                Text="{Binding NewSets}"
-                                Keyboard="Numeric"
-                                TextColor="#CDD6F4"
-                                PlaceholderColor="#45475A"
-                                Placeholder="4"
-                                BackgroundColor="Transparent"
-                                FontSize="15" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Column="1" BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
-                        <VerticalStackLayout Spacing="4">
-                            <Label FontSize="11" Text="REPS" TextColor="#6C7086" CharacterSpacing="1" />
-                            <Entry
-                                Text="{Binding NewReps}"
-                                Keyboard="Numeric"
-                                TextColor="#CDD6F4"
-                                PlaceholderColor="#45475A"
-                                Placeholder="8"
-                                BackgroundColor="Transparent"
-                                FontSize="15" />
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
-
-                <Border BackgroundColor="#A6E3A1" Padding="0,16" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <ScrollView Grid.Row="3" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout x:Name="GroupChipsContainer" Spacing="6" />
+                </ScrollView>
+                <CollectionView Grid.Row="4" ItemsSource="{Binding Picker.Items}" SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="Ningún ejercicio coincide" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" Margin="0,24" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPickerItemTapped" />
+                                </Grid.GestureRecognizers>
+                                <Border WidthRequest="46" HeightRequest="46" StrokeThickness="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SpCardHi}">
+                                    <Grid>
+                                        <Image Source="{Binding Exercise, Converter={StaticResource ExerciseThumb}}" Aspect="AspectFill" />
+                                        <Label Text="▶" FontSize="14" TextColor="{StaticResource SpText3}" HorizontalOptions="Center" VerticalOptions="Center"
+                                               IsVisible="{Binding Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=video}" />
+                                    </Grid>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Detail}" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+                                <!-- + sin elegir, ✓ elegido -->
+                                <Border Grid.Column="2" WidthRequest="30" HeightRequest="30" StrokeThickness="0" StrokeShape="RoundRectangle 15" VerticalOptions="Center"
+                                        Background="{StaticResource SpSteelBrush}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="#33A6E3A1" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="+" FontFamily="SpaceGroteskBold" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Text" Value="✓" />
+                                                <Setter Property="TextColor" Value="{StaticResource SpOk}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <Border Grid.Row="5" Style="{StaticResource SheetPrimary}" Opacity="0.45">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Picker.HasSelection}" Value="True">
+                            <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnConfirmAddExerciseTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Añadir" FontAttributes="Bold" FontSize="16" TextColor="#1E1E2E" HorizontalOptions="Center" />
+                    <Label Text="{Binding Picker.ConfirmText}" Style="{StaticResource SheetPrimaryLabel}" />
                 </Border>
-            </VerticalStackLayout>
+            </Grid>
         </Border>
 
         <!-- ── Sheet: nuevo día ── -->
         <Border
             x:Name="AddDaySheet"
-            BackgroundColor="#1E1E2E"
-            StrokeShape="RoundRectangle 24,24,0,0"
-            StrokeThickness="0"
+            Style="{StaticResource SpSheetStyle}"
             VerticalOptions="End"
             TranslationY="700"
             IsVisible="False">
-            <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
-                <BoxView HeightRequest="4" WidthRequest="40" BackgroundColor="#45475A" CornerRadius="2" HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="16" Padding="0,0,0,8">
+                <BoxView HeightRequest="4" WidthRequest="40" Color="{StaticResource SpText4}" CornerRadius="2" HorizontalOptions="Center" />
                 <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                    <Label FontAttributes="Bold" FontSize="20" Text="Nuevo día" TextColor="#CDD6F4" VerticalOptions="Center" />
-                    <Border Grid.Column="1" BackgroundColor="#313244" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
+                    <Label Text="Nuevo día" Style="{StaticResource SpHeading}" FontSize="20" VerticalOptions="Center" />
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource SpCardHi}" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnCloseSheetTapped" />
                         </Border.GestureRecognizers>
-                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="#6C7086" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="{StaticResource SpText3}" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
 
-                <Border BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <Border Style="{StaticResource SheetField}">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOMBRE DEL DÍA" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            x:Name="DayNameEntry"
-                            Text="{Binding NewDayName}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            Placeholder="ej. Empuje"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
+                        <Label Text="Nombre del día" Style="{StaticResource SpOverline}" />
+                        <Entry x:Name="DayNameEntry" Text="{Binding NewDayName}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}"
+                               Placeholder="ej. Empuje" BackgroundColor="Transparent" FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Border BackgroundColor="#A6E3A1" Padding="0,16" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <Border Style="{StaticResource SheetPrimary}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnConfirmAddDayTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Añadir día" FontAttributes="Bold" FontSize="16" TextColor="#1E1E2E" HorizontalOptions="Center" />
+                    <Label Text="Añadir día" Style="{StaticResource SheetPrimaryLabel}" />
                 </Border>
             </VerticalStackLayout>
         </Border>
@@ -365,63 +301,50 @@
         <!-- ── Sheet: editar rutina ── -->
         <Border
             x:Name="EditRoutineSheet"
-            BackgroundColor="#1E1E2E"
-            StrokeShape="RoundRectangle 24,24,0,0"
-            StrokeThickness="0"
+            Style="{StaticResource SpSheetStyle}"
             VerticalOptions="End"
             TranslationY="700"
             IsVisible="False">
-            <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
-                <BoxView HeightRequest="4" WidthRequest="40" BackgroundColor="#45475A" CornerRadius="2" HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="16" Padding="0,0,0,8">
+                <BoxView HeightRequest="4" WidthRequest="40" Color="{StaticResource SpText4}" CornerRadius="2" HorizontalOptions="Center" />
                 <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                    <Label FontAttributes="Bold" FontSize="20" Text="Editar rutina" TextColor="#CDD6F4" VerticalOptions="Center" />
-                    <Border Grid.Column="1" BackgroundColor="#313244" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
+                    <Label Text="Editar rutina" Style="{StaticResource SpHeading}" FontSize="20" VerticalOptions="Center" />
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource SpCardHi}" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnCloseSheetTapped" />
                         </Border.GestureRecognizers>
-                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="#6C7086" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="{StaticResource SpText3}" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
 
-                <Border BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <Border Style="{StaticResource SheetField}">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOMBRE" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            x:Name="EditNameEntry"
-                            Text="{Binding RoutineName}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
+                        <Label Text="Nombre" Style="{StaticResource SpOverline}" />
+                        <Entry x:Name="EditNameEntry" Text="{Binding RoutineName}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}"
+                               BackgroundColor="Transparent" FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Border BackgroundColor="#252536" Padding="16,12" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <Border Style="{StaticResource SheetField}">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOTAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            x:Name="EditNotesEntry"
-                            Text="{Binding RoutineNotes}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            Placeholder="Objetivo, frecuencia..."
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
+                        <Label Text="Notas (opcional)" Style="{StaticResource SpOverline}" />
+                        <Entry x:Name="EditNotesEntry" Text="{Binding RoutineNotes}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}"
+                               Placeholder="Objetivo, frecuencia..." BackgroundColor="Transparent" FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Border BackgroundColor="#A6E3A1" Padding="0,16" StrokeShape="RoundRectangle 14" StrokeThickness="0">
+                <Border Style="{StaticResource SheetPrimary}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSaveRoutineTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Guardar" FontAttributes="Bold" FontSize="16" TextColor="#1E1E2E" HorizontalOptions="Center" />
+                    <Label Text="Guardar" Style="{StaticResource SheetPrimaryLabel}" />
                 </Border>
 
                 <Border BackgroundColor="Transparent" Padding="0,12" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#F38BA8">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnDeleteRoutineTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Eliminar rutina" FontAttributes="Bold" FontSize="15" TextColor="#F38BA8" HorizontalOptions="Center" />
+                    <Label Text="Eliminar rutina" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
                 </Border>
             </VerticalStackLayout>
         </Border>

@@ -140,8 +140,8 @@ Cómo se resolvieron los conflictos:
 
 El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantallas antiguas siguen con colores escritos a mano. Orden acordado (§12.3 del documento de diseño), siguiendo las maquetas de `docs/maquetas/propuesta_diseno.html`:
 
-1. Entreno — **hecho, pendiente de probar en el móvil** (ver abajo).
-2. Rutinas (pasar la lista y el detalle a los tokens y a las maquetas).
+1. Entreno — **hecho** (ver abajo).
+2. Rutinas — **hecho, pendiente de probar en el móvil** (ver abajo).
 3. Progreso (absorbe Historial) e Inicio.
 4. Ejercicios (filtro «Propios», ficha con vídeo, mejor marca, 1RM estimado).
 5. Respuesta táctil y animaciones en toda la app.
@@ -171,6 +171,29 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 **Aún no está**
 * Si la app se cierra a mitad de entreno, las series están guardadas pero la sesión no se retoma al volver a abrirla.
 * «Entreno libre» (sin rutina) y la tarjeta «Hoy toca» (fase de Inicio).
+
+### Rediseño 2 — Rutinas
+
+**Qué hace**
+* **Lista**:
+  * La **rutina activa** (la última que has entrenado) va en una placa con su semana: un tramo por día, «Esta semana: 2 de 4» y «Toca: Pierna B». El resto, en tarjetas con insignia («5×5», «FB») y «última vez hace 3 semanas».
+  * **Orden**: automático (activa primero y el resto por última vez entrenada) o a mano con «Ordenar» → arrastrar → «Hecho». «Volver al orden automático» deshace el orden manual. Con orden manual, las rutinas nuevas o importadas van al final. Migración `AddRoutineSortOrder`.
+  * **Eliminar deslizando** a la izquierda, con «Deshacer» durante 5 s. El borrado real ocurre al caducar el aviso o al salir de la pantalla.
+* **Detalle**: título con notas y nº de días, días en chips (el activo con el degradado acero), ejercicios con su superserie (A1) o posición y lo prescrito. Los que no tienen series indicadas muestran «+ Añadir series y reps», porque en Entreno sin objetivo no se sabe cuándo está hecho.
+* **Añadir ejercicios**: panel con buscador (sin distinguir tildes), filtro por grupo, miniatura y selección múltiple; se añaden en el orden en que se tocaron. Se puede repetir un ejercicio en el mismo día.
+* **Ojo, comportamiento que ya existía**: borrar una rutina o un día borra también sus entrenos del historial. Ahora se avisa con el número de entrenos antes de borrar. Conservar el historial exigiría cambiar el esquema de la base de datos.
+* «Toca» lo calcula `RoutineSchedule` (Core): el siguiente día al último entrenado que no se haya hecho esta semana (la semana empieza el lunes). Lo reutilizará Inicio para «Hoy toca».
+
+**Probar**
+1. Rutinas: la última entrenada sale arriba en la placa con su semana y el día que toca.
+2. «Ordenar» → «Ordenar a mano» → arrastrar → «Hecho»; salir y volver: se mantiene. Crear una rutina: va al final. «Volver al orden automático».
+3. Deslizar una rutina a la izquierda → Eliminar (si tiene entrenos, avisa cuántos) → «Deshacer». Repetir sin deshacer y cambiar de pestaña: ya no está.
+4. Entrar en una rutina → + → buscar «biceps», filtrar por grupo, marcar varios → «Añadir N ejercicios». Deben salir en ese orden y con «+ Añadir series y reps».
+5. En Windows: deslizar con el ratón puede no funcionar; eliminar desde el detalle (lápiz → Eliminar rutina).
+
+**Aún no está**
+* «Semana 3 de 8» de la maqueta: haría falta guardar la duración del programa.
+* Tocar «Toca: …» no empieza el entreno (será parte de Inicio).
 
 ---
 

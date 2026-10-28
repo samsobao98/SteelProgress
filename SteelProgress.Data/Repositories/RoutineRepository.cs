@@ -32,9 +32,53 @@ public class RoutineRepository
             {
                 Routine = r,
                 DayCount = r.Days.Count,
-                ExerciseCount = r.Days.SelectMany(d => d.Exercises).Count()
+                ExerciseCount = r.Days.SelectMany(d => d.Exercises).Count(),
+                // Vía WorkoutSessions para que se apliquen los filtros de perfil y cliente
+                LastTrained = _context.WorkoutSessions
+                    .Where(s => s.RoutineDay!.RoutineId == r.Id && s.Exercises.Any(e => e.Sets.Any()))
+                    .Max(s => (DateTime?)s.Date)
             })
             .ToListAsync();
+    }
+
+    // Avance de una rutina desde weekStart: qué días se han entrenado y cuál fue el último
+    public async Task<RoutineWeek> GetRoutineWeekAsync(int routineId, DateTime weekStart)
+    {
+        var days = await GetDaysByRoutineIdAsync(routineId);
+
+        var trained = _context.WorkoutSessions
+            .Where(s => s.RoutineDay!.RoutineId == routineId && s.Exercises.Any(e => e.Sets.Any()));
+
+        var doneThisWeek = await trained
+            .Where(s => s.Date >= weekStart)
+            .Select(s => s.RoutineDayId)
+            .Distinct()
+            .ToListAsync();
+
+        var lastDayId = await trained
+            .OrderByDescending(s => s.Date)
+            .Select(s => (int?)s.RoutineDayId)
+            .FirstOrDefaultAsync();
+
+        return new RoutineWeek(days, doneThisWeek, lastDayId);
+    }
+
+    // Entrenos que se borrarían en cascada con la rutina o el día
+    public Task<int> CountSessionsOfRoutineAsync(int routineId) =>
+        _context.WorkoutSessions.CountAsync(s => s.RoutineDay!.RoutineId == routineId);
+
+    public Task<int> CountSessionsOfDayAsync(int routineDayId) =>
+        _context.WorkoutSessions.CountAsync(s => s.RoutineDayId == routineDayId);
+
+    // Guarda el orden elegido a mano (o null en todas para volver al automático)
+    public async Task SetSortOrderAsync(IReadOnlyList<Routine> ordered, bool manual)
+    {
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            ordered[i].SortOrder = manual ? i + 1 : null;
+            _context.Routines.Update(ordered[i]);
+        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task AddAsync(Routine routine)
@@ -131,3 +175,5 @@ public class RoutineRepository
         await _context.SaveChangesAsync();
     }
 }
+
+public sealed record RoutineWeek(IReadOnlyList<RoutineDay> Days, IReadOnlyCollection<int> DoneThisWeek, int? LastTrainedDayId);

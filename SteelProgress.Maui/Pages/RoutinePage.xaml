@@ -1,17 +1,121 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="SteelProgress.Maui.Pages.RoutinePage"
+    x:Name="Page"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
     xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
-    BackgroundColor="#1E1E2E"
+    BackgroundColor="{StaticResource SpBg}"
     Shell.NavBarIsVisible="False"
     Title="Rutinas">
 
     <ContentPage.Resources>
-        <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmpty" />
+        <converters:RoutineAccentConverter x:Key="Accent" />
+
+        <!-- Rutina activa: placa protagonista con la semana y lo que toca -->
+        <DataTemplate x:Key="ActiveRoutineTemplate">
+            <Grid Padding="0,0,0,12">
+                <SwipeView IsEnabled="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" BackgroundColor="Transparent">
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border Padding="18" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
+                                <GradientStop Color="#2C2D45" Offset="0" />
+                                <GradientStop Color="#252536" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRoutineTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="0">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4">
+                                    <Label Text="● ACTIVA" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
+                                </Border>
+                                <mi:MauiIcon Grid.Column="1" Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22"
+                                             HorizontalOptions="End" IsVisible="{Binding BindingContext.IsReordering, Source={x:Reference Page}}" />
+                            </Grid>
+                            <Label Text="{Binding Name}" FontFamily="SpaceGroteskBold" FontSize="22" TextColor="{StaticResource SpText}" Margin="0,10,0,0" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" Margin="0,2,0,0" />
+
+                            <!-- Un tramo por día: lleno si se ha hecho esta semana -->
+                            <FlexLayout Margin="0,14,0,0" HeightRequest="6" BindableLayout.ItemsSource="{Binding Week}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid FlexLayout.Grow="1" FlexLayout.Basis="0" Padding="3,0">
+                                            <Border HeightRequest="6" StrokeThickness="0" StrokeShape="RoundRectangle 3" BackgroundColor="#3A3B52">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding Done}" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource SpSteelBrush}" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                                <Label Text="{Binding WeekText}" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                <Label Grid.Column="1" FontSize="12" IsVisible="{Binding HasNextDay}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Toca: " TextColor="{StaticResource SpText3}" />
+                                            <Span Text="{Binding NextDayName}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                                            <Span Text=" ›" TextColor="{StaticResource SpText3}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </SwipeView>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Resto de rutinas: tarjeta con insignia -->
+        <DataTemplate x:Key="RoutineCardTemplate">
+            <Grid Padding="0,0,0,12">
+                <SwipeView IsEnabled="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" BackgroundColor="Transparent">
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border Style="{StaticResource SpCardStyle}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRoutineTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                                    BackgroundColor="{Binding AccentIndex, Converter={StaticResource Accent}, ConverterParameter=bg}">
+                                <Label Text="{Binding Monogram}" FontFamily="SpaceGroteskBold" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center"
+                                       TextColor="{Binding AccentIndex, Converter={StaticResource Accent}}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
+                            </VerticalStackLayout>
+                            <Grid Grid.Column="2" VerticalOptions="Center">
+                                <Label Text="›" FontSize="22" TextColor="{StaticResource SpText4}" IsVisible="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" />
+                                <mi:MauiIcon Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" IsVisible="{Binding BindingContext.IsReordering, Source={x:Reference Page}}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </SwipeView>
+            </Grid>
+        </DataTemplate>
+
+        <controls:RoutineTemplateSelector
+            x:Key="RoutineTemplates"
+            ActiveTemplate="{StaticResource ActiveRoutineTemplate}"
+            CardTemplate="{StaticResource RoutineCardTemplate}" />
     </ContentPage.Resources>
 
     <Grid>
@@ -19,58 +123,39 @@
         <!-- Orb decorativo -->
         <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
             <Ellipse
-                AbsoluteLayout.LayoutBounds="1, 0, 260, 260"
+                AbsoluteLayout.LayoutBounds="1, 0, 280, 280"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
-                Fill="#CBA6F7"
-                Opacity="0.05" />
+                TranslationX="110"
+                TranslationY="-90"
+                Fill="#89B4FA"
+                Opacity="0.06" />
         </AbsoluteLayout>
 
         <!-- ── Contenido principal ── -->
         <Grid RowDefinitions="Auto,Auto,*">
 
-            <!-- Mini-header: título + importar + contador -->
-            <Grid
-                Grid.Row="0"
-                ColumnDefinitions="*,Auto,Auto"
-                ColumnSpacing="8"
-                Padding="20,20,20,12">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="26"
-                    Text="Rutinas"
-                    TextColor="#CDD6F4"
-                    VerticalOptions="Center" />
+            <!-- Cabecera: título, resumen, importar y ordenar -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="20,20,20,14">
+                <VerticalStackLayout VerticalOptions="End">
+                    <Label Text="Rutinas" Style="{StaticResource SpTitle}" />
+                    <Label Text="{Binding HeaderText}" Style="{StaticResource SpSecondary}" IsVisible="{Binding HasRoutines}" />
+                </VerticalStackLayout>
                 <!-- Importar una rutina compartida (.steel) -->
-                <Border
-                    Grid.Column="1"
-                    BackgroundColor="#252536"
-                    HeightRequest="36"
-                    WidthRequest="36"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
+                <Border Grid.Column="1" BackgroundColor="{StaticResource SpCard}" HeightRequest="36" WidthRequest="36"
+                        StrokeShape="RoundRectangle 10" StrokeThickness="0" VerticalOptions="End"
+                        IsVisible="{Binding IsNotReordering}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnImportTapped" />
                     </Border.GestureRecognizers>
-                    <mi:MauiIcon
-                        Icon="{mi:Material FileDownload}"
-                        IconColor="#CDD6F4"
-                        IconSize="20"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
+                    <mi:MauiIcon Icon="{mi:Material FileDownload}" IconColor="{StaticResource SpText2}" IconSize="20"
+                                 HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
-                <Border
-                    Grid.Column="2"
-                    BackgroundColor="#252536"
-                    Padding="12,6"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
-                    <Label
-                        FontSize="13"
-                        FontAttributes="Bold"
-                        Text="{Binding Routines.Count}"
-                        TextColor="#6C7086" />
+                <Border Grid.Column="2" x:Name="OrderButton" BackgroundColor="{StaticResource SpCard}" Padding="12,8"
+                        StrokeShape="RoundRectangle 10" StrokeThickness="0" VerticalOptions="End" IsVisible="{Binding HasRoutines}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOrderTapped" />
+                    </Border.GestureRecognizers>
+                    <Label x:Name="OrderButtonLabel" Text="Ordenar" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpText2}" />
                 </Border>
             </Grid>
 
@@ -81,120 +166,80 @@
             <CollectionView
                 x:Name="RoutineList"
                 Grid.Row="2"
-                ItemsSource="{Binding Routines}"
+                ItemsSource="{Binding Items}"
+                ItemTemplate="{StaticResource RoutineTemplates}"
+                CanReorderItems="{Binding IsReordering}"
                 Opacity="0"
                 Margin="20,0,20,0">
+                <CollectionView.Footer>
+                    <VerticalStackLayout Padding="0,0,0,96">
+                        <Label HorizontalTextAlignment="Center" Style="{StaticResource SpSecondary}" FontSize="12" IsVisible="{Binding HasRoutines}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsReordering}" Value="True">
+                                    <Setter Property="Text" Value="Mantén pulsada una rutina y arrástrala · Hecho para guardar" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsReordering}" Value="False">
+                                    <Setter Property="Text" Value="← Desliza para eliminar · «Ordenar» para cambiar el orden" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </VerticalStackLayout>
+                </CollectionView.Footer>
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="0,60" Spacing="14" HorizontalOptions="Center">
-                        <mi:MauiIcon
-                            Icon="{mi:Material ListAlt}"
-                            IconColor="#313244"
-                            IconSize="52"
-                            HorizontalOptions="Center" />
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="Sin rutinas todavía"
-                            TextColor="#585B70"
-                            FontSize="15" />
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="Toca + para crear la primera"
-                            TextColor="#45475A"
-                            FontSize="13" />
+                        <mi:MauiIcon Icon="{mi:Material ListAlt}" IconColor="{StaticResource SpCardHi}" IconSize="52" HorizontalOptions="Center" />
+                        <Label HorizontalTextAlignment="Center" Text="Sin rutinas todavía" Style="{StaticResource SpBody}" TextColor="{StaticResource SpText3}" />
+                        <Label HorizontalTextAlignment="Center" Text="Toca + para crear la primera" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText4}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="0,0,0,10">
-                            <Border
-                                BackgroundColor="#252536"
-                                Padding="16,14"
-                                StrokeShape="RoundRectangle 14"
-                                StrokeThickness="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnRoutineTapped" />
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-                                    <!-- Badge con inicial -->
-                                    <Border
-                                        Grid.Column="0"
-                                        BackgroundColor="#CBA6F7"
-                                        HeightRequest="46"
-                                        WidthRequest="46"
-                                        StrokeShape="RoundRectangle 14"
-                                        StrokeThickness="0"
-                                        VerticalOptions="Center">
-                                        <Label
-                                            Text="{Binding Initial}"
-                                            FontAttributes="Bold"
-                                            FontSize="20"
-                                            TextColor="#1E1E2E"
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center" />
-                                    </Border>
-                                    <VerticalStackLayout
-                                        Grid.Column="1"
-                                        Spacing="4"
-                                        VerticalOptions="Center">
-                                        <Label
-                                            FontAttributes="Bold"
-                                            FontSize="16"
-                                            Text="{Binding Name}"
-                                            TextColor="#CDD6F4"
-                                            LineBreakMode="TailTruncation" />
-                                        <Label
-                                            FontSize="12"
-                                            Text="{Binding SummaryText}"
-                                            TextColor="#89B4FA" />
-                                        <Label
-                                            FontSize="12"
-                                            Text="{Binding Notes}"
-                                            TextColor="#6C7086"
-                                            LineBreakMode="TailTruncation"
-                                            IsVisible="{Binding Notes, Converter={StaticResource StringNotNullOrEmpty}}" />
-                                    </VerticalStackLayout>
-                                    <mi:MauiIcon
-                                        Grid.Column="2"
-                                        Icon="{mi:Material ChevronRight}"
-                                        IconColor="#45475A"
-                                        IconSize="20"
-                                        VerticalOptions="Center" />
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
             </CollectionView>
 
         </Grid>
 
+        <!-- ── Aviso de deshacer ── -->
+        <Border
+            x:Name="UndoBar"
+            IsVisible="{Binding HasPendingDelete}"
+            BackgroundColor="{StaticResource SpCardHi}"
+            StrokeShape="RoundRectangle 14"
+            StrokeThickness="0"
+            Padding="16,12"
+            Margin="20,0,96,28"
+            VerticalOptions="End">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Text="{Binding PendingDeleteText}" Style="{StaticResource SpBody}" FontSize="14" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                <Label Grid.Column="1" Text="Deshacer" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpSteel2}" VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UndoDeleteCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+        </Border>
+
         <!-- ── FAB ── -->
+        <!-- Sin animar: Scale/Opacity sobre un elemento con Shadow deja la sombra borrosa en Android -->
         <Border
             x:Name="FabButton"
-            BackgroundColor="#A6E3A1"
-            HeightRequest="56"
-            WidthRequest="56"
-            StrokeShape="RoundRectangle 28"
+            Background="{StaticResource SpSteelBrush}"
+            HeightRequest="58"
+            WidthRequest="58"
+            StrokeShape="RoundRectangle 18"
             StrokeThickness="0"
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Shadow="{Shadow Brush='#A6E3A1', Offset='0,4', Radius=12, Opacity=0.35}">
+            IsVisible="{Binding IsNotReordering}"
+            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />
             </Border.GestureRecognizers>
-            <mi:MauiIcon
-                Icon="{mi:Material Add}"
-                IconColor="#1E1E2E"
-                IconSize="28"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
+            <mi:MauiIcon Icon="{mi:Material Add}" IconColor="{StaticResource SpOnAccent}" IconSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
         </Border>
 
         <!-- ── Overlay backdrop ── -->
         <BoxView
             x:Name="OverlayBackdrop"
-            BackgroundColor="#000000"
+            BackgroundColor="#0A0A10"
             Opacity="0"
             IsVisible="False"
             InputTransparent="False">
@@ -206,98 +251,45 @@
         <!-- ── Bottom sheet: nueva rutina ── -->
         <Border
             x:Name="BottomSheet"
-            BackgroundColor="#1E1E2E"
-            StrokeShape="RoundRectangle 24,24,0,0"
-            StrokeThickness="0"
+            Style="{StaticResource SpSheetStyle}"
             VerticalOptions="End"
             TranslationY="700"
             IsVisible="False">
-            <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
-
-                <BoxView
-                    HeightRequest="4"
-                    WidthRequest="40"
-                    BackgroundColor="#45475A"
-                    CornerRadius="2"
-                    HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="16" Padding="0,0,0,8">
+                <BoxView HeightRequest="4" WidthRequest="40" Color="{StaticResource SpText4}" CornerRadius="2" HorizontalOptions="Center" />
 
                 <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                    <Label
-                        FontAttributes="Bold"
-                        FontSize="20"
-                        Text="Nueva rutina"
-                        TextColor="#CDD6F4"
-                        VerticalOptions="Center" />
-                    <Border
-                        Grid.Column="1"
-                        BackgroundColor="#313244"
-                        HeightRequest="36"
-                        WidthRequest="36"
-                        StrokeShape="RoundRectangle 18"
-                        StrokeThickness="0">
+                    <Label Text="Nueva rutina" Style="{StaticResource SpHeading}" FontSize="20" VerticalOptions="Center" />
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource SpCardHi}" HeightRequest="36" WidthRequest="36" StrokeShape="RoundRectangle 18" StrokeThickness="0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnCloseSheetTapped" />
                         </Border.GestureRecognizers>
-                        <mi:MauiIcon
-                            Icon="{mi:Material Close}"
-                            IconColor="#6C7086"
-                            IconSize="18"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
+                        <mi:MauiIcon Icon="{mi:Material Close}" IconColor="{StaticResource SpText3}" IconSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
 
-                <Border
-                    BackgroundColor="#252536"
-                    Padding="16,12"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0">
+                <Border Style="{StaticResource SpCardStyle}" Padding="16,12">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOMBRE" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            x:Name="NameEntry"
-                            Text="{Binding NewName}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            Placeholder="ej. Push Pull Legs"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
+                        <Label Text="Nombre" Style="{StaticResource SpOverline}" />
+                        <Entry x:Name="NameEntry" Text="{Binding NewName}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}"
+                               Placeholder="ej. Push Pull Legs" BackgroundColor="Transparent" FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Border
-                    BackgroundColor="#252536"
-                    Padding="16,12"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0">
+                <Border Style="{StaticResource SpCardStyle}" Padding="16,12">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOTAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            Text="{Binding NewNotes}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            Placeholder="Objetivo, frecuencia..."
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
+                        <Label Text="Notas (opcional)" Style="{StaticResource SpOverline}" />
+                        <Entry Text="{Binding NewNotes}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}"
+                               Placeholder="Objetivo, frecuencia..." BackgroundColor="Transparent" FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Border
-                    BackgroundColor="#A6E3A1"
-                    Padding="0,16"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0">
+                <Border Background="{StaticResource SpSteelBrush}" Padding="0,16" StrokeShape="RoundRectangle 14" StrokeThickness="0">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCreateTapped" />
                     </Border.GestureRecognizers>
-                    <Label
-                        Text="Crear rutina"
-                        FontAttributes="Bold"
-                        FontSize="16"
-                        TextColor="#1E1E2E"
-                        HorizontalOptions="Center" />
+                    <Label Text="Crear rutina" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                 </Border>
-
             </VerticalStackLayout>
         </Border>
 
