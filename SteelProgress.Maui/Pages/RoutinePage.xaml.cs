@@ -11,6 +11,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class RoutinePage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private static readonly TimeSpan UndoWindow = TimeSpan.FromSeconds(5);
 
     private readonly RoutineViewModel _vm;
@@ -38,6 +41,7 @@ public partial class RoutinePage : ContentPage
     protected override async void OnDisappearing()
     {
         base.OnDisappearing();
+        if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
         if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
 
         PreviewLayer.IsVisible = false;
@@ -45,6 +49,7 @@ public partial class RoutinePage : ContentPage
 
         // Al salir (otra pestaña o el detalle) ya no se puede deshacer: se borra de verdad
         _undoTimer?.Cancel();
+        if (_vm.HasPendingDelete) AppToast.Dismiss(); // su «Deshacer» ya no serviría
         await _vm.CommitPendingDeleteAsync();
         if (_vm.IsReordering)
             await _vm.FinishReorderCommand.ExecuteAsync(null);
@@ -53,6 +58,7 @@ public partial class RoutinePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         _clientContext ??= _services.GetService<ClientContextService>();
         if (_clientContext is not null)
         {
@@ -291,7 +297,11 @@ public partial class RoutinePage : ContentPage
         _ = Task.Delay(UndoWindow, cts.Token).ContinueWith(async t =>
         {
             if (t.IsCanceled) return;
-            await MainThread.InvokeOnMainThreadAsync(_vm.CommitPendingDeleteAsync);
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                AppToast.Dismiss();
+                await _vm.CommitPendingDeleteAsync();
+            });
         }, TaskScheduler.Default);
     }
 

@@ -11,6 +11,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class WorkoutPage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private static readonly string[] Feelings = ["😫", "😕", "😐", "💪", "🔥"];
 
     private readonly WorkoutViewModel _vm;
@@ -41,6 +44,7 @@ public partial class WorkoutPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
         if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
         _timer?.Stop();
     }
@@ -48,6 +52,7 @@ public partial class WorkoutPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         _clientContext ??= Handler?.MauiContext?.Services.GetService<Core.Services.ClientContextService>();
         if (_clientContext is not null)
         {

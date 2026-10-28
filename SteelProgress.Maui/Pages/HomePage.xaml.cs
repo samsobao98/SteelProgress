@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using MauiIcons.Core;
 using SteelProgress.Core.ViewModels;
 
@@ -5,6 +6,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class HomePage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly HomeViewModel _vm;
 
     public HomePage(HomeViewModel vm)
@@ -18,9 +22,17 @@ public partial class HomePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         await _vm.RefreshAsync();
         await RunEntryAnimationsAsync();
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (AppDialogs.IsShowing) _coveredByPopup = true; // solo se abrió una ventana encima
+    }
+
 
     private async Task RunEntryAnimationsAsync()
     {

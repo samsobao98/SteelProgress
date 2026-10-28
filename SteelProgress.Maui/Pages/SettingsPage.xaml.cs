@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using System.ComponentModel;
 using SteelProgress.Core.ViewModels;
 
@@ -5,6 +6,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class SettingsPage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly SettingsViewModel _vm;
 
     public SettingsPage(SettingsViewModel vm)
@@ -17,6 +21,7 @@ public partial class SettingsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         await _vm.LoadAsync();
         UpdateModeSelector();
 
@@ -26,6 +31,13 @@ public partial class SettingsPage : ContentPage
             PageContent.FadeToAsync(1, 260, Easing.CubicOut),
             PageContent.TranslateToAsync(0, 0, 260, Easing.CubicOut));
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (AppDialogs.IsShowing) _coveredByPopup = true; // solo se abrió una ventana encima
+    }
+
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {

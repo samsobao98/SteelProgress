@@ -104,17 +104,20 @@ public partial class WorkoutViewModel : ObservableObject
         var selected = Routines.FirstOrDefault(r => r.Id == _pickedRoutineId)
                        ?? Routines.FirstOrDefault(r => r.Id == activeId)
                        ?? Routines.FirstOrDefault();
-        if (ReferenceEquals(selected, SelectedRoutine) || selected?.Id == SelectedRoutine?.Id)
-        {
-            _selectedRoutine = selected; // misma rutina: solo refrescar sus días
-            OnPropertyChanged(nameof(SelectedRoutine));
-            _dayOptionsLoad = LoadDayOptionsAsync();
-        }
-        else
-            SelectedRoutine = selected;
+        // Una sola carga de días aunque la rutina sea la misma (los días o «Toca» pueden haber cambiado)
+        _suppressDayOptionsLoad = true;
+        SelectedRoutine = selected;
+        _suppressDayOptionsLoad = false;
+        _dayOptionsLoad = LoadDayOptionsAsync();
     }
 
-    partial void OnSelectedRoutineChanged(Routine? value) => _dayOptionsLoad = LoadDayOptionsAsync();
+    private bool _suppressDayOptionsLoad;
+
+    partial void OnSelectedRoutineChanged(Routine? value)
+    {
+        if (!_suppressDayOptionsLoad)
+            _dayOptionsLoad = LoadDayOptionsAsync();
+    }
 
     private async Task LoadDayOptionsAsync()
     {

@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using System.ComponentModel;
 using SteelProgress.Core.ViewModels;
 
@@ -6,6 +7,9 @@ namespace SteelProgress.Maui.Pages;
 // Se abre con la ruta de un .steel ya copiado a la caché: GoToAsync("ImportPreviewPage", { ["path"] = ruta })
 public partial class ImportPreviewPage : ContentPage, IQueryAttributable
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly ImportViewModel _vm;
     private string? _path;
 
@@ -25,6 +29,7 @@ public partial class ImportPreviewPage : ContentPage, IQueryAttributable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         if (_path is null || _vm.IsLoaded || _vm.IsDone) return;
 
         await _vm.LoadAsync(File.OpenRead(_path));
@@ -51,6 +56,7 @@ public partial class ImportPreviewPage : ContentPage, IQueryAttributable
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
         if (_vm.IsDone || !_vm.IsLoaded) _vm.Dispose();
     }
 

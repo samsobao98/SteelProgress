@@ -13,6 +13,16 @@ public enum ToastKind { Info, Success, Error, Record }
 public static class AppToast
 {
     private static ISnackbar? _current;
+    private static ToastCardView? _card;
+
+    /// <summary>Quita el aviso visible (p. ej. un «Deshacer» que ya no se puede usar).</summary>
+    public static void Dismiss() => MainThread.BeginInvokeOnMainThread(async () =>
+    {
+        _card?.Dismiss();
+        if (_current is null) return;
+        try { await _current.Dismiss(); } catch (Exception) { }
+        _current = null;
+    });
 
     public static void Show(string message, ToastKind kind = ToastKind.Info, string? actionText = null, Action? action = null, TimeSpan? duration = null)
         => MainThread.BeginInvokeOnMainThread(async () =>
@@ -42,7 +52,7 @@ public static class AppToast
             // allí se usa una tarjeta propia abajo que se cierra sola
             if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                await AppDialogs.ShowToastCardAsync(message, Color.FromArgb(background), Color.FromArgb(text), actionText, action, time);
+                await AppDialogs.ShowToastCardAsync(message, Color.FromArgb(background), Color.FromArgb(text), actionText, action, time, v => _card = v);
                 return;
             }
 
@@ -57,7 +67,7 @@ public static class AppToast
             catch (Exception)
             {
                 // Si el Snackbar falla, el aviso sale como tarjeta propia
-                await AppDialogs.ShowToastCardAsync(message, Color.FromArgb(background), Color.FromArgb(text), actionText, action, time);
+                await AppDialogs.ShowToastCardAsync(message, Color.FromArgb(background), Color.FromArgb(text), actionText, action, time, v => _card = v);
             }
         });
 }

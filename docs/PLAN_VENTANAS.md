@@ -49,6 +49,9 @@ Ejercicios (añadir vídeo, permiso), Clientes (menú) y selector de perfil (eli
 * Un doble toque no abre dos ventanas.
 * Windows: todo se puede usar con ratón.
 * TalkBack lee el título y los botones.
+* El aviso breve (Snackbar) no tapa la barra de pestañas, «Serie hecha» ni el botón +. Si lo hace, `Snackbar.Make` admite un elemento de anclaje.
+* Rutinas: eliminar desde ⋮ y pulsar «Deshacer»; eliminar, cambiar de pestaña y volver (el aviso debe haberse ido y la rutina estar borrada).
+* Abrir una ventana con la vista previa de una rutina abierta.
 
 ## Estado
 
@@ -68,4 +71,5 @@ Ya no queda ningún `DisplayActionSheetAsync`, `DisplayAlertAsync` ni `DisplayPr
 * Tocar fuera o Atrás equivale a «Cancelar».
 * La petición de texto valida dentro de la misma ventana (p. ej. el peso en Entreno: «Un número entre 0 y 1000»).
 * `ConfirmDialogService` (Core) admite ahora el texto del botón y si es destructivo (`ConfirmRequest`).
-* **Windows**: el Snackbar necesitaría registrar la app para notificaciones del sistema, así que allí el aviso breve es una tarjeta propia abajo que se cierra sola. También se usa si el Snackbar fallara en el móvil.
+* **Windows**: el Snackbar necesitaría registrar la app para notificaciones del sistema, así que allí el aviso breve es una tarjeta propia abajo que se cierra sola. También se usa si el Snackbar fallara en el móvil. Mientras está visible bloquea los toques unos segundos; tocar fuera la cierra y ese toque se pierde.
+* **Las ventanas son páginas modales** (así funciona el `Popup` del Toolkit): al abrir una, la pantalla de debajo recibe `OnDisappearing` y al cerrarla `OnAppearing`. Todas las pantallas lo ignoran cuando la causa es una ventana propia (`AppDialogs.IsShowing`); si no, Rutinas confirmaría el borrado pendiente al abrir el ⋮ y las listas se recargarían con cada aviso.

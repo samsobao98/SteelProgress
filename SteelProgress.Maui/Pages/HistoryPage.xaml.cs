@@ -1,9 +1,13 @@
+using SteelProgress.Maui.Services;
 using SteelProgress.Core.ViewModels;
 
 namespace SteelProgress.Maui.Pages;
 
 public partial class HistoryPage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly HistoryViewModel _vm;
 
     public HistoryPage(HistoryViewModel vm)
@@ -20,12 +24,14 @@ public partial class HistoryPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
         if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         _clientContext ??= Handler?.MauiContext?.Services.GetService<Core.Services.ClientContextService>();
         if (_clientContext is not null)
         {

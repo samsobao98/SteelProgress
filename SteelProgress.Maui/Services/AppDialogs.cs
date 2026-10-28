@@ -15,6 +15,15 @@ public static class AppDialogs
     // Una ventana cada vez: un doble toque no abre dos
     private static bool _isOpen;
 
+    // El Popup del Toolkit es una página modal: al abrirse, la página de debajo recibe
+    // OnDisappearing y al cerrarse OnAppearing. Las páginas lo consultan para no tratarlo
+    // como si el usuario se hubiera ido (p. ej. Rutinas confirmaría el borrado pendiente).
+    private static int _showing;
+    public static bool IsShowing => _showing > 0;
+
+    // Sin borde ni fondo propios del Popup: cada ventana dibuja su tarjeta
+    private static Shape NoShape() => new RoundRectangle { CornerRadius = 0, StrokeThickness = 0, Stroke = Colors.Transparent, Fill = Colors.Transparent };
+
     /// <summary>Menú de opciones. Devuelve la opción elegida o null si se cancela.</summary>
     public static Task<string?> ChooseAsync(string title, IEnumerable<string> options, string? destructive = null, string? subtitle = null) =>
         ShowAsync<string?>(new ActionSheetView(title, subtitle, options.ToList(), destructive), bottom: true, fallback: null);
@@ -38,22 +47,33 @@ public static class AppDialogs
             bottom: false, fallback: null);
 
     /// <summary>Aviso breve como tarjeta abajo que se cierra sola (alternativa al Snackbar en Windows).</summary>
-    internal static async Task ShowToastCardAsync(string message, Color background, Color text, string? actionText, Action? action, TimeSpan duration)
+    internal static async Task ShowToastCardAsync(string message, Color background, Color text, string? actionText, Action? action, TimeSpan duration,
+        Action<ToastCardView?>? track = null)
     {
         var page = CurrentPage();
         if (page is null || _isOpen) return;
 
         var view = new ToastCardView(message, background, text, actionText, action);
+        track?.Invoke(view);
         var options = new PopupOptions
         {
             PageOverlayColor = Colors.Transparent,
-            Shape = null,
+            Shape = NoShape(),
             Shadow = null,
             CanBeDismissedByTappingOutsideOfPopup = true
         };
-        var shown = page.ShowPopupAsync<bool?>(view, options);
-        _ = Task.Delay(duration).ContinueWith(_ => MainThread.BeginInvokeOnMainThread(() => view.Dismiss()), TaskScheduler.Default);
-        await shown;
+        _showing++;
+        try
+        {
+            var shown = page.ShowPopupAsync<bool?>(view, options);
+            _ = Task.Delay(duration).ContinueWith(_ => MainThread.BeginInvokeOnMainThread(() => view.Dismiss()), TaskScheduler.Default);
+            await shown;
+        }
+        finally
+        {
+            _showing--;
+            track?.Invoke(null);
+        }
     }
 
     private static async Task<T> ShowAsync<T>(DialogView<T> view, bool bottom, T fallback)
@@ -62,12 +82,13 @@ public static class AppDialogs
         if (page is null || _isOpen) return fallback;
 
         _isOpen = true;
+        _showing++;
         try
         {
             var options = new PopupOptions
             {
                 PageOverlayColor = Color.FromArgb("#990A0A10"),
-                Shape = null,
+                Shape = NoShape(),
                 Shadow = null,
                 CanBeDismissedByTappingOutsideOfPopup = true
             };
@@ -75,7 +96,11 @@ public static class AppDialogs
             var result = await page.ShowPopupAsync<T>(view, options);
             return result.WasDismissedByTappingOutsideOfPopup ? fallback : result.Result ?? fallback;
         }
-        finally { _isOpen = false; }
+        finally
+        {
+            _isOpen = false;
+            _showing--;
+        }
     }
 
     private static Page? CurrentPage()

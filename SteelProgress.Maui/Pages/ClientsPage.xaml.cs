@@ -6,6 +6,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class ClientsPage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly ClientsViewModel _vm;
 
     public ClientsPage(ClientsViewModel vm)
@@ -19,12 +22,20 @@ public partial class ClientsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         await _vm.RefreshAsync();
 
         ClientList.Opacity = 0;
         ClientList.TranslationY = 12;
         await Task.WhenAll(ClientList.FadeToAsync(1, 260, Easing.CubicOut), ClientList.TranslateToAsync(0, 0, 260, Easing.CubicOut));
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (AppDialogs.IsShowing) _coveredByPopup = true; // solo se abrió una ventana encima
+    }
+
 
     // Al tocar un cliente: qué hacer con él
     private async void OnClientTapped(object? sender, TappedEventArgs e)

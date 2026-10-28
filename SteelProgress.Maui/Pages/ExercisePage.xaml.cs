@@ -9,6 +9,9 @@ namespace SteelProgress.Maui.Pages;
 
 public partial class ExercisePage : ContentPage
 {
+    // Ver AppDialogs.IsShowing: las ventanas propias son páginas modales
+    private bool _coveredByPopup;
+
     private readonly ExerciseViewModel _vm;
     private readonly List<(string? value, Border chip, Label label)> _groupChips = new();
     private bool _chipsBuilt;
@@ -23,6 +26,7 @@ public partial class ExercisePage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
         if (!_chipsBuilt)
         {
             _chipsBuilt = true;
@@ -31,6 +35,13 @@ public partial class ExercisePage : ContentPage
         await _vm.RefreshAsync();
         await RunEntryAnimationsAsync();
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (AppDialogs.IsShowing) _coveredByPopup = true; // solo se abrió una ventana encima
+    }
+
 
     // ── Chips de filtro por grupo muscular ───────────────────────────────
 
