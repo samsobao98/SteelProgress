@@ -177,7 +177,7 @@ Hoy todas las entidades usan `int Id` autonumérico, que cambia de un móvil a o
 
 * `AppDbContext` ya filtra por `CurrentUserId`; `Client` sigue el mismo patrón.
 * `SaveChangesAsync` asigna `UserId` a ejercicios nuevos: los ejercicios importados deben entrar con el `UserId` del perfil que importa.
-* `SteelProgress.Data` lo comparten WPF (net8) y MAUI (EF 10). Las migraciones nuevas tienen que funcionar en los dos o generarse con cuidado (ya hay un aviso suprimido por esta diferencia en `MauiProgram.cs`).
+* `SteelProgress.Data` lo comparten las pruebas (net8) y MAUI (EF 10); la app WPF ya no existe. Las migraciones nuevas tienen que funcionar en los dos o generarse con cuidado (ya hay un aviso suprimido por esta diferencia en `MauiProgram.cs`).
 
 ---
 
@@ -301,7 +301,7 @@ Cada fase es usable por sí sola.
 | **5. Clientes** | `Client`, `ClientsPage`, rutinas por cliente, "Enviar rutina", "¿Quién entrena?" y sesiones presenciales, copiar ejercicios entre perfiles | Entrenador organizado por clientes |
 | **6. Devolución de sesiones** | Paquete `sessions`, "Enviar a mi entrenador", importar en la ficha del cliente, progreso del cliente | Circuito completo entrenador ↔ cliente |
 | 7. Versiones de rutinas | Actualizar una rutina recibida sin perder el historial | Seguimiento a largo plazo |
-| Después | Escritorio con las mismas funciones; envío dentro de la app con servidor; series prescritas una a una | — |
+| Después | Envío dentro de la app con servidor; series prescritas una a una. (La app MAUI ya corre en Windows con las mismas funciones) | — |
 
 Recomendación: **1 → 2 → 3 → 4** primero; con eso la app ya se diferencia aunque no haya clientes. Las fases 5–6 completan la parte de entrenadores.
 
@@ -316,7 +316,7 @@ Recomendación: **1 → 2 → 3 → 4** primero; con eso la app ya se diferencia
 | D3 | Prescripción | Por ejercicio · Serie a serie | Por ejercicio en la fase 2; serie a serie más adelante |
 | D4 | Límite de tamaño de vídeo | 25 / 50 / 100 MB | 50 MB y aviso al exportar |
 | D5 | Ejercicios importados | Editables · Solo lectura con opción de duplicar | Editables, marcando que vienen de otro autor |
-| D6 | Biblioteca de ejercicios inicial | Vacía · Precargada con ejercicios comunes sin vídeo | Precargada: un usuario nuevo puede empezar sin crear nada |
+| ~~D6~~ | ~~Biblioteca de ejercicios inicial~~ | **Hecho:** precargada con 111 ejercicios comunes sin vídeo (`exercise_library.json`), con `Uid` fijo para que compartir rutinas no los duplique | — |
 
 ---
 
@@ -348,6 +348,8 @@ Maquetas aprobadas por Samuel el 2026-10-27 en `docs/maquetas/` (no son la app r
 * **Entreno libre** (sin rutina): propuesto en las maquetas, opcional y fuera de las fases actuales.
 
 ### 12.3. Orden recomendado del rediseño
+
+Estado (2026-10-28): el punto 1 está hecho (`Tokens.xaml`, Space Grotesk); las pantallas aún no lo usan. Rutinas ya tiene la navegación en profundidad (lista → detalle con días y ejercicios reordenables) pero no el estilo de las maquetas.
 
 1. Sistema de diseño (base para todo).
 2. Entreno.

@@ -1,6 +1,8 @@
 # Implementación por fases — estado y cómo probar
 
-Cada fase está en **su propia rama**, encadenada a la anterior. Si una falla, las anteriores siguen sirviendo.
+> **Estado (2026-10-28):** las cinco fases están fusionadas en `maui` junto con el trabajo local que no estaba en la nube (ver [Fusión con `maui`](#fusión-con-maui-2026-10-28)). Probado en el PC y en el móvil. Las ramas `fase*` se conservan solo como referencia.
+
+Cada fase se desarrolló en **su propia rama**, encadenada a la anterior:
 
 ```
 maui ── diseno-entrenador ── fase1-base-datos ── fase2-ajustes ── fase3-multimedia ── fase4-compartir ── fase5-clientes
@@ -9,7 +11,7 @@ maui ── diseno-entrenador ── fase1-base-datos ── fase2-ajustes ─�
                                                    prescripción)
 ```
 
-Para probar una fase: `git checkout <rama>`, compilar y ejecutar en el móvil. La última rama incluye todo lo anterior.
+Para probar todo: compilar y ejecutar `maui` (Windows Machine o Android desde Visual Studio).
 
 ## Cómo se ha verificado (sin Android)
 
@@ -21,7 +23,9 @@ En la nube no hay SDK de Android, así que:
 * **Recursos** (`StaticResource`) de todas las pantallas comprobados con un script: un recurso que falta no lo detecta el compilador y haría fallar la pantalla al abrirse.
 * **Código de Android** (`MainActivity`) compilado contra las librerías de referencia de Android, con MAUI simulado.
 
-Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la galería y la cámara del móvil, y la compilación real para Android/iOS.
+Lo que **no** se ha podido comprobar en la nube: cómo se ve, el comportamiento táctil, la galería y la cámara del móvil, y la compilación real para Android/iOS.
+
+Tras la fusión, en el PC: 88 pruebas automáticas en verde, compilación real para Android y Windows sin errores ni avisos, migración comprobada sobre una copia de la base de datos real y prueba manual de la app.
 
 ---
 
@@ -38,12 +42,12 @@ Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la
 
 **Qué hace**
 * **Ajustes** (engranaje en Inicio): vista simple o entrenador, bloques de la vista simple y «Yo también entreno». Se guarda al momento. Primera pantalla con el sistema de diseño.
-* **Rutinas → Ejercicios**: cada ejercicio muestra lo prescrito («4 × 6–8 · RPE 8 · 1:30») y el botón «Editar series, reps e intensidad» abre un panel inferior. Los campos avanzados aparecen según la vista y los bloques, o si ya tienen valor (la vista simple nunca esconde datos).
+* **Detalle de rutina**: cada ejercicio muestra lo prescrito («4 × 6–8 · RPE 8 · 1:30») y el menú ⋮ → «Editar series, reps e intensidad» abre un panel inferior. Los campos avanzados aparecen según la vista y los bloques, o si ya tienen valor (la vista simple nunca esconde datos).
 * **Entreno**: debajo del ejercicio seleccionado, el objetivo y la nota del entrenador.
 
 **Probar**
 1. Inicio → engranaje → cambiar entre Simple y Entrenador; activar y desactivar bloques; salir y volver: debe recordarse.
-2. Rutinas → elegir rutina, día y ejercicio → «Editar series…». En vista simple solo series, reps y notas; activar «Intensidad» en Ajustes y volver: aparece la sección. En vista entrenador, todo.
+2. Rutinas → abrir una rutina → elegir el día → ⋮ del ejercicio → «Editar series…». En vista simple solo series, reps y notas; activar «Intensidad» en Ajustes y volver: aparece la sección. En vista entrenador, todo.
 3. Escribir valores (probar «72,5» con coma) y guardar; ver el texto bajo el ejercicio. Probar un valor incorrecto (RPE 11): debe avisar sin guardar.
 4. Iniciar un entreno de ese día: debe verse «Objetivo: …» y la nota.
 
@@ -68,9 +72,9 @@ Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la
 
 **Qué hace**
 * Archivo **`.steel`**: un ZIP con `manifest.json` (autor, mensaje, fecha, si lleva vídeos), `data.json` (ejercicios y rutinas con su prescripción) y `media/` si se exporta con vídeos.
-* **Rutinas → Compartir**: con la rutina seleccionada, elegir con o sin vídeos (se ve el tamaño), escribir un mensaje opcional y compartir con el menú del móvil (WhatsApp, correo, Drive…).
-* **Rutinas → Importar**: elegir un `.steel`; se abre la **vista previa** con autor, mensaje, días, ejercicios nuevos, vídeos y, si ya la tienes, «Actualización vX → vY».
-* **Importar** reutiliza los ejercicios que ya tienes (por su `Uid`), solo trae los vídeos que faltan y:
+* **Compartir** (icono arriba a la derecha en el detalle de la rutina): elegir con o sin vídeos (se ve el tamaño), escribir un mensaje opcional y compartir con el menú del móvil (WhatsApp, correo, Drive…).
+* **Importar** (icono de descarga junto al título de Rutinas): elegir un `.steel`; se abre la **vista previa** con autor, mensaje, días, ejercicios nuevos, vídeos y, si ya la tienes, «Actualización vX → vY».
+* **Importar** reutiliza los ejercicios que ya tienes (por su `Uid`, también los de la biblioteca precargada), solo trae los vídeos que faltan y:
   * **Actualizar rutina**: cambia la rutina que ya tienes sin perder historial (los días se reutilizan por orden y un día con entrenos nunca se borra);
   * **Guardar como copia**: crea otra rutina («Nombre (v4)»).
 * Si un ejercicio importado se llama igual que uno tuyo distinto, entra como «Nombre (2)».
@@ -79,8 +83,8 @@ Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la
 * **Abrir desde otras apps (Android)**: tocar un `.steel` en WhatsApp o en el correo y elegir SteelProgress. Si aún no has elegido perfil, se abre al elegirlo. Va en su propio commit (`ce629f9`): si diera problemas al compilar o abrir, se puede revertir solo ese.
 
 **Probar**
-1. Rutinas → seleccionar una rutina → «↗ Compartir» → con vídeos → escribir un mensaje → enviártelo (por ejemplo, a ti mismo por WhatsApp o a Drive).
-2. En el mismo móvil, «↓ Importar» → elegir el archivo: debe decir que ya la tienes («Actualización v1 → v1») y ofrecer guardarla como copia.
+1. Rutinas → abrir una rutina → icono de compartir → con vídeos → escribir un mensaje → enviártelo (por ejemplo, a ti mismo por WhatsApp o a Drive).
+2. En el mismo móvil, Rutinas → icono de importar → elegir el archivo: debe decir que ya la tienes («Actualización v1 → v1») y ofrecer guardarla como copia.
 3. Con otro perfil (o en otro móvil): importar → debe crear la rutina con sus ejercicios, prescripción y vídeos.
 4. Cambiar algo de la rutina original, subir su versión (de momento no hay botón: se hará en la fase 7) y volver a compartir para probar «Actualizar».
 5. Tocar el `.steel` desde WhatsApp o un gestor de archivos → «Abrir con SteelProgress».
@@ -113,15 +117,45 @@ Lo que **no** se ha podido comprobar: cómo se ve, el comportamiento táctil, la
 
 ---
 
+## Fusión con `maui` (2026-10-28)
+
+Mientras se hacían las fases en la nube, en `maui` (PC) había 7 commits que no estaban subidos:
+
+* **Rutinas rediseñadas**: lista de rutinas con resumen y una pantalla de detalle con días en chips y ejercicios reordenables arrastrando (`RoutineDetailPage`).
+* **Biblioteca de ejercicios precargada** (decisión D6): 111 ejercicios de sistema (`IsSystem`) desde `Resources/Raw/exercise_library.json`, con músculos secundarios, material e instrucciones; ficha de detalle en Ejercicios y distintivo «Propio» en los del usuario.
+* **La app MAUI corre también en Windows** (MSIX); la app WPF (`SteelProgress.App`) queda retirada de la solución.
+* Arreglos de `LauncherPage` y del botón flotante, y `SQLitePCLRaw` 2.1.13 (CVE-2025-6965).
+
+Cómo se resolvieron los conflictos:
+
+* **Rutinas**: se mantiene lista + detalle. Lo de la nube pasa a esas pantallas: editor de prescripción y Compartir en el detalle; Importar y el aviso de cliente activo en la lista.
+* **Ejercicios**: la ficha de detalle y la biblioteca conviven con las miniaturas y la sección de vídeos e imágenes.
+* **Migraciones**: `AddExerciseLibraryFields` (local, 2026-07-14) y `AddSharingAndPrescription` añadían las dos `Equipment` e `Instructions`. Se quitaron de la segunda y el snapshot recoge `SecondaryMuscles` e `IsSystem`. Un móvil que hubiera instalado la versión de la nube antes de la fusión fallaría al migrar: habría que borrar los datos de la app (no se llegó a instalar en ninguno).
+* **Biblioteca y compartir**: los ejercicios de sistema tienen un `Uid` fijo calculado a partir del nombre, igual en todos los móviles, para que una rutina importada los reconozca en vez de duplicarlos. Al arrancar se corrigen los de bibliotecas ya sembradas.
+* **Pruebas**: nueva `MigrationTests.ModelSnapshotMatchesCurrentModel`, que falla si el snapshot de EF no coincide con el modelo (por ejemplo, tras fusionar ramas con migraciones).
+
+---
+
+## Siguiente: rediseño de pantallas
+
+El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantallas antiguas siguen con colores escritos a mano. Orden acordado (§12.3 del documento de diseño), siguiendo las maquetas de `docs/maquetas/propuesta_diseno.html`:
+
+1. Entreno.
+2. Rutinas (pasar la lista y el detalle a los tokens y a las maquetas).
+3. Progreso (absorbe Historial) e Inicio.
+4. Ejercicios (filtro «Propios», ficha con vídeo, mejor marca, 1RM estimado).
+5. Respuesta táctil y animaciones en toda la app.
+
+---
+
 ## Pendiente de decidir
 
 * **D1** — reproductor de vídeo dentro de la app (`CommunityToolkit.Maui.MediaElement`, dependencia nueva) o seguir con el del sistema.
-* **D6** — biblioteca de ejercicios precargada.
 * Límite de vídeo configurable en Ajustes (hoy fijo en 50 MB).
 
 ## Notas técnicas
 
 * `Directory.Build.props` usa `C:\SPBuild\` (ruta de Windows). Para compilar en Linux se usa una copia temporal con otra ruta; no hace falta cambiar nada en tu PC.
-* `RoutineViewModel` y `ExerciseViewModel` aceptan sus servicios nuevos como opcionales para que la app de escritorio (WPF), que los crea a mano, siga compilando.
+* `ExerciseViewModel` y `RoutineDetailViewModel` aceptan sus servicios nuevos (multimedia, opciones de vista) como opcionales para poder crearlos a mano en las pruebas. La app WPF, que era el motivo original, ya no está en la solución.
 * Corregido durante las pruebas: al quitar un vídeo de un ejercicio cargado, EF Core lo «resucitaba» en vez de borrarlo (`ExerciseRepository.RemoveMediaAsync`). Lo mismo se evita al quitar días en una actualización de rutina.
 * Ojo: la asignación automática del perfil a los datos nuevos (`AppDbContext.SaveChangesAsync`) solo actúa con `SaveChangesAsync`, no con `SaveChanges`. El código nuevo usa siempre la versión asíncrona.
