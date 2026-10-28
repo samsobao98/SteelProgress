@@ -1,6 +1,6 @@
 # Implementación por fases — estado y cómo probar
 
-> **Estado (2026-10-28):** las cinco fases están fusionadas en `maui` junto con el trabajo local que no estaba en la nube (ver [Fusión con `maui`](#fusión-con-maui-2026-10-28)). Probado en el PC y en el móvil. Las ramas `fase*` se conservan solo como referencia.
+> **Estado (2026-10-28):** las cinco fases están fusionadas en `maui` junto con el trabajo local que no estaba en la nube (ver [Fusión con `maui`](#fusión-con-maui-2026-10-28)). Probadas por el usuario tras la fusión. Las ramas `fase*` se conservan solo como referencia.
 
 Cada fase se desarrolló en **su propia rama**, encadenada a la anterior:
 
