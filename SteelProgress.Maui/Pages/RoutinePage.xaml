@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="SteelProgress.Maui.Pages.RoutinePage"
-    x:Name="Page"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
     xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
     BackgroundColor="{StaticResource SpBg}"
     Shell.NavBarIsVisible="False"
     Title="Rutinas">
@@ -17,7 +17,7 @@
         <!-- Rutina activa: placa protagonista con la semana y lo que toca -->
         <DataTemplate x:Key="ActiveRoutineTemplate">
             <Grid Padding="0,0,0,12">
-                <SwipeView IsEnabled="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" BackgroundColor="Transparent">
+                <SwipeView IsEnabled="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" BackgroundColor="Transparent">
                     <SwipeView.RightItems>
                         <SwipeItems Mode="Execute">
                             <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
@@ -39,7 +39,7 @@
                                     <Label Text="● ACTIVA" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
                                 </Border>
                                 <mi:MauiIcon Grid.Column="1" Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22"
-                                             HorizontalOptions="End" IsVisible="{Binding BindingContext.IsReordering, Source={x:Reference Page}}" />
+                                             HorizontalOptions="End" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
                             </Grid>
                             <Label Text="{Binding Name}" FontFamily="SpaceGroteskBold" FontSize="22" TextColor="{StaticResource SpText}" Margin="0,10,0,0" LineBreakMode="TailTruncation" />
                             <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" Margin="0,2,0,0" />
@@ -82,7 +82,7 @@
         <!-- Resto de rutinas: tarjeta con insignia -->
         <DataTemplate x:Key="RoutineCardTemplate">
             <Grid Padding="0,0,0,12">
-                <SwipeView IsEnabled="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" BackgroundColor="Transparent">
+                <SwipeView IsEnabled="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" BackgroundColor="Transparent">
                     <SwipeView.RightItems>
                         <SwipeItems Mode="Execute">
                             <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
@@ -103,8 +103,8 @@
                                 <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
                             </VerticalStackLayout>
                             <Grid Grid.Column="2" VerticalOptions="Center">
-                                <Label Text="›" FontSize="22" TextColor="{StaticResource SpText4}" IsVisible="{Binding BindingContext.IsNotReordering, Source={x:Reference Page}}" />
-                                <mi:MauiIcon Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" IsVisible="{Binding BindingContext.IsReordering, Source={x:Reference Page}}" />
+                                <Label Text="›" FontSize="22" TextColor="{StaticResource SpText4}" IsVisible="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
+                                <mi:MauiIcon Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
                             </Grid>
                         </Grid>
                     </Border>

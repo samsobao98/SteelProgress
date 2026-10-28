@@ -6,6 +6,19 @@ namespace SteelProgress.Core.Services;
 // Avance semanal de una rutina y qué día toca. Lo usan la lista de Rutinas y, más adelante, Inicio.
 public static class RoutineSchedule
 {
+    public const string DeleteBlockedMessage = "Termina o descarta el entreno en curso antes de eliminar.";
+
+    /// <summary>
+    /// Borrar una rutina o un día borra en cascada sus sesiones, incluida la del entreno en curso,
+    /// y Entreno fallaría al guardar la siguiente serie: con un entreno activo no se permite.
+    /// </summary>
+    public static bool CanDeleteNow()
+    {
+        if (!WorkoutStateService.IsWorkoutActive) return true;
+        NotificationService.Error(DeleteBlockedMessage);
+        return false;
+    }
+
     /// <summary>Lunes de la semana de <paramref name="today"/>.</summary>
     public static DateTime WeekStart(DateTime today)
     {

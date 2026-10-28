@@ -9,6 +9,8 @@ using SteelProgress.Domain.Entities;
 namespace SteelProgress.Tests;
 
 // Lista de rutinas: rutina activa, semana, «Toca», orden, borrar con deshacer y panel de añadir ejercicios
+// WorkoutStateService es estático: las clases que lo tocan no se ejecutan en paralelo
+[Collection("EstadoEntreno")]
 public class RoutineListTests : IDisposable
 {
     // Miércoles 28 de octubre de 2026: la semana empieza el lunes 26
@@ -30,6 +32,7 @@ public class RoutineListTests : IDisposable
     {
         _connection.Open();
         _user.SetCurrentUser(1);
+        WorkoutStateService.IsWorkoutActive = false;
         using var db = Db();
         db.Database.Migrate();
         db.UserProfiles.Add(new UserProfile { Id = 1, Name = "Laura" });
@@ -250,6 +253,66 @@ public class RoutineListTests : IDisposable
         Assert.Equal("«B» eliminada", vm.PendingDeleteText);
         using var db = Db();
         Assert.Equal(new[] { "B", "C" }, db.Routines.Select(r => r.Name).OrderBy(n => n).ToArray());
+    }
+
+    [Fact]
+    public async Task CannotDeleteDuringAWorkout()
+    {
+        // Borrar la rutina borraría en cascada la sesión en curso y Entreno fallaría
+        var a = AddRoutine("A", "Día 1", "Día 2");
+        var vm = Vm();
+        await vm.RefreshAsync();
+        var detail = new RoutineDetailViewModel(new RoutineRepository(Db()), new ExerciseRepository(Db()));
+        await detail.InitializeAsync(a);
+
+        WorkoutStateService.IsWorkoutActive = true;
+        try
+        {
+            await vm.DeleteWithUndoAsync(vm.Items[0]);
+            await detail.DeleteDayAsync(detail.Days[0]);
+            await detail.DeleteRoutineAsync();
+        }
+        finally { WorkoutStateService.IsWorkoutActive = false; }
+
+        Assert.False(vm.HasPendingDelete);
+        using var db = Db();
+        Assert.Single(db.Routines);
+        Assert.Equal(2, db.RoutineDays.Count());
+    }
+
+    [Fact]
+    public async Task PendingDeleteIsCancelledIfAWorkoutStarts()
+    {
+        AddRoutine("A", "Día");
+        var vm = Vm();
+        await vm.RefreshAsync();
+        await vm.DeleteWithUndoAsync(vm.Items[0]);
+
+        WorkoutStateService.IsWorkoutActive = true;
+        try { await vm.CommitPendingDeleteAsync(); }
+        finally { WorkoutStateService.IsWorkoutActive = false; }
+
+        Assert.Equal(new[] { "A" }, Names(vm));
+        using var db = Db();
+        Assert.Single(db.Routines);
+    }
+
+    [Fact]
+    public async Task RemovingAnExerciseRenumbersTheRest()
+    {
+        var routine = AddRoutine("A", "Día");
+        var vm = new RoutineDetailViewModel(new RoutineRepository(Db()), new ExerciseRepository(Db()));
+        await vm.InitializeAsync(routine);
+        vm.Picker.ToggleCommand.Execute(vm.Picker.Items.First(i => i.Name == "Sentadilla"));
+        vm.Picker.ToggleCommand.Execute(vm.Picker.Items.First(i => i.Name == "Curl de bíceps"));
+        await vm.AddSelectedExercisesCommand.ExecuteAsync(null);
+        var orders = new List<int[]>();
+        vm.ExercisesChanged += () => orders.Add(vm.DayExercises.Select(e => e.Order).ToArray());
+
+        await vm.DeleteExerciseAsync(vm.DayExercises[1]);
+
+        Assert.Equal(new[] { 1, 2 }, vm.DayExercises.Select(e => e.Order));
+        Assert.Equal(new[] { 1, 2 }, orders.Last()); // lo que ve la lista al refrescarse
     }
 
     // ── Panel «Añadir ejercicio» ──────────────────────────────────────────

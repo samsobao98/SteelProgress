@@ -189,6 +189,7 @@ public partial class RoutineDetailViewModel : ObservableObject
 
     public Task DeleteDayAsync(RoutineDay day) => LockedAsync(async () =>
     {
+        if (!RoutineSchedule.CanDeleteNow()) return;
         await _repository.DeleteDayAsync(day);
         await LoadDaysAsync();
     });
@@ -230,9 +231,11 @@ public partial class RoutineDetailViewModel : ObservableObject
     public Task DeleteExerciseAsync(RoutineDayExercise rde) => LockedAsync(async () =>
     {
         await _repository.DeleteExerciseFromDayAsync(rde);
+        // Renumerar antes de mostrar: si no, la lista enseñaría «1, 3»
+        var remaining = await _repository.GetExercisesByDayIdAsync(rde.RoutineDayId);
+        if (remaining.Count > 0)
+            await _repository.ReorderDayExercisesAsync(remaining);
         await LoadDayExercisesAsync();
-        if (DayExercises.Count > 0)
-            await _repository.ReorderDayExercisesAsync(DayExercises.ToList());
     });
 
     /// <summary>Guarda el orden actual de <see cref="DayExercises"/> tras un drag.</summary>
@@ -260,6 +263,7 @@ public partial class RoutineDetailViewModel : ObservableObject
 
     public async Task DeleteRoutineAsync()
     {
+        if (!RoutineSchedule.CanDeleteNow()) return;
         await LockedAsync(() => _repository.DeleteAsync(Routine));
         RoutineDeleted?.Invoke();
     }

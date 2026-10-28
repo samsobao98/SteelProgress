@@ -8,6 +8,8 @@ using SteelProgress.Domain.Entities;
 
 namespace SteelProgress.Tests;
 
+// WorkoutStateService es estático: las clases que lo tocan no se ejecutan en paralelo
+[Collection("EstadoEntreno")]
 public class PrescriptionEditorTests : IDisposable
 {
     private readonly SqliteConnection _connection = new("Data Source=:memory:");

@@ -10,6 +10,8 @@ using SteelProgress.Domain.Entities;
 namespace SteelProgress.Tests;
 
 // Pantalla de entreno: registrar series, sugerencias, récords, descanso y resumen
+// WorkoutStateService es estático: las clases que lo tocan no se ejecutan en paralelo
+[Collection("EstadoEntreno")]
 public class WorkoutSessionTests : IDisposable
 {
     private readonly SqliteConnection _connection = new("Data Source=:memory:");
@@ -33,6 +35,7 @@ public class WorkoutSessionTests : IDisposable
     {
         _connection.Open();
         _user.SetCurrentUser(1);
+        WorkoutStateService.IsWorkoutActive = false;
         using var db = Db();
         db.Database.Migrate();
         db.UserProfiles.Add(new UserProfile { Id = 1, Name = "Laura" });

@@ -120,6 +120,7 @@ public partial class RoutinePage : ContentPage
     private async void OnSwipeDeleteInvoked(object? sender, EventArgs e)
     {
         if ((sender as BindableObject)?.BindingContext is not RoutineListItem item) return;
+        if (!RoutineSchedule.CanDeleteNow()) return;
 
         // Borrar una rutina borra también su historial: si lo hay, se avisa antes
         var sessions = await _vm.CountSessionsAsync(item);

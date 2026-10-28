@@ -210,6 +210,7 @@ public partial class RoutineViewModel : ObservableObject
 
     public async Task DeleteWithUndoAsync(RoutineListItem item)
     {
+        if (!RoutineSchedule.CanDeleteNow()) return;
         await CommitPendingDeleteAsync(); // solo una pendiente a la vez
 
         _pendingIndex = Items.IndexOf(item);
@@ -233,6 +234,11 @@ public partial class RoutineViewModel : ObservableObject
     public async Task CommitPendingDeleteAsync()
     {
         if (PendingDelete is not { } item) return;
+        if (WorkoutStateService.IsWorkoutActive)
+        {
+            UndoDelete(); // se empezó un entreno mientras tanto: no se borra
+            return;
+        }
         PendingDelete = null;
 
         await _dbLock.WaitAsync();

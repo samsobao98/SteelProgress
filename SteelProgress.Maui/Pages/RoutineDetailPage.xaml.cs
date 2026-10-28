@@ -148,7 +148,7 @@ public partial class RoutineDetailPage : ContentPage
             if (!string.IsNullOrWhiteSpace(name))
                 await _vm.RenameDayAsync(day, name);
         }
-        else if (action == "Eliminar día")
+        else if (action == "Eliminar día" && RoutineSchedule.CanDeleteNow())
         {
             // Borrar un día borra también sus entrenos del historial
             var sessions = await _vm.CountSessionsOfDayAsync(day);
@@ -342,6 +342,8 @@ public partial class RoutineDetailPage : ContentPage
 
     private async void OnDeleteRoutineTapped(object? sender, TappedEventArgs e)
     {
+        if (!RoutineSchedule.CanDeleteNow()) return;
+
         // Borrar una rutina borra también su historial de entrenos
         var sessions = await _vm.CountSessionsOfRoutineAsync();
         var history = sessions switch
