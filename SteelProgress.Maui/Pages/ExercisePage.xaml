@@ -253,6 +253,8 @@
             VerticalOptions="End"
             TranslationY="700"
             IsVisible="False">
+            <!-- Se desplaza si no cabe (MaximumHeightRequest, en código) -->
+            <ScrollView x:Name="SheetScroll">
             <VerticalStackLayout Padding="20,16,20,36" Spacing="16">
 
                 <!-- Handle -->
@@ -341,6 +343,44 @@
                             PlaceholderColor="#45475A"
                             Placeholder="Descripción, variantes..."
                             BackgroundColor="Transparent"
+                            FontSize="15" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Material e instrucciones: vista entrenador -->
+                <Border
+                    BackgroundColor="#252536"
+                    Padding="16,12"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0"
+                    IsVisible="{Binding ShowDetailFields}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="11" Text="MATERIAL (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Entry
+                            Text="{Binding Equipment}"
+                            TextColor="#CDD6F4"
+                            PlaceholderColor="#45475A"
+                            Placeholder="ej. Barra, mancuernas, polea"
+                            BackgroundColor="Transparent"
+                            FontSize="15" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border
+                    BackgroundColor="#252536"
+                    Padding="16,12"
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0"
+                    IsVisible="{Binding ShowDetailFields}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="11" Text="INSTRUCCIONES (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Editor
+                            Text="{Binding Instructions}"
+                            TextColor="#CDD6F4"
+                            PlaceholderColor="#45475A"
+                            Placeholder="Cómo se ejecuta, puntos técnicos…"
+                            BackgroundColor="Transparent"
+                            AutoSize="TextChanges"
+                            MaximumHeightRequest="120"
                             FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
@@ -437,6 +477,7 @@
                 </Border>
 
             </VerticalStackLayout>
+            </ScrollView>
         </Border>
 
         <!-- ── Ficha de detalle (solo lectura) ── -->

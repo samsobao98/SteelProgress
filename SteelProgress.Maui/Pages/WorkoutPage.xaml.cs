@@ -193,9 +193,27 @@ public partial class WorkoutPage : ContentPage
     {
         if ((sender as BindableObject)?.BindingContext is not DoneSet done) return;
 
-        var action = await AppDialogs.ChooseAsync($"Serie {done.Number} · {done.Text}", [], destructive: "Borrar serie");
+        // La nota existente se puede corregir siempre; añadir una nueva, solo si está permitido
+        var noteAction = done.HasNotes ? "Editar nota" : _vm.CanNoteSets ? "Añadir nota" : null;
+        var action = await AppDialogs.ChooseAsync($"Serie {done.Number} · {done.Text}", noteAction is null ? [] : [noteAction],
+            destructive: "Borrar serie", subtitle: done.HasNotes ? done.Notes : null);
         if (action == "Borrar serie" && !_vm.DeleteSetCommand.IsRunning)
             await _vm.DeleteSetCommand.ExecuteAsync(done);
+        else if (action == noteAction && noteAction is not null)
+            await EditNoteAsync(done);
+    }
+
+    private async Task EditNoteAsync(DoneSet done)
+    {
+        var text = await AppDialogs.PromptAsync($"Nota de la serie {done.Number}", "Se verá en el historial y la próxima vez que hagas este ejercicio. Déjala vacía para borrarla.",
+            done.Notes, "ej. molestia en el hombro, última con ayuda…", maxLength: 200, accept: "Guardar");
+        if (text is null) return;
+        try { await _vm.SetNoteAsync(done, text); }
+        catch (Exception ex)
+        {
+            NotificationService.Error("No se pudo guardar la nota.");
+            System.Diagnostics.Debug.WriteLine(ex);
+        }
     }
 
     private async void OnWeightTapped(object? sender, TappedEventArgs e)

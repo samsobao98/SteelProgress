@@ -104,7 +104,7 @@
                         <Grid ColumnDefinitions="*,Auto" Padding="0,12">
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="Notas detalladas" Style="{StaticResource SpBody}" />
-                                <Label Text="Notas por serie" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                <Label Text="Apuntar una nota en cada serie del entreno" Style="{StaticResource SpSecondary}" FontSize="12" />
                             </VerticalStackLayout>
                             <Switch Grid.Column="1" IsToggled="{Binding ShowDetailedNotes}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
                         </Grid>
@@ -126,7 +126,7 @@
                     <Grid ColumnDefinitions="*,Auto" Padding="0,12">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="Yo también entreno con este perfil" Style="{StaticResource SpBody}" />
-                            <Label Text="Muestra «Yo» en Entreno y tu historial" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <Label Text="Muestra Progreso con tus propios entrenos aunque no estés con un cliente" Style="{StaticResource SpSecondary}" FontSize="12" />
                         </VerticalStackLayout>
                         <Switch Grid.Column="1" IsToggled="{Binding TrainsSelf}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
                     </Grid>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -110,6 +110,12 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateSetAsync(WorkoutSet workoutSet)
+    {
+        _context.WorkoutSets.Update(workoutSet);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateSessionAsync(WorkoutSession session)
     {
         _context.WorkoutSessions.Update(session);
@@ -125,7 +131,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .Where(ws => ws.Id != excludeSessionId)
             .SelectMany(ws => ws.Exercises, (ws, we) => new { ws.Date, we.ExerciseId, we.Sets })
             .Where(x => x.ExerciseId == exerciseId)
-            .SelectMany(x => x.Sets, (x, set) => new { x.Date, set.Id, set.Weight, set.Reps, set.IsWarmup })
+            .SelectMany(x => x.Sets, (x, set) => new { x.Date, set.Id, set.Weight, set.Reps, set.IsWarmup, set.Notes })
             .Where(x => !x.IsWarmup)
             .ToListAsync();
 
@@ -135,7 +141,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         var lastDate = sets.Max(x => x.Date);
         var last = sets.Where(x => x.Date == lastDate)
             .OrderBy(x => x.Id)
-            .Select(x => new PreviousSet(x.Weight, x.Reps))
+            .Select(x => new PreviousSet(x.Weight, x.Reps, x.Notes))
             .ToList();
 
         var bestRepsByWeight = sets
@@ -200,7 +206,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
     {
         var sets = await _context.WorkoutSessions
             .SelectMany(ws => ws.Exercises, (ws, we) => new { SessionId = ws.Id, ws.Date, we.ExerciseId, we.Exercise!.Name, we.Sets })
-            .SelectMany(x => x.Sets, (x, set) => new { x.SessionId, x.Date, x.ExerciseId, x.Name, set.Id, set.Weight, set.Reps, set.IsWarmup })
+            .SelectMany(x => x.Sets, (x, set) => new { x.SessionId, x.Date, x.ExerciseId, x.Name, set.Id, set.Weight, set.Reps, set.IsWarmup, set.Notes })
             .Where(x => !x.IsWarmup)
             .ToListAsync();
 
@@ -213,7 +219,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         return new TrainingLog(
             sessions.OrderByDescending(s => s.Date).ToList(),
             sets.OrderBy(x => x.Date).ThenBy(x => x.Id)
-                .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps))
+                .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps, x.Notes))
                 .ToList());
     }
 
@@ -224,7 +230,8 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
 
 }
 
-public sealed record PreviousSet(double Weight, int Reps);
+// Notes: la nota que se apuntó en esa serie (solo en LastSessionSets)
+public sealed record PreviousSet(double Weight, int Reps, string? Notes = null);
 
 // Historial para estadísticas: sesiones (la más reciente primero) y sus series en orden
 public sealed record TrainingLog(IReadOnlyList<LoggedSession> Sessions, IReadOnlyList<LoggedSet> Sets)
@@ -235,7 +242,8 @@ public sealed record TrainingLog(IReadOnlyList<LoggedSession> Sessions, IReadOnl
 public sealed record LoggedSession(int Id, DateTime Date, int? DurationMinutes, int? Feeling, string? Notes, bool IsComplete,
     int RoutineDayId, string DayName, string RoutineName);
 
-public sealed record LoggedSet(int SessionId, DateTime Date, int ExerciseId, string ExerciseName, int SetId, double Weight, int Reps);
+public sealed record LoggedSet(int SessionId, DateTime Date, int ExerciseId, string ExerciseName, int SetId, double Weight, int Reps,
+    string? Notes = null);
 
 // Lo que se sabe de un ejercicio antes de la sesión actual: las series de la última vez
 // y, para los récords, el máximo de repeticiones que se ha hecho con cada peso

@@ -381,6 +381,8 @@
                                                    VerticalOptions="Center" IsVisible="{Binding HasRecord}" />
                                         </Grid>
                                         <Label Text="{Binding SetsText}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpText2}" />
+                                        <Label Text="{Binding SetNotes}" FontFamily="OpenSansRegular" FontSize="13" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
+                                               Margin="0,2,0,0" IsVisible="{Binding HasSetNotes}" />
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                             <Label Text="{Binding ComparisonText}" Style="{StaticResource StatCaption}" IsVisible="{Binding HasComparison}" />
                                             <Label Grid.Column="1" Text="Evolución ›" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel1}">

@@ -21,6 +21,7 @@ public partial class ExercisePage : ContentPage
         InitializeComponent();
         _ = new MauiIcon();
         BindingContext = _vm = vm;
+        SizeChanged += (_, _) => { if (Height > 0) SheetScroll.MaximumHeightRequest = Height * 0.92; };
     }
 
     protected override async void OnAppearing()

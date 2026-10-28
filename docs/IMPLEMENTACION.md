@@ -244,6 +244,19 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 * «Entreno libre» (sin rutina): necesita cambiar la base de datos (una sesión siempre pertenece a un día de rutina).
 * Elegir el objetivo semanal a mano y «Ver todos» los récords.
 
+### Notas por serie y ajustes que faltaban
+
+**Qué hace**
+* **Notas por serie**: en Entreno, tocar una serie hecha → «Añadir nota». Se ven bajo la serie, en Progreso → Historial (detalle de la sesión) y la próxima vez, debajo de «La última vez». Se puede apuntar en vista entrenador o con «Notas detalladas» en vista simple; una nota que ya existe se ve y se corrige siempre. Usa `WorkoutSet.Notes`, que ya existía: sin cambios en la base de datos.
+* **Material e instrucciones** de los ejercicios propios: en el formulario de Ejercicios, solo en vista entrenador (si el ejercicio ya los tiene, se ven en cualquier vista). El formulario ahora se desplaza si no cabe.
+* Texto de «Yo también entreno»: decía que mostraba «Yo» en Entreno, que no existe; lo que hace es mostrar Progreso sin cliente activo.
+
+**Probar**
+1. Vista simple sin «Notas detalladas»: tocar una serie hecha solo ofrece «Borrar serie».
+2. Activar «Notas detalladas» (o vista entrenador) → tocar la serie → «Añadir nota» → guardar: aparece «📝 …» bajo la serie y en Progreso → Historial.
+3. Siguiente entreno de ese día: la nota sale bajo «La última vez».
+4. Vista entrenador → Ejercicios → nuevo ejercicio: campos Material e Instrucciones; guardar y abrir su ficha.
+
 ---
 
 ## Pendiente de decidir

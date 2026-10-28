@@ -84,6 +84,14 @@ public partial class WorkoutExerciseState : ObservableObject
         }
     }
 
+    /// <summary>Notas que se apuntaron la última vez, una por línea: "Serie 3: molestia en el hombro".</summary>
+    public string LastTimeNotesText => string.Join(Environment.NewLine, History.LastSessionSets
+        .Select((s, i) => (s.Notes, Number: i + 1))
+        .Where(x => !string.IsNullOrWhiteSpace(x.Notes))
+        .Select(x => $"Serie {x.Number}: {x.Notes}"));
+
+    public bool HasLastTimeNotes => LastTimeNotesText.Length > 0;
+
     /// <summary>Peso y reps con los que empezar la serie <paramref name="setNumber"/>.</summary>
     public (double weight, int reps) Suggestion(int setNumber)
     {
@@ -133,6 +141,15 @@ public partial class DoneSet : ObservableObject
     {
         Set = set;
         Number = number;
+    }
+
+    public string Notes => Set.Notes ?? "";
+    public bool HasNotes => !string.IsNullOrWhiteSpace(Set.Notes);
+
+    internal void NotifyNotes()
+    {
+        OnPropertyChanged(nameof(Notes));
+        OnPropertyChanged(nameof(HasNotes));
     }
 
     public bool IsRecord => Record != RecordKind.None;

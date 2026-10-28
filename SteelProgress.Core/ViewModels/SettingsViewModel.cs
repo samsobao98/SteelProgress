@@ -33,7 +33,7 @@ public partial class SettingsViewModel : ObservableObject
     public bool IsSimple => !IsTrainer;
 
     public string ModeDescription => IsTrainer
-        ? "Todas las opciones de edición, ficha de clientes y envío de rutinas."
+        ? "Todas las opciones de edición, notas en cada serie, material e instrucciones de los ejercicios, ficha de clientes y envío de rutinas."
         : "Solo lo necesario para entrenar y editar rutinas de forma sencilla. Los datos que tenga una rutina se ven siempre.";
 
     public SettingsViewModel(AppDbContext dbContext, ICurrentUserService currentUser, ViewOptionsService viewOptions)

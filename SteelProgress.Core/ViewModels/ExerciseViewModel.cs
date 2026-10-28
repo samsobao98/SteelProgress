@@ -12,6 +12,7 @@ public partial class ExerciseViewModel : ObservableObject
     private readonly ExerciseRepository _repository;
     private List<Exercise> _allExercises = new();
     private readonly ExerciseMediaService? _media;
+    private readonly ViewOptionsService? _viewOptions;
 
     // Vídeos e imágenes del ejercicio que se está creando o editando.
     // Al crear, se copian a la app al elegirlos y se asocian al guardar; si se cancela, se borran.
@@ -36,6 +37,12 @@ public partial class ExerciseViewModel : ObservableObject
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string? _muscleGroup;
     [ObservableProperty] private string _notes = string.Empty;
+    [ObservableProperty] private string _equipment = string.Empty;
+    [ObservableProperty] private string _instructions = string.Empty;
+
+    /// <summary>Material e instrucciones: solo vista entrenador (si el ejercicio ya los tiene, se ven siempre).</summary>
+    public bool ShowDetailFields => (_viewOptions?.Current.EditExerciseDetails ?? false)
+        || Equipment.Length > 0 || Instructions.Length > 0;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAddMode), nameof(OverlayTitle), nameof(SaveButtonText))]
@@ -59,10 +66,11 @@ public partial class ExerciseViewModel : ObservableObject
     }
 
     // media es opcional para que la app de escritorio, que crea el ViewModel a mano, siga compilando
-    public ExerciseViewModel(ExerciseRepository repository, ExerciseMediaService? media = null)
+    public ExerciseViewModel(ExerciseRepository repository, ExerciseMediaService? media = null, ViewOptionsService? viewOptions = null)
     {
         _repository = repository;
         _media = media;
+        _viewOptions = viewOptions;
         _ = LoadExercisesAsync();
     }
 
@@ -88,8 +96,11 @@ public partial class ExerciseViewModel : ObservableObject
         DiscardPendingMedia();
         Name = string.Empty;
         Notes = string.Empty;
+        Equipment = string.Empty;
+        Instructions = string.Empty;
         MuscleGroup = null;
         SelectedExercise = null;
+        OnPropertyChanged(nameof(ShowDetailFields));
     }
 
     private void LoadSelectedExerciseIntoForm()
@@ -101,6 +112,9 @@ public partial class ExerciseViewModel : ObservableObject
             Name = string.Empty;
             MuscleGroup = null;
             Notes = string.Empty;
+            Equipment = string.Empty;
+            Instructions = string.Empty;
+            OnPropertyChanged(nameof(ShowDetailFields));
             return;
         }
 
@@ -110,6 +124,9 @@ public partial class ExerciseViewModel : ObservableObject
         Name = SelectedExercise.Name;
         MuscleGroup = SelectedExercise.MuscleGroup;
         Notes = SelectedExercise.Notes ?? string.Empty;
+        Equipment = SelectedExercise.Equipment ?? string.Empty;
+        Instructions = SelectedExercise.Instructions ?? string.Empty;
+        OnPropertyChanged(nameof(ShowDetailFields));
     }
 
     [RelayCommand]
@@ -141,7 +158,9 @@ public partial class ExerciseViewModel : ObservableObject
         {
             Name = name,
             MuscleGroup = muscleGroup,
-            Notes = string.IsNullOrWhiteSpace(notes) ? null : notes
+            Notes = string.IsNullOrWhiteSpace(notes) ? null : notes,
+            Equipment = Clean(Equipment),
+            Instructions = Clean(Instructions)
         };
         for (var i = 0; i < Media.Count; i++)
         {
@@ -196,6 +215,8 @@ public partial class ExerciseViewModel : ObservableObject
         SelectedExercise.Name = name;
         SelectedExercise.MuscleGroup = muscleGroup;
         SelectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
+        SelectedExercise.Equipment = Clean(Equipment);
+        SelectedExercise.Instructions = Clean(Instructions);
 
         await _repository.UpdateAsync(SelectedExercise);
         await LoadExercisesAsync();
@@ -231,6 +252,8 @@ public partial class ExerciseViewModel : ObservableObject
         await LoadExercisesAsync();
         ClearForm();
     }
+
+    private static string? Clean(string text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
     // ── Vídeos e imágenes ─────────────────────────────────────────────────
 

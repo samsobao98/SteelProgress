@@ -229,7 +229,7 @@
                         <Label Text="{Binding PrescriptionNotes}" FontSize="13" TextColor="{StaticResource SpText2}" />
                     </Border>
 
-                    <!-- Series hechas: tocar una para borrarla -->
+                    <!-- Series hechas: tocar una para borrarla o apuntar una nota -->
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentExercise.Sets}" Spacing="8" Margin="0,12,0,0">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate>
@@ -237,6 +237,7 @@
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnDoneSetTapped" />
                                     </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="0">
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                         <Border WidthRequest="24" HeightRequest="24" StrokeThickness="0" StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource SpOk}" VerticalOptions="Center">
                                             <Label Text="✓" FontSize="13" FontAttributes="Bold" TextColor="#1B2B1B" HorizontalOptions="Center" VerticalOptions="Center" />
@@ -246,6 +247,9 @@
                                             <Label Text="{Binding RecordText}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
                                         </Border>
                                     </Grid>
+                                    <Label Text="{Binding Notes, StringFormat='📝 {0}'}" FontSize="13" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
+                                           Margin="36,6,0,0" IsVisible="{Binding HasNotes}" />
+                                    </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -309,6 +313,8 @@
                             </Grid>
                             <Label Text="{Binding CurrentExercise.LastTimeText}" Style="{StaticResource SpSecondary}" FontSize="12" HorizontalOptions="Center" Margin="0,12,0,0"
                                    IsVisible="{Binding CurrentExercise.LastTimeText, Converter={StaticResource NotEmpty}}" />
+                            <Label Text="{Binding CurrentExercise.LastTimeNotesText}" FontSize="12" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="0,4,0,0" IsVisible="{Binding CurrentExercise.HasLastTimeNotes}" />
                             <Label Text="Toca un número para escribirlo · +2,5 kg por pulsación" Style="{StaticResource SpSecondary}" FontSize="11" TextColor="{StaticResource SpText4}" HorizontalOptions="Center" Margin="0,4,0,0" />
                         </VerticalStackLayout>
                     </Border>

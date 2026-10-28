@@ -23,13 +23,20 @@ public partial class WorkoutViewModel : ObservableObject
     private readonly WorkoutRepository _workoutRepository;
     private readonly RoutineRepository _routineRepository;
     private readonly TimeProvider _clock;
+    private readonly ViewOptionsService? _viewOptions;
 
-    public WorkoutViewModel(WorkoutRepository workoutRepository, RoutineRepository routineRepository, TimeProvider? clock = null)
+    public WorkoutViewModel(WorkoutRepository workoutRepository, RoutineRepository routineRepository, TimeProvider? clock = null,
+        ViewOptionsService? viewOptions = null)
     {
         _workoutRepository = workoutRepository;
         _routineRepository = routineRepository;
         _clock = clock ?? TimeProvider.System;
+        _viewOptions = viewOptions;
     }
+
+    /// <summary>Apuntar notas en cada serie: vista entrenador, o «Notas detalladas» en vista simple.
+    /// Las notas que ya hay se ven siempre.</summary>
+    public bool CanNoteSets => _viewOptions?.Current.EditDetailedNotes ?? false;
 
     // En la app todos los repositorios comparten un DbContext, que no admite dos operaciones
     // a la vez: toda operación de base de datos de esta pantalla pasa por este cerrojo
@@ -39,6 +46,7 @@ public partial class WorkoutViewModel : ObservableObject
     /// <summary>La página lo llama al aparecer.</summary>
     public async Task RefreshAsync()
     {
+        OnPropertyChanged(nameof(CanNoteSets)); // pudo cambiar en Ajustes
         if (IsSessionActive) return;
         await LoadRoutinesAsync();
         await _dayOptionsLoad;
@@ -472,6 +480,25 @@ public partial class WorkoutViewModel : ObservableObject
         state.NotifyProgress();
         OnPropertyChanged(nameof(TodayVolume));
         if (ReferenceEquals(state, CurrentExercise)) LoadSuggestion();
+    }
+
+    /// <summary>Guarda la nota de una serie ya hecha; vacía la borra.</summary>
+    public async Task SetNoteAsync(DoneSet done, string? text)
+    {
+        var note = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+        if (note == done.Set.Notes) return;
+
+        var before = done.Set.Notes;
+        done.Set.Notes = note;
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.UpdateSetAsync(done.Set); }
+        catch
+        {
+            done.Set.Notes = before;
+            throw;
+        }
+        finally { _dbLock.Release(); }
+        done.NotifyNotes();
     }
 
     private WorkoutExerciseState? NextPending(WorkoutExerciseState from)

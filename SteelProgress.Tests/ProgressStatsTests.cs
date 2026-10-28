@@ -337,4 +337,87 @@ public class ProgressStatsTests : IDisposable
         Assert.True(vm.IsExercises);
         Assert.Equal(_benchId, vm.SelectedExercise!.Progress.ExerciseId);
     }
+
+    // ── Notas por serie ──
+
+    private static ViewOptionsService Options(ProfileViewMode mode, SimpleViewBlocks blocks = SimpleViewBlocks.None)
+    {
+        var options = new ViewOptionsService();
+        options.Apply(new UserProfile { ViewMode = mode, SimpleViewBlocks = blocks });
+        return options;
+    }
+
+    [Fact]
+    public void SetNotesNeedTrainerViewOrDetailedNotes()
+    {
+        WorkoutViewModel Workout(ViewOptionsService? o) => new(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock, o);
+
+        Assert.False(Workout(null).CanNoteSets);
+        Assert.False(Workout(Options(ProfileViewMode.Simple)).CanNoteSets);
+        Assert.True(Workout(Options(ProfileViewMode.Simple, SimpleViewBlocks.DetailedNotes)).CanNoteSets);
+        Assert.True(Workout(Options(ProfileViewMode.Trainer)).CanNoteSets);
+    }
+
+    [Fact]
+    public async Task SetNoteShowsInHistoryAndNextTime()
+    {
+        var workout = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock, Options(ProfileViewMode.Trainer));
+        await workout.StartDayAsync(_dayA);
+        workout.Weight = 60;
+        workout.Reps = 8;
+        await workout.CompleteSetCommand.ExecuteAsync(null);
+        workout.Reps = 6;
+        await workout.CompleteSetCommand.ExecuteAsync(null);
+
+        var second = workout.ExerciseStates[0].Sets[1];
+        await workout.SetNoteAsync(second, "  molestia en el hombro ");
+        Assert.Equal(("molestia en el hombro", true), (second.Notes, second.HasNotes));
+        var sessionId = workout.CurrentSession!.Id;
+
+        // Progreso → Historial: debajo de las series de ese ejercicio
+        var progress = new ProgressViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        await progress.RefreshAsync();
+        progress.OpenSessionById(sessionId);
+        var ex = Assert.Single(progress.SessionDetail!.Exercises);
+        Assert.Equal("Serie 2: molestia en el hombro", ex.SetNotes);
+
+        // La próxima vez, junto a «La última vez»
+        var history = await new WorkoutRepository(Db()).GetExerciseHistoryAsync(_benchId, excludeSessionId: -1);
+        var state = new WorkoutExerciseState(new WorkoutExercise(), null, history, 1);
+        Assert.Equal("Serie 2: molestia en el hombro", state.LastTimeNotesText);
+
+        // Vacía, se borra
+        await workout.SetNoteAsync(second, " ");
+        Assert.False(second.HasNotes);
+        using var db = Db();
+        Assert.Null(db.WorkoutSets.Single(s => s.Id == second.Set.Id).Notes);
+    }
+
+    // ── Material e instrucciones ──
+
+    [Fact]
+    public async Task ExerciseDetailsAreForTrainersButExistingOnesStayVisible()
+    {
+        var simple = new ExerciseViewModel(new ExerciseRepository(Db()), viewOptions: Options(ProfileViewMode.Simple));
+        Assert.False(simple.ShowDetailFields);
+
+        var trainer = new ExerciseViewModel(new ExerciseRepository(Db()), viewOptions: Options(ProfileViewMode.Trainer));
+        trainer.ClearForm();
+        Assert.True(trainer.ShowDetailFields);
+        trainer.Name = "Remo en polea";
+        trainer.MuscleGroup = "Espalda";
+        trainer.Equipment = " Polea ";
+        trainer.Instructions = "Espalda recta";
+        await trainer.AddExerciseCommand.ExecuteAsync(null);
+
+        Exercise saved;
+        using (var db = Db())
+            saved = db.Exercises.Single(e => e.Name == "Remo en polea");
+        Assert.Equal(("Polea", "Espalda recta"), (saved.Equipment, saved.Instructions));
+
+        // En vista simple no se ofrecen, pero si el ejercicio ya los tiene se ven
+        simple.SelectedExercise = saved;
+        Assert.True(simple.ShowDetailFields);
+        Assert.Equal("Polea", simple.Equipment);
+    }
 }

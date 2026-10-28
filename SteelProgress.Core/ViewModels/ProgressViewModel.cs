@@ -302,7 +302,8 @@ public partial class ProgressViewModel : ObservableObject
                 return new SessionExerciseDetail(g.Key, sets[0].ExerciseName,
                     string.Join("   ", sets.Select(s => WorkoutExerciseState.FormatSet(s.Weight, s.Reps).Replace(' ', (char)0xA0))), // la línea solo se corta entre series
                     ComparisonText(sets, before),
-                    record is null ? "" : RecordItem.KindText(record.Kind));
+                    record is null ? "" : RecordItem.KindText(record.Kind),
+                    SetNotesText(sets));
             })
             .ToList();
 
@@ -314,6 +315,12 @@ public partial class ProgressViewModel : ObservableObject
         return new SessionDetail(session.Id, session.DayName, session.RoutineName, string.Join(" · ", parts),
             session.Notes ?? "", !session.IsComplete, exercises);
     }
+
+    // "Serie 3: molestia en el hombro", una por línea
+    internal static string SetNotesText(IReadOnlyList<LoggedSet> sets) => string.Join(Environment.NewLine, sets
+        .Select((s, i) => (s.Notes, Number: i + 1))
+        .Where(x => !string.IsNullOrWhiteSpace(x.Notes))
+        .Select(x => $"Serie {x.Number}: {x.Notes}"));
 
     // Mejor serie de hoy frente a la de la sesión anterior del mismo día
     internal static string ComparisonText(IReadOnlyList<LoggedSet> current, IReadOnlyList<LoggedSet>? previous)
@@ -377,10 +384,12 @@ public partial class ExerciseProgressItem : ObservableObject
     }
 }
 
-public sealed record SessionExerciseDetail(int ExerciseId, string Name, string SetsText, string ComparisonText, string RecordText)
+public sealed record SessionExerciseDetail(int ExerciseId, string Name, string SetsText, string ComparisonText, string RecordText,
+    string SetNotes = "")
 {
     public bool HasRecord => RecordText.Length > 0;
     public bool HasComparison => ComparisonText.Length > 0;
+    public bool HasSetNotes => SetNotes.Length > 0;
 }
 
 public sealed record SessionDetail(int SessionId, string Title, string RoutineName, string Subtitle, string Notes,
