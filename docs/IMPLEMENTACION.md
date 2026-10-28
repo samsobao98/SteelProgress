@@ -208,6 +208,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 **Qué hace**
 * **Inicio**:
   * **«Hoy toca»** sustituye al botón genérico. Muestra la rutina activa (la marcada o la última entrenada), el día que toca (`RoutineSchedule`), sus ejercicios, la duración media de ese día y cuándo se hizo por última vez.
+  * Si hoy ya has entrenado, la tarjeta lo dice («✓ Hoy ya has entrenado Torso A») y pasa a «Siguiente».
   * **«▶ Empezar»** abre Entreno con la sesión ya empezada. «Elegir otro entreno» abre Entreno con el día propuesto. Con un entreno a medias, la tarjeta pasa a «Continuar entreno»; sin rutinas, invita a crear la primera.
   * Tira de la semana (L–D) con los días entrenados y hoy con contorno.
   * Sesiones, **semanas seguidas** 🔥 y **récords del mes** ★.
@@ -225,6 +226,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 * **Semanas seguidas**: semanas (de lunes a domingo) con algún entreno. Si esta semana aún no has entrenado, la racha se cuenta hasta la semana pasada, para que no se rompa el lunes.
 * **Objetivo semanal**: los días de la rutina activa (3 si no hay). No hay un campo propio para elegirlo.
 * **Volumen del mes**: kg × reps sin calentamiento. Se compara con el mes pasado del día 1 al mismo día de hoy.
+* Lo renombrado en Rutinas se ve al momento en Inicio y en Entreno (antes Entreno podía seguir mostrando el nombre anterior hasta reiniciar la app).
 * Todo sale de una sola carga del historial (`WorkoutRepository.GetTrainingLogAsync`) y de cálculos en `TrainingStats` (Core), con pruebas en `ProgressStatsTests`.
 
 **Probar**
@@ -234,7 +236,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 4. Progreso → Resumen: el anillo, la racha y el calendario cuadran con lo que has entrenado. Hacer un récord y comprobar que sale en «Récords recientes».
 5. Progreso → Ejercicios → tocar uno: sale la gráfica; tocarlo otra vez la quita.
 6. Rutinas → mantener pulsada una rutina → «▶ Empezar …».
-7. Vista entrenador con «Yo también entreno» apagado: Progreso no aparece; Clientes → «Historial de…» lo muestra con los datos del cliente.
+7. Vista entrenador con «Yo también entreno» apagado: Progreso no aparece; Clientes → «Historial de…» lo muestra con los datos del cliente. Pulsar «Salir» estando en Progreso: vuelve a Clientes y la pestaña desaparece.
 8. Cambiar rápido entre Inicio y Progreso varias veces: no debe dar error.
 
 **Aún no está**

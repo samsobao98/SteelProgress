@@ -65,6 +65,7 @@ public partial class ProgressViewModel : ObservableObject
         try
         {
             _log = await _workoutRepository.GetTrainingLogAsync();
+            _routineRepository.ForgetLoaded();
             goal = await WeeklyGoalAsync();
         }
         finally { _dbLock.Release(); }

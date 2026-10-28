@@ -19,6 +19,13 @@ public class RoutineRepository
         _context = context;
     }
 
+    /// <summary>
+    /// Olvida lo ya cargado. Cada pantalla tiene su propio contexto y EF devuelve las entidades que ya
+    /// sigue sin actualizarlas: sin esto, lo renombrado en otra pantalla se seguiría viendo con el nombre
+    /// antiguo. Solo para pantallas que leen; las que editan entidades cargadas no deben llamarlo.
+    /// </summary>
+    public void ForgetLoaded() => _context.ChangeTracker.Clear();
+
     public async Task<List<Routine>> GetAllAsync()
     {
         return await _context.Routines.OrderBy(r=>r.Name).ToListAsync();

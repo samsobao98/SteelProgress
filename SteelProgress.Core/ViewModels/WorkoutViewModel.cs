@@ -88,6 +88,8 @@ public partial class WorkoutViewModel : ObservableObject
         await _dbLock.WaitAsync();
         try
         {
+            // Nombres frescos si se renombró algo en Rutinas (ver RoutineRepository.ForgetLoaded)
+            _routineRepository.ForgetLoaded();
             routines = await _routineRepository.GetAllAsync();
             // La marcada a mano; si no hay, la última entrenada
             activeId = await _routineRepository.GetMarkedActiveRoutineIdAsync()

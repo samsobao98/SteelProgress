@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 using SteelProgress.Core.Services;
 using SteelProgress.Data.Context;
 using SteelProgress.Data.Repositories;
@@ -53,6 +54,12 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _todayMoreText = "";
     [ObservableProperty] private int? _todayDayId;
     [ObservableProperty] private bool _canStartToday;
+
+    // Si hoy ya se entrenó, la tarjeta pasa a «Siguiente» y lo dice arriba
+    [ObservableProperty] private string _todayLabel = "Hoy toca";
+    [ObservableProperty] private string _todayDoneText = "";
+    public bool HasTodayDone => TodayDoneText.Length > 0;
+    partial void OnTodayDoneTextChanged(string value) => OnPropertyChanged(nameof(HasTodayDone));
 
     // La tarjeta de arriba: lo que toca, el entreno en curso o crear la primera rutina
     public bool ShowToday => IsLoaded && HasRoutines && !IsWorkoutActive;
@@ -109,8 +116,9 @@ public partial class HomeViewModel : ObservableObject
             _ => "Buenas noches"
         };
 
+        // Sin seguimiento: un cambio de nombre o color en Ajustes (otro contexto) se ve al volver
         if (_currentUser.CurrentUserId is int userId
-            && await _dbContext.UserProfiles.FindAsync(userId) is UserProfile profile)
+            && await _dbContext.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.Id == userId) is UserProfile profile)
         {
             ProfileName = profile.Name;
             ProfileColor = profile.AvatarColor;
@@ -137,8 +145,12 @@ public partial class HomeViewModel : ObservableObject
     private async Task LoadTodayAsync(TrainingLog log, DateTime today)
     {
         IsWorkoutActive = WorkoutStateService.IsWorkoutActive;
+        var doneToday = log.Sessions.Where(s => s.Date.Date == today).Select(s => s.DayName).Distinct().ToList();
+        TodayLabel = doneToday.Count > 0 ? "Siguiente" : "Hoy toca";
+        TodayDoneText = doneToday.Count > 0 ? $"✓ Hoy ya has entrenado {string.Join(" y ", doneToday)}" : "";
 
         // La rutina activa: la marcada a mano; si no hay, la última entrenada (como Entreno)
+        _routineRepository.ForgetLoaded();
         var routines = await _routineRepository.GetAllAsync();
         HasRoutines = routines.Count > 0;
         var activeId = await _routineRepository.GetMarkedActiveRoutineIdAsync()

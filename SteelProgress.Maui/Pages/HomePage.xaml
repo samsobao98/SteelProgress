@@ -57,8 +57,10 @@
             <Border x:Name="TodayCard" BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 20"
                     Stroke="#3D4066" StrokeThickness="1" Padding="18,16,18,18" IsVisible="{Binding ShowToday}">
                 <VerticalStackLayout Spacing="0">
+                    <Label Text="{Binding TodayDoneText}" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpOk}"
+                           Margin="0,0,0,10" IsVisible="{Binding HasTodayDone}" />
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <Label Text="Hoy toca" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpSteel2}" VerticalOptions="Center" />
+                        <Label Text="{Binding TodayLabel}" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpSteel2}" VerticalOptions="Center" />
                         <Label Grid.Column="1" Text="{Binding TodayRoutineText}" Style="{StaticResource SpSecondary}" FontSize="12"
                                HorizontalOptions="End" LineBreakMode="TailTruncation" VerticalOptions="Center" />
                     </Grid>

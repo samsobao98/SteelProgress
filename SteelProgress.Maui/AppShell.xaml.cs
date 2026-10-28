@@ -29,7 +29,11 @@ public partial class AppShell : Shell
             {
                 var o = viewOptions.Current;
                 ClientsTab.IsVisible = o.ShowClients;
-                ProgressTab.IsVisible = o.ShowOwnTraining || clientContext.HasActiveClient;
+                var showProgress = o.ShowOwnTraining || clientContext.HasActiveClient;
+                // «Salir» del cliente estando en Progreso: antes de ocultar la pestaña se vuelve a Clientes
+                if (!showProgress && CurrentItem?.CurrentItem == ProgressTab)
+                    CurrentItem.CurrentItem = ClientsTab.IsVisible ? ClientsTab : CurrentItem.Items[0];
+                ProgressTab.IsVisible = showProgress;
             }
             if (MainThread.IsMainThread) Apply();
             else MainThread.BeginInvokeOnMainThread(Apply);

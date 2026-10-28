@@ -218,6 +218,7 @@ public class ProgressStatsTests : IDisposable
         await home.RefreshAsync();
 
         Assert.Equal("Pierna A", home.TodayDayName); // Torso A ya está hecho esta semana
+        Assert.Equal(("Hoy toca", false), (home.TodayLabel, home.HasTodayDone));
         Assert.Equal("Torso / Pierna · activa", home.TodayRoutineText);
         Assert.Equal("1 ejercicio · sin entrenar aún", home.TodayDetail);
         Assert.Equal(new[] { "Sentadilla" }, home.TodayExercises);
@@ -247,6 +248,38 @@ public class ProgressStatsTests : IDisposable
         Assert.Equal("Pierna A", home.TodayDayName);
         Assert.Equal("1 ejercicio · ~50 min · última vez hace 9 días", home.TodayDetail);
         Assert.Equal(0, home.MonthRecords);
+    }
+
+    [Fact]
+    public async Task AfterTrainingTodayTheCardShowsWhatIsNext()
+    {
+        await SeedAsync(_dayA, Today.AddHours(9), (60, 8));
+
+        var home = new HomeViewModel(Db(), _user, new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        await home.RefreshAsync();
+
+        Assert.Equal(("Siguiente", "Pierna A"), (home.TodayLabel, home.TodayDayName));
+        Assert.Equal("✓ Hoy ya has entrenado Torso A", home.TodayDoneText);
+    }
+
+    [Fact]
+    public async Task HomeShowsRenamesMadeInOtherScreens()
+    {
+        // En la app, Inicio conserva sus repositorios: lo renombrado en Rutinas (otro contexto) debe verse
+        var home = new HomeViewModel(Db(), _user, new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        await home.RefreshAsync();
+        Assert.Equal("Torso A", home.TodayDayName);
+
+        using (var db = Db())
+        {
+            db.RoutineDays.Single(d => d.Id == _dayA).Name = "Empuje";
+            db.Routines.Single(r => r.Id == _routineId).Name = "PPL";
+            await db.SaveChangesAsync();
+        }
+        await home.RefreshAsync();
+
+        Assert.Equal("Empuje", home.TodayDayName);
+        Assert.StartsWith("PPL", home.TodayRoutineText);
     }
 
     [Fact]
