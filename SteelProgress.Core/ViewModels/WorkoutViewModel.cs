@@ -237,20 +237,30 @@ public partial class WorkoutViewModel : ObservableObject
             return;
         }
 
+        await StartDayAsync(SelectedRoutineDay.Id);
+    }
+
+    /// <summary>
+    /// Empieza un día de rutina. Lo usan el botón de esta pantalla y, a través de
+    /// <see cref="WorkoutLaunch"/>, «Hoy toca» de Inicio y la vista previa de Rutinas.
+    /// Con un entreno ya en curso no hace nada.
+    /// </summary>
+    public async Task StartDayAsync(int routineDayId)
+    {
         if (IsSessionActive) return; // doble toque
 
         await _dbLock.WaitAsync();
         try
         {
             if (IsSessionActive) return;
-            var exercises = await _routineRepository.GetExercisesByDayIdAsync(SelectedRoutineDay.Id);
+            var exercises = await _routineRepository.GetExercisesByDayIdAsync(routineDayId);
             if (exercises.Count == 0)
             {
                 NotificationService.Error("Este día no tiene ejercicios. Añádelos en Rutinas.");
                 return;
             }
 
-            var session = await _workoutRepository.CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id);
+            var session = await _workoutRepository.CreateSessionFromRoutineDayAsync(routineDayId);
             await LoadSessionCoreAsync(session.Id);
             // Al terminar se vuelve a proponer la activa y el día que toca
             _pickedRoutineId = null;
@@ -479,20 +489,12 @@ public partial class WorkoutViewModel : ObservableObject
     // marcaría todas las series).
     internal static void RecomputeRecords(WorkoutExerciseState state)
     {
-        const double eps = 0.001;
         var seen = state.History.BestRepsByWeight.ToList();
 
         foreach (var done in state.Sets)
         {
             var (weight, reps) = (done.Set.Weight, done.Set.Reps);
-            if (seen.Count == 0)
-                done.Record = RecordKind.None;
-            else if (weight > seen.Max(s => s.Weight) + eps)
-                done.Record = RecordKind.Weight;
-            else if (reps > seen.Where(s => s.Weight >= weight - eps).Max(s => s.Reps))
-                done.Record = RecordKind.Reps;
-            else
-                done.Record = RecordKind.None;
+            done.Record = TrainingStats.RecordOf(seen, weight, reps);
 
             if (state.History.HasData)
                 seen.Add(new PreviousSet(weight, reps));

@@ -238,6 +238,18 @@ public partial class RoutinePage : ContentPage
         await OpenRoutineAsync(item);
     }
 
+    private async void OnPreviewStartTapped(object? sender, TappedEventArgs e)
+    {
+        if (_vm.Preview?.StartDayId is not int dayId) return;
+        await PressAsync(sender as VisualElement);
+        await HidePreviewAsync();
+        if (WorkoutStateService.IsWorkoutActive)
+            NotificationService.Info("Ya tienes un entreno en curso.");
+        else
+            WorkoutLaunch.Request(dayId);
+        await Shell.Current.GoToAsync("//WorkoutPage");
+    }
+
     // ── Ordenar ────────────────────────────────────────────────────────────
 
     private async void OnOrderTapped(object? sender, TappedEventArgs e)

@@ -15,21 +15,29 @@ public partial class AppShell : Shell
         ExerciseContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ExercisePage>());
         RoutineContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<RoutinePage>());
         WorkoutContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<WorkoutPage>());
-        HistoryContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<HistoryPage>());
+        ProgressContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ProgressPage>());
         ClientsContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ClientsPage>());
 
-        // Barra según la vista: en vista entrenador aparece Clientes y, si el perfil no entrena, se quita Historial
+        // Barra según la vista: en vista entrenador aparece Clientes y, si el perfil no entrena, Progreso
+        // solo se ve mientras se trabaja con un cliente (es su progreso e historial)
         var viewOptions = services.GetRequiredService<ViewOptionsService>();
-        void ApplyTabs() => MainThread.BeginInvokeOnMainThread(() =>
+        var clientContext = services.GetRequiredService<ClientContextService>();
+        // En el hilo principal, al momento: Clientes activa al cliente y navega a Progreso justo después
+        void ApplyTabs()
         {
-            var o = viewOptions.Current;
-            ClientsTab.IsVisible = o.ShowClients;
-            HistoryTab.IsVisible = o.ShowOwnTraining;
-        });
+            void Apply()
+            {
+                var o = viewOptions.Current;
+                ClientsTab.IsVisible = o.ShowClients;
+                ProgressTab.IsVisible = o.ShowOwnTraining || clientContext.HasActiveClient;
+            }
+            if (MainThread.IsMainThread) Apply();
+            else MainThread.BeginInvokeOnMainThread(Apply);
+        }
         viewOptions.Changed += ApplyTabs;
+        clientContext.Changed += ApplyTabs;
         ApplyTabs();
 
-        Routing.RegisterRoute("ProgressPage", typeof(ProgressPage));
         Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
         Routing.RegisterRoute(nameof(ImportPreviewPage), typeof(ImportPreviewPage));
 

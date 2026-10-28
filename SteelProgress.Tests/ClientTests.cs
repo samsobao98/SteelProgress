@@ -89,19 +89,29 @@ public class ClientTests : IDisposable
     [Fact]
     public async Task OwnStatsDoNotIncludeClientSessions()
     {
-        await new WorkoutRepository(Db()).CreateSessionFromRoutineDayAsync(_dayId); // entreno propio
+        // Inicio solo cuenta sesiones con alguna serie hecha
+        async Task TrainAsync(int day)
+        {
+            using var db = Db();
+            var session = await new WorkoutRepository(db).CreateSessionFromRoutineDayAsync(day);
+            var exercise = db.WorkoutExercises.First(we => we.WorkoutSessionId == session.Id);
+            db.WorkoutSets.Add(new WorkoutSet { WorkoutExerciseId = exercise.Id, Weight = 50, Reps = 10 });
+            await db.SaveChangesAsync();
+        }
+
+        await TrainAsync(_dayId); // entreno propio
 
         var marta = await AddClientAsync("Marta");
         _clientContext.Activate(marta);
         var dayId = await CreateRoutineForActiveClientAsync("Rutina de Marta");
-        await new WorkoutRepository(Db()).CreateSessionFromRoutineDayAsync(dayId);
-        await new WorkoutRepository(Db()).CreateSessionFromRoutineDayAsync(dayId);
+        await TrainAsync(dayId);
+        await TrainAsync(dayId);
         _clientContext.Clear();
 
-        var home = new HomeViewModel(Db(), _user);
+        var home = new HomeViewModel(Db(), _user, new WorkoutRepository(Db()), new RoutineRepository(Db()));
         await home.RefreshAsync();
         Assert.Equal(1, home.SessionCount);
-        Assert.Equal(1, home.RoutineCount);
+        Assert.NotEqual("Rutina de Marta · activa", home.TodayRoutineText);
     }
 
     [Fact]

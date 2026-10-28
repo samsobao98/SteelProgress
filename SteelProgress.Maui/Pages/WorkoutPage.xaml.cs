@@ -64,6 +64,9 @@ public partial class WorkoutPage : ContentPage
         _timer ??= CreateTimer();
         _timer.Start();
 
+        // Inicio o Rutinas han pedido empezar un día: se empieza directamente, sin pasar por preparar
+        if (WorkoutLaunch.Take() is int dayId)
+            await _vm.StartDayAsync(dayId);
         await _vm.RefreshAsync();
     }
 

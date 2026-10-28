@@ -55,7 +55,8 @@ public partial class ClientsPage : ContentPage
         if (choice == edit) { _vm.StartEdit(item.Client); return; }
         if (choice == delete) { await _vm.DeleteAsync(item.Client); return; }
 
-        var route = choice == train ? "//WorkoutPage" : choice == routines ? "//RoutinePage" : choice == history ? "//HistoryPage" : null;
+        if (choice == history) ProgressPage.Request(ProgressSection.History);
+        var route = choice == train ? "//WorkoutPage" : choice == routines ? "//RoutinePage" : choice == history ? "//ProgressPage" : null;
         if (route is null) return;
 
         // Desde aquí, esas pantallas muestran y guardan los datos del cliente

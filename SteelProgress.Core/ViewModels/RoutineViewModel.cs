@@ -201,10 +201,16 @@ public partial class RoutineViewModel : ObservableObject
     {
         if (IsReordering) return;
         RoutineOverview overview;
+        RoutineWeek week;
+        var today = _clock.GetLocalNow().DateTime;
         await _dbLock.WaitAsync();
-        try { overview = await _repository.GetRoutineOverviewAsync(item.Routine.Id); }
+        try
+        {
+            overview = await _repository.GetRoutineOverviewAsync(item.Routine.Id);
+            week = await _repository.GetRoutineWeekAsync(item.Routine.Id, RoutineSchedule.WeekStart(today));
+        }
         finally { _dbLock.Release(); }
-        Preview = RoutinePreview.Build(item, overview, _clock.GetLocalNow().DateTime);
+        Preview = RoutinePreview.Build(item, overview, today, RoutineSchedule.NextDay(week));
     }
 
     [RelayCommand]

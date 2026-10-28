@@ -1,32 +1,38 @@
+using SteelProgress.Core.Services;
+using SteelProgress.Data.Repositories;
+
 namespace SteelProgress.Core.ViewModels;
 
+/// <summary>Una sesión en las listas de Inicio y del historial de Progreso.</summary>
 public class RecentSessionItem
 {
-    public string DayName { get; set; } = "";
-    public DateTime Date { get; set; }
-    public int ExerciseCount { get; set; }
+    // Los mismos que la pantalla de fin de entreno (1–5)
+    public static readonly string[] FeelingEmojis = ["😫", "😕", "😐", "💪", "🔥"];
 
-    public string RelativeDate => (DateTime.Today - Date.Date).Days switch
-    {
-        0 => "Hoy",
-        1 => "Ayer",
-        var d when d < 7 => $"Hace {d} días",
-        var d when d < 30 => $"Hace {d / 7} sem.",
-        var d => $"Hace {d / 30} mes."
-    };
+    public LoggedSession Session { get; }
+    public int SessionId => Session.Id;
+    public string Title => Session.DayName;
+    public string RoutineName => Session.RoutineName;
+    public bool IsComplete => Session.IsComplete;
+    public bool IsIncomplete => !Session.IsComplete;
 
-    // Color-coded chips so every card doesn't look identical
-    public string ChipColor => RelativeDate switch
-    {
-        "Hoy" => "#A6E3A1",
-        "Ayer" => "#89B4FA",
-        _ => "#313244"
-    };
+    /// <summary>"Ayer · 58 min · 7,9 t".</summary>
+    public string Detail { get; }
 
-    public string ChipTextColor => RelativeDate switch
+    /// <summary>"lun 26 oct".</summary>
+    public string DateText { get; }
+
+    public string FeelingEmoji => Session.Feeling is >= 1 and <= 5 ? FeelingEmojis[Session.Feeling.Value - 1] : "";
+    public bool HasFeeling => FeelingEmoji.Length > 0;
+
+    public RecentSessionItem(LoggedSession session, double volume, DateTime today)
     {
-        "Hoy" => "#1E1E2E",
-        "Ayer" => "#1E1E2E",
-        _ => "#BAC2DE"
-    };
+        Session = session;
+        var ago = RoutineSchedule.AgoText(session.Date, today);
+        var parts = new List<string> { char.ToUpper(ago[0]) + ago[1..] };
+        if (session.DurationMinutes is > 0) parts.Add($"{session.DurationMinutes} min");
+        if (volume > 0) parts.Add(TrainingStats.FormatVolume(volume));
+        Detail = string.Join(" · ", parts);
+        DateText = session.Date.ToString("ddd d MMM", System.Globalization.CultureInfo.GetCultureInfo("es-ES")).Replace(".", "");
+    }
 }

@@ -94,10 +94,10 @@ Tras la fusión, en el PC: 88 pruebas automáticas en verde, compilación real p
 
 **Qué hace**
 * Migración `AddClients`: tabla de clientes (cuelgan del perfil del entrenador), y rutinas y sesiones con `ClientId`; las sesiones registradas por el entrenador con el cliente delante quedan marcadas como **presenciales**.
-* **Cliente activo**: en lugar de duplicar pantallas, el entrenador «entra» en un cliente y **Rutinas, Entreno e Historial** pasan a mostrar y guardar los datos de ese cliente. Un aviso «Trabajando con Marta · Salir» lo indica y, al salir, todo vuelve a tus datos. Durante un entreno no se puede salir.
-* Tus estadísticas de Inicio no cuentan las sesiones de clientes.
+* **Cliente activo**: en lugar de duplicar pantallas, el entrenador «entra» en un cliente y **Inicio, Rutinas, Entreno y Progreso** (antes Historial) pasan a mostrar y guardar los datos de ese cliente. Un aviso «Trabajando con Marta · Salir» lo indica y, al salir, todo vuelve a tus datos. Durante un entreno no se puede salir.
+* Tus estadísticas de Inicio no cuentan las sesiones de clientes (con un cliente activo, Inicio muestra las suyas).
 * **Pestaña Clientes** (solo en vista entrenador): lista con objetivo, rutina, sesiones de la semana y aviso en rojo si lleva 7 días o más sin entrenar. Al tocar uno: entrenar con él, ver sus rutinas, ver su historial, editar o eliminar (borra sus rutinas y sesiones, no las tuyas).
-* En vista entrenador, **Historial** solo aparece si el perfil «también entrena» (Ajustes).
+* En vista entrenador, **Progreso** (antes Historial) solo aparece si el perfil «también entrena» (Ajustes) o mientras se trabaja con un cliente.
 * **Importar** con un cliente activo crea la rutina para ese cliente.
 
 **Probar**
@@ -141,8 +141,8 @@ Cómo se resolvieron los conflictos:
 El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantallas antiguas siguen con colores escritos a mano. Orden acordado (§12.3 del documento de diseño), siguiendo las maquetas de `docs/maquetas/propuesta_diseno.html`:
 
 1. Entreno — **hecho** (ver abajo).
-2. Rutinas — **hecho, pendiente de probar en el móvil** (ver abajo).
-3. Progreso (absorbe Historial) e Inicio.
+2. Rutinas — **hecho** (ver abajo).
+3. Progreso (absorbe Historial) e Inicio — **hecho, pendiente de probar en el móvil** (ver abajo).
 4. Ejercicios (filtro «Propios», ficha con vídeo, mejor marca, 1RM estimado).
 5. Respuesta táctil y animaciones en toda la app.
 
@@ -201,7 +201,46 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 
 **Aún no está**
 * «Semana 3 de 8» de la maqueta: haría falta guardar la duración del programa.
-* Tocar «Toca: …» no empieza el entreno (será parte de Inicio).
+* Tocar «Toca: …» en la placa no empieza el entreno: se hace desde Inicio o desde el resumen (mantener pulsado).
+
+### Rediseño 3 — Inicio y Progreso
+
+**Qué hace**
+* **Inicio**:
+  * **«Hoy toca»** sustituye al botón genérico. Muestra la rutina activa (la marcada o la última entrenada), el día que toca (`RoutineSchedule`), sus ejercicios, la duración media de ese día y cuándo se hizo por última vez.
+  * **«▶ Empezar»** abre Entreno con la sesión ya empezada. «Elegir otro entreno» abre Entreno con el día propuesto. Con un entreno a medias, la tarjeta pasa a «Continuar entreno»; sin rutinas, invita a crear la primera.
+  * Tira de la semana (L–D) con los días entrenados y hoy con contorno.
+  * Sesiones, **semanas seguidas** 🔥 y **récords del mes** ★.
+  * Últimas 3 sesiones con su duración y volumen; tocar una la abre en Progreso.
+* **Progreso** sustituye a la pestaña Historial y tiene tres secciones:
+  * **Resumen**: anillo del objetivo semanal con el degradado acero, racha, volumen del mes frente al mismo tramo del mes pasado, calendario de constancia de 15 semanas (más claro cuanto más volumen) y récords recientes.
+  * **Ejercicios**: cada ejercicio entrenado con su mejor serie y su 1RM estimado. Al tocar uno sale la gráfica de peso máximo y 1RM estimado por sesión.
+  * **Historial**: todas las sesiones con día, rutina, duración, volumen, cómo te sentiste y si quedó incompleta. Tocar una abre su detalle: series, comparación con la vez anterior de ese día, récords y nota. Desde ahí, «Evolución ›» lleva a la gráfica del ejercicio.
+* **Resumen de rutina** (mantener pulsado en Rutinas): nuevo botón «▶ Empezar <día que toca>».
+* Clientes → «Historial de…» abre Progreso → Historial de ese cliente.
+
+**Definiciones**
+* Solo cuentan las sesiones con alguna serie que no sea de calentamiento. Al empezar un entreno ya se crea su sesión vacía; antes, Inicio la contaba.
+* **Récords**: la misma regla que Entreno, en una sola función (`TrainingStats.RecordOf`). Al repasar el historial, la primera sesión de cada ejercicio no marca récords. Por sesión y ejercicio cuenta uno (el de peso antes que el de reps).
+* **Semanas seguidas**: semanas (de lunes a domingo) con algún entreno. Si esta semana aún no has entrenado, la racha se cuenta hasta la semana pasada, para que no se rompa el lunes.
+* **Objetivo semanal**: los días de la rutina activa (3 si no hay). No hay un campo propio para elegirlo.
+* **Volumen del mes**: kg × reps sin calentamiento. Se compara con el mes pasado del día 1 al mismo día de hoy.
+* Todo sale de una sola carga del historial (`WorkoutRepository.GetTrainingLogAsync`) y de cálculos en `TrainingStats` (Core), con pruebas en `ProgressStatsTests`.
+
+**Probar**
+1. Inicio con una rutina activa: «Hoy toca» muestra el día siguiente al último que hiciste. «▶ Empezar» abre Entreno ya registrando ese día.
+2. Con el entreno a medias, volver a Inicio: sale «Continuar entreno». Terminarlo: la tira marca hoy con ✓ y la sesión sale en «Últimas sesiones».
+3. Tocar una sesión de Inicio: abre Progreso → Historial con su detalle. Atrás (o tocar fuera) lo cierra.
+4. Progreso → Resumen: el anillo, la racha y el calendario cuadran con lo que has entrenado. Hacer un récord y comprobar que sale en «Récords recientes».
+5. Progreso → Ejercicios → tocar uno: sale la gráfica; tocarlo otra vez la quita.
+6. Rutinas → mantener pulsada una rutina → «▶ Empezar …».
+7. Vista entrenador con «Yo también entreno» apagado: Progreso no aparece; Clientes → «Historial de…» lo muestra con los datos del cliente.
+8. Cambiar rápido entre Inicio y Progreso varias veces: no debe dar error.
+
+**Aún no está**
+* Cambiar de perfil tocando el avatar: hoy no hay forma de volver al selector de perfiles desde dentro de la app y hay que reiniciar el estado de todas las pantallas. Queda como paso aparte.
+* «Entreno libre» (sin rutina): necesita cambiar la base de datos (una sesión siempre pertenece a un día de rutina).
+* Elegir el objetivo semanal a mano y «Ver todos» los récords.
 
 ---
 

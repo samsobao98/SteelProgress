@@ -1,6 +1,9 @@
-using SteelProgress.Maui.Services;
+using System.ComponentModel;
+using Microsoft.Maui.Controls.Shapes;
 using MauiIcons.Core;
+using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
+using SteelProgress.Maui.Services;
 
 namespace SteelProgress.Maui.Pages;
 
@@ -10,6 +13,7 @@ public partial class HomePage : ContentPage
     private bool _coveredByPopup;
 
     private readonly HomeViewModel _vm;
+    private ClientContextService? _clientContext;
 
     public HomePage(HomeViewModel vm)
     {
@@ -17,86 +21,161 @@ public partial class HomePage : ContentPage
         // Workaround for MAUI bug with URL-style xmlns (dotnet/maui#7503)
         _ = new MauiIcon();
         BindingContext = _vm = vm;
+        _vm.PropertyChanged += OnVmPropertyChanged;
     }
+
+    // Al entrar o salir de un cliente, Inicio pasa a mostrar sus datos
+    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
-        await _vm.RefreshAsync();
-        await RunEntryAnimationsAsync();
+        _clientContext ??= Handler?.MauiContext?.Services.GetService<ClientContextService>();
+        if (_clientContext is not null)
+        {
+            _clientContext.Changed -= OnClientChanged;
+            _clientContext.Changed += OnClientChanged;
+        }
+
+        var first = !_vm.IsLoaded;
+        try { await _vm.RefreshAsync(); }
+        finally
+        {
+            // La primera vez aparece con un fundido (también si la carga falla: nunca se queda en blanco)
+            if (first)
+            {
+                PageBody.TranslationY = 10;
+                await Task.WhenAll(PageBody.FadeToAsync(1, 260, Easing.CubicOut), PageBody.TranslateToAsync(0, 0, 260, Easing.CubicOut));
+            }
+        }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        if (AppDialogs.IsShowing) _coveredByPopup = true; // solo se abrió una ventana encima
+        if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
+        if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
     }
 
-
-    private async Task RunEntryAnimationsAsync()
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (IsReduceMotionEnabled())
+        if (e.PropertyName == nameof(HomeViewModel.Week)) BuildWeek();
+        else if (e.PropertyName is nameof(HomeViewModel.TodayExercises) or nameof(HomeViewModel.TodayMoreText)) BuildTodayChips();
+    }
+
+    // Tira de la semana: letra del día y un círculo (✓ si se entrenó; contorno el de hoy)
+    private void BuildWeek()
+    {
+        WeekStrip.Children.Clear();
+        var col = 0;
+        foreach (var day in _vm.Week)
         {
-            HeaderSection.Opacity = 1;
-            StatHeroCard.Opacity = 1; StatHeroCard.Scale = 1;
-            StatRow.Opacity = 1;     StatRow.TranslationX = 0;
-            CtaSection.Opacity = 1;  CtaSection.Scale = 1;
-            SessionsSection.Opacity = 1;
-            return;
+            var circle = new Border
+            {
+                HeightRequest = 34,
+                WidthRequest = 34,
+                HorizontalOptions = LayoutOptions.Center,
+                StrokeShape = new RoundRectangle { CornerRadius = 17 },
+                BackgroundColor = day.Done ? Color.FromArgb("#2E3050") : Color.FromArgb("#252536"),
+                Stroke = day.IsToday ? Color.FromArgb("#B4BEFE") : Colors.Transparent,
+                StrokeThickness = day.IsToday ? 2 : 0,
+                Opacity = day.IsFuture ? 0.55 : 1,
+                Content = new Label
+                {
+                    Text = day.Done ? "✓" : "",
+                    FontFamily = "OpenSansSemibold",
+                    FontSize = 14,
+                    TextColor = Color.FromArgb("#B4BEFE"),
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                }
+            };
+            var cell = new VerticalStackLayout
+            {
+                Spacing = 4,
+                Children =
+                {
+                    new Label
+                    {
+                        Text = day.Letter,
+                        FontFamily = "OpenSansSemibold",
+                        FontSize = 11,
+                        TextColor = day.IsToday ? Color.FromArgb("#CDD6F4") : Color.FromArgb("#6C7086"),
+                        HorizontalOptions = LayoutOptions.Center
+                    },
+                    circle
+                }
+            };
+            SemanticProperties.SetDescription(cell, $"{day.Date:dddd}{(day.Done ? ", entrenado" : "")}");
+            WeekStrip.Add(cell, col++, 0);
         }
-
-        // Reset — each section has a different starting state (impeccable: vary per element)
-        HeaderSection.Opacity = 0;  HeaderSection.TranslationY = -16;
-        StatHeroCard.Opacity = 0;   StatHeroCard.Scale = 0.95;
-        StatRow.Opacity = 0;        StatRow.TranslationX = -20;
-        CtaSection.Opacity = 0;     CtaSection.Scale = 0.97;
-        SessionsSection.Opacity = 0;
-
-        // 1. Header: slide desde arriba
-        await Task.WhenAll(
-            HeaderSection.FadeToAsync(1, 260, Easing.CubicOut),
-            HeaderSection.TranslateToAsync(0, 0, 260, Easing.CubicOut));
-
-        // 2. Hero stat: escala (distinto al header — sin Y)
-        await Task.WhenAll(
-            StatHeroCard.FadeToAsync(1, 300, Easing.CubicOut),
-            StatHeroCard.ScaleToAsync(1, 300, Easing.CubicOut));
-
-        // 3. Fila de stats: deslizamiento horizontal (distinto eje)
-        await Task.WhenAll(
-            StatRow.FadeToAsync(1, 280, Easing.CubicOut),
-            StatRow.TranslateToAsync(0, 0, 280, Easing.CubicOut));
-
-        // 4. CTA: escala suave (como el hero pero más rápido)
-        await Task.WhenAll(
-            CtaSection.FadeToAsync(1, 240, Easing.CubicOut),
-            CtaSection.ScaleToAsync(1, 240, Easing.CubicOut));
-
-        // 5. Sesiones: fade puro, sin movimiento — calma al final de la secuencia
-        await SessionsSection.FadeToAsync(1, 300, Easing.CubicOut);
     }
 
-    private static bool IsReduceMotionEnabled()
+    private void BuildTodayChips()
     {
-#if IOS
-        return UIKit.UIAccessibility.IsReduceMotionEnabled;
-#else
-        return false;
-#endif
+        TodayChips.Children.Clear();
+        foreach (var name in _vm.TodayExercises)
+            TodayChips.Children.Add(Chip(name, "#A6ADC8", "OpenSansRegular"));
+        if (_vm.HasTodayMore)
+            TodayChips.Children.Add(Chip(_vm.TodayMoreText, "#6C7086", "OpenSansSemibold"));
+    }
+
+    private static Border Chip(string text, string color, string font) => new()
+    {
+        BackgroundColor = Color.FromArgb("#252536"),
+        StrokeThickness = 0,
+        StrokeShape = new RoundRectangle { CornerRadius = 12 },
+        Padding = new Thickness(10, 5),
+        Margin = new Thickness(0, 0, 6, 6),
+        Content = new Label { Text = text, FontFamily = font, FontSize = 12, TextColor = Color.FromArgb(color), LineBreakMode = LineBreakMode.TailTruncation, MaximumWidthRequest = 220 }
+    };
+
+    private static async Task PressAsync(VisualElement? element)
+    {
+        if (element is null) return;
+        await element.ScaleToAsync(0.97, 70, Easing.CubicIn);
+        await element.ScaleToAsync(1.0, 120, Easing.SpringOut);
     }
 
     private async void OnSettingsTapped(object? sender, TappedEventArgs e)
     {
-        await SettingsButton.ScaleToAsync(0.92, 70, Easing.CubicIn);
-        await SettingsButton.ScaleToAsync(1.0, 120, Easing.SpringOut);
+        await PressAsync(SettingsButton);
         await Shell.Current.GoToAsync("SettingsPage");
     }
 
-    private async void OnWorkoutCtaTapped(object? sender, TappedEventArgs e)
+    // ▶ Empezar: Entreno crea la sesión al aparecer (WorkoutLaunch)
+    private async void OnStartTapped(object? sender, TappedEventArgs e)
     {
-        await CtaSection.ScaleToAsync(0.97, 80, Easing.CubicIn);
-        await CtaSection.ScaleToAsync(1.0, 80, Easing.CubicOut);
+        await PressAsync(StartButton);
+        if (!_vm.RequestStartToday()) return;
         await Shell.Current.GoToAsync("//WorkoutPage");
+    }
+
+    // «Elegir otro entreno» y «Continuar»: la pantalla de Entreno, con el día que toca ya propuesto
+    private async void OnOtherWorkoutTapped(object? sender, TappedEventArgs e)
+    {
+        await PressAsync(sender as VisualElement);
+        await Shell.Current.GoToAsync("//WorkoutPage");
+    }
+
+    private async void OnRoutinesTapped(object? sender, TappedEventArgs e)
+    {
+        await PressAsync(sender as VisualElement);
+        await Shell.Current.GoToAsync("//RoutinePage");
+    }
+
+    private async void OnHistoryTapped(object? sender, TappedEventArgs e)
+    {
+        ProgressPage.Request(ProgressSection.History);
+        await Shell.Current.GoToAsync("//ProgressPage");
+    }
+
+    private async void OnSessionTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is not RecentSessionItem item) return;
+        await PressAsync(sender as VisualElement);
+        ProgressPage.Request(ProgressSection.History, item.SessionId);
+        await Shell.Current.GoToAsync("//ProgressPage");
     }
 }

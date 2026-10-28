@@ -1,3 +1,4 @@
+using SteelProgress.Domain.Entities;
 using System.Globalization;
 using SteelProgress.Core.Services;
 using SteelProgress.Data.Repositories;
@@ -26,13 +27,24 @@ public sealed class RoutinePreview
     public string MonthText { get; }
     public string AverageDurationText { get; }
 
+    // El día que toca, para empezarlo desde aquí (null si no hay días o no tiene ejercicios)
+    public int? StartDayId { get; }
+    public bool CanStart => StartDayId is not null;
+    public string StartText { get; } = "";
+
     public bool HasLastSession { get; }
     public string LastSessionTitle { get; }
     public string LastSessionDetail { get; }
 
-    private RoutinePreview(RoutineListItem item, RoutineOverview overview, DateTime today)
+    private RoutinePreview(RoutineListItem item, RoutineOverview overview, DateTime today, RoutineDay? next)
     {
         Item = item;
+
+        if (next is not null && overview.Days.FirstOrDefault(d => d.Id == next.Id) is { ExerciseCount: > 0 })
+        {
+            StartDayId = next.Id;
+            StartText = $"▶ Empezar {next.Name}";
+        }
 
         Days = overview.Days
             .Select(d => new RoutinePreviewDay(d.Name,
@@ -63,7 +75,8 @@ public sealed class RoutinePreview
         LastSessionDetail = string.Join(" · ", parts);
     }
 
-    public static RoutinePreview Build(RoutineListItem item, RoutineOverview overview, DateTime today) => new(item, overview, today);
+    public static RoutinePreview Build(RoutineListItem item, RoutineOverview overview, DateTime today, RoutineDay? next = null) =>
+        new(item, overview, today, next);
 
     // "lun 26 oct"
     internal static string ShortDate(DateTime date) =>

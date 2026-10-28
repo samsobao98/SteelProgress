@@ -71,9 +71,7 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineViewModel>();
         builder.Services.AddTransient<RoutineDetailViewModel>();
         builder.Services.AddTransient<WorkoutViewModel>();
-        builder.Services.AddTransient<HistoryViewModel>();
-        builder.Services.AddTransient<ProgressViewModel>(sp =>
-            new ProgressViewModel(sp.GetRequiredService<AppDbContext>()));
+        builder.Services.AddTransient<ProgressViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddTransient<ClientsViewModel>();
@@ -85,7 +83,6 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutinePage>();
         builder.Services.AddTransient<RoutineDetailPage>();
         builder.Services.AddTransient<WorkoutPage>();
-        builder.Services.AddTransient<HistoryPage>();
         builder.Services.AddTransient<ProgressPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<ImportPreviewPage>();

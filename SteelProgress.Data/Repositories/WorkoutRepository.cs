@@ -193,6 +193,30 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
     public static double EstimatedOneRepMax(double weight, int reps) =>
         reps <= 1 ? weight : weight * (1 + reps / 30.0);
 
+    // Todo el historial del perfil y cliente activos en dos consultas planas, para las
+    // estadísticas de Inicio y Progreso. Solo cuentan las sesiones con alguna serie que no sea
+    // de calentamiento: al empezar un entreno ya se crea su sesión, todavía vacía.
+    public async Task<TrainingLog> GetTrainingLogAsync()
+    {
+        var sets = await _context.WorkoutSessions
+            .SelectMany(ws => ws.Exercises, (ws, we) => new { SessionId = ws.Id, ws.Date, we.ExerciseId, we.Exercise!.Name, we.Sets })
+            .SelectMany(x => x.Sets, (x, set) => new { x.SessionId, x.Date, x.ExerciseId, x.Name, set.Id, set.Weight, set.Reps, set.IsWarmup })
+            .Where(x => !x.IsWarmup)
+            .ToListAsync();
+
+        var sessions = await _context.WorkoutSessions
+            .Where(ws => ws.Exercises.Any(we => we.Sets.Any(s => !s.IsWarmup)))
+            .Select(ws => new LoggedSession(ws.Id, ws.Date, ws.DurationMinutes, ws.Feeling, ws.Notes, ws.IsComplete,
+                ws.RoutineDayId, ws.RoutineDay!.Name, ws.RoutineDay.Routine!.Name))
+            .ToListAsync();
+
+        return new TrainingLog(
+            sessions.OrderByDescending(s => s.Date).ToList(),
+            sets.OrderBy(x => x.Date).ThenBy(x => x.Id)
+                .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps))
+                .ToList());
+    }
+
     public async Task<List<WorkoutSession>> GetAllSessionsAsync()
     {
         return await _context.WorkoutSessions.Include(ws=>ws.RoutineDay).OrderByDescending(ws=>ws.Date).ToListAsync();
@@ -201,6 +225,17 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
 }
 
 public sealed record PreviousSet(double Weight, int Reps);
+
+// Historial para estadísticas: sesiones (la más reciente primero) y sus series en orden
+public sealed record TrainingLog(IReadOnlyList<LoggedSession> Sessions, IReadOnlyList<LoggedSet> Sets)
+{
+    public static TrainingLog Empty { get; } = new(Array.Empty<LoggedSession>(), Array.Empty<LoggedSet>());
+}
+
+public sealed record LoggedSession(int Id, DateTime Date, int? DurationMinutes, int? Feeling, string? Notes, bool IsComplete,
+    int RoutineDayId, string DayName, string RoutineName);
+
+public sealed record LoggedSet(int SessionId, DateTime Date, int ExerciseId, string ExerciseName, int SetId, double Weight, int Reps);
 
 // Lo que se sabe de un ejercicio antes de la sesión actual: las series de la última vez
 // y, para los récords, el máximo de repeticiones que se ha hecho con cada peso
