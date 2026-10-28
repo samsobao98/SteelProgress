@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using MauiIcons.Core;
 using Microsoft.Maui.Controls.Shapes;
+using SteelProgress.Core.Services;
+using SteelProgress.Core.Sharing;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
 
@@ -9,14 +11,16 @@ namespace SteelProgress.Maui.Pages;
 public partial class RoutineDetailPage : ContentPage
 {
     private readonly RoutineDetailViewModel _vm;
+    private readonly RoutineSharingService _sharing;
     private readonly List<(RoutineDay day, Border chip)> _dayChips = new();
     private Border? _activeSheet;
 
-    public RoutineDetailPage(RoutineDetailViewModel vm)
+    public RoutineDetailPage(RoutineDetailViewModel vm, RoutineSharingService sharing)
     {
         InitializeComponent();
         _ = new MauiIcon();
         BindingContext = _vm = vm;
+        _sharing = sharing;
 
         _vm.DaysChanged += BuildDayChips;
         _vm.RoutineDeleted += OnRoutineDeleted;
@@ -148,21 +152,11 @@ public partial class RoutineDetailPage : ContentPage
             return;
 
         var title = rde.Exercise?.Name ?? "Ejercicio";
-        var action = await DisplayActionSheetAsync(title, "Cancelar", "Eliminar", "Editar series y reps");
+        var action = await DisplayActionSheetAsync(title, "Cancelar", "Eliminar", "Editar series, reps e intensidad");
 
-        if (action == "Editar series y reps")
+        if (action == "Editar series, reps e intensidad")
         {
-            var setsStr = await DisplayPromptAsync("Series", "Número de series objetivo",
-                initialValue: rde.TargetSets?.ToString() ?? string.Empty, keyboard: Keyboard.Numeric);
-            if (setsStr is null) return; // cancelado
-
-            var repsStr = await DisplayPromptAsync("Repeticiones", "Repeticiones objetivo",
-                initialValue: rde.TargetReps?.ToString() ?? string.Empty, keyboard: Keyboard.Numeric);
-            if (repsStr is null) return;
-
-            int? sets = int.TryParse(setsStr, out var s) && s > 0 ? s : null;
-            int? reps = int.TryParse(repsStr, out var r) && r > 0 ? r : null;
-            await _vm.UpdateExerciseTargetsAsync(rde, sets, reps);
+            _vm.EditPrescription(rde);
         }
         else if (action == "Eliminar")
         {
@@ -170,6 +164,47 @@ public partial class RoutineDetailPage : ContentPage
                 $"¿Quitar \"{title}\" de este día?", "Eliminar", "Cancelar");
             if (ok)
                 await _vm.DeleteExerciseAsync(rde);
+        }
+    }
+
+    // ── Compartir (.steel) ─────────────────────────────────────────────────
+
+    private async void OnShareTapped(object? sender, TappedEventArgs e)
+    {
+        var routine = _vm.Routine;
+        var estimate = await _sharing.EstimateAsync(routine.Id);
+        bool includeMedia = false;
+        if (estimate.MediaCount > 0)
+        {
+            var withVideos = $"Con vídeos ({estimate.MediaCount} · {MediaKinds.FormatSize(estimate.MediaBytes)})";
+            const string withoutVideos = "Sin vídeos (solo datos)";
+            var choice = await DisplayActionSheetAsync($"Compartir «{routine.Name}»", "Cancelar", null, withVideos, withoutVideos);
+            if (choice != withVideos && choice != withoutVideos) return;
+            includeMedia = choice == withVideos;
+        }
+
+        var message = await DisplayPromptAsync("Mensaje (opcional)", "Lo verá quien abra la rutina.",
+            accept: "Compartir", cancel: "Cancelar", placeholder: "Ej. Empezamos el lunes", maxLength: 300);
+        if (message is null) return; // cancelado
+
+        ShareButton.IsEnabled = false;
+        try
+        {
+            var folder = System.IO.Path.Combine(FileSystem.CacheDirectory, "compartir");
+            var path = await _sharing.ExportRoutineToFileAsync(routine.Id, routine.Name, includeMedia, message, folder);
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = $"Compartir «{routine.Name}»",
+                File = new ShareFile(path, "application/octet-stream")
+            });
+        }
+        catch (Exception ex) when (ex is SteelPackageException or IOException)
+        {
+            NotificationService.Error($"No se pudo crear el archivo: {ex.Message}");
+        }
+        finally
+        {
+            ShareButton.IsEnabled = true;
         }
     }
 

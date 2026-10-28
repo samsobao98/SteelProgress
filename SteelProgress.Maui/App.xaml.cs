@@ -35,6 +35,7 @@ public partial class App : Application
         // ejercicios legacy con UserId null que aún no son de sistema.
         await SeedDefaultProfileIfNeededAsync(db);
         await SeedExerciseLibraryIfNeededAsync(db);
+        await NormalizeLibraryUidsAsync(db);
     }
 
     private static async Task SeedDefaultProfileIfNeededAsync(AppDbContext db)
@@ -94,9 +95,35 @@ public partial class App : Application
             Equipment = i.Equipment,
             Instructions = i.Instructions,
             UserId = null,
-            IsSystem = true
+            IsSystem = true,
+            Uid = LibraryUid(i.Name)
         }));
 
         await db.SaveChangesAsync();
+    }
+
+    // Uid estable por nombre: el mismo ejercicio de biblioteca tiene el mismo Uid
+    // en todos los dispositivos, así una rutina importada lo reconoce y no lo duplica.
+    private static Guid LibraryUid(string name)
+    {
+        var hash = System.Security.Cryptography.MD5.HashData(
+            System.Text.Encoding.UTF8.GetBytes("steelprogress.library/" + name.Trim().ToLowerInvariant()));
+        return new Guid(hash);
+    }
+
+    // Bibliotecas sembradas antes de existir LibraryUid tienen Uids aleatorios
+    private static async Task NormalizeLibraryUidsAsync(AppDbContext db)
+    {
+        var library = await db.Exercises.IgnoreQueryFilters().Where(e => e.IsSystem).ToListAsync();
+        var changed = false;
+        foreach (var ex in library)
+        {
+            var uid = LibraryUid(ex.Name);
+            if (ex.Uid == uid) continue;
+            ex.Uid = uid;
+            changed = true;
+        }
+        if (changed)
+            await db.SaveChangesAsync();
     }
 }

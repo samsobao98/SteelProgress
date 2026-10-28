@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
+    xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
     BackgroundColor="#1E1E2E"
     Shell.NavBarIsVisible="False"
     Title="Rutinas">
@@ -25,12 +26,13 @@
         </AbsoluteLayout>
 
         <!-- ── Contenido principal ── -->
-        <Grid RowDefinitions="Auto,*">
+        <Grid RowDefinitions="Auto,Auto,*">
 
-            <!-- Mini-header: título + contador -->
+            <!-- Mini-header: título + importar + contador -->
             <Grid
                 Grid.Row="0"
-                ColumnDefinitions="*,Auto"
+                ColumnDefinitions="*,Auto,Auto"
+                ColumnSpacing="8"
                 Padding="20,20,20,12">
                 <Label
                     FontAttributes="Bold"
@@ -38,8 +40,27 @@
                     Text="Rutinas"
                     TextColor="#CDD6F4"
                     VerticalOptions="Center" />
+                <!-- Importar una rutina compartida (.steel) -->
                 <Border
                     Grid.Column="1"
+                    BackgroundColor="#252536"
+                    HeightRequest="36"
+                    WidthRequest="36"
+                    StrokeShape="RoundRectangle 10"
+                    StrokeThickness="0"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnImportTapped" />
+                    </Border.GestureRecognizers>
+                    <mi:MauiIcon
+                        Icon="{mi:Material FileDownload}"
+                        IconColor="#CDD6F4"
+                        IconSize="20"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+                <Border
+                    Grid.Column="2"
                     BackgroundColor="#252536"
                     Padding="12,6"
                     StrokeShape="RoundRectangle 10"
@@ -53,10 +74,13 @@
                 </Border>
             </Grid>
 
+            <!-- Con un cliente activo, estas rutinas son las suyas -->
+            <controls:ActiveClientBanner Grid.Row="1" Margin="20,0,20,12" />
+
             <!-- Lista de rutinas -->
             <CollectionView
                 x:Name="RoutineList"
-                Grid.Row="1"
+                Grid.Row="2"
                 ItemsSource="{Binding Routines}"
                 Opacity="0"
                 Margin="20,0,20,0">

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Aviso «Trabajando con Marta · Salir» en las pantallas que muestran los datos del cliente activo -->
+<ContentView
+    x:Class="SteelProgress.Maui.Controls.ActiveClientBanner"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    IsVisible="False">
+    <Border
+        BackgroundColor="#24FAB387"
+        StrokeThickness="0"
+        StrokeShape="RoundRectangle 12"
+        Padding="12,8"
+        Margin="0">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Border x:Name="Avatar" WidthRequest="28" HeightRequest="28" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource SpIntensity}" VerticalOptions="Center">
+                <Label x:Name="InitialLabel" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpOnAccent}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                <Label Text="Trabajando con" FontSize="11" TextColor="{StaticResource SpText3}" />
+                <Label x:Name="NameLabel" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpText}" />
+            </VerticalStackLayout>
+            <Border x:Name="ExitButton" Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource SpCardHi}" Padding="12,6" VerticalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnExitTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="Salir" FontSize="13" TextColor="{StaticResource SpText}" />
+            </Border>
+        </Grid>
+    </Border>
+</ContentView>

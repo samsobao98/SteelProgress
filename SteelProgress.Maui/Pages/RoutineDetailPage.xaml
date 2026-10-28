@@ -10,7 +10,8 @@
 
     <ContentPage.Resources>
         <converters:MuscleGroupColorConverter x:Key="MuscleGroupColor" />
-        <converters:TargetSetsRepsConverter x:Key="SetsReps" />
+        <converters:PrescriptionTextConverter x:Key="PrescriptionText" />
+        <converters:StringNotNullOrEmptyConverter x:Key="NotEmpty" />
     </ContentPage.Resources>
 
     <Grid>
@@ -26,10 +27,10 @@
 
         <Grid RowDefinitions="Auto,Auto,*">
 
-            <!-- ── Header: volver + nombre + editar ── -->
+            <!-- ── Header: volver + nombre + compartir + editar ── -->
             <Grid
                 Grid.Row="0"
-                ColumnDefinitions="Auto,*,Auto"
+                ColumnDefinitions="Auto,*,Auto,Auto"
                 ColumnSpacing="10"
                 Padding="14,18,14,8">
                 <Border
@@ -58,8 +59,28 @@
                     TextColor="#CDD6F4"
                     LineBreakMode="TailTruncation"
                     VerticalOptions="Center" />
+                <!-- Compartir la rutina como archivo .steel -->
                 <Border
+                    x:Name="ShareButton"
                     Grid.Column="2"
+                    BackgroundColor="#252536"
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnShareTapped" />
+                    </Border.GestureRecognizers>
+                    <mi:MauiIcon
+                        Icon="{mi:Material Share}"
+                        IconColor="#CDD6F4"
+                        IconSize="20"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+                <Border
+                    Grid.Column="3"
                     BackgroundColor="#252536"
                     HeightRequest="40"
                     WidthRequest="40"
@@ -123,7 +144,7 @@
                                 Padding="14,12"
                                 StrokeShape="RoundRectangle 14"
                                 StrokeThickness="0">
-                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <!-- Handle de arrastre -->
                                     <mi:MauiIcon
                                         Grid.Column="0"
@@ -141,6 +162,13 @@
                                             Text="{Binding Exercise.Name}"
                                             TextColor="#CDD6F4"
                                             LineBreakMode="TailTruncation" />
+                                        <!-- Lo prescrito: "4 × 6–8 · RPE 8 · 1:30" -->
+                                        <Label
+                                            FontFamily="SpaceGroteskMedium"
+                                            FontSize="13"
+                                            Text="{Binding ., Converter={StaticResource PrescriptionText}}"
+                                            TextColor="{StaticResource SpOk}"
+                                            IsVisible="{Binding ., Converter={StaticResource PrescriptionText}, ConverterParameter=visible}" />
                                         <Border
                                             BackgroundColor="{Binding Exercise.MuscleGroup, Converter={StaticResource MuscleGroupColor}}"
                                             Padding="9,3"
@@ -154,23 +182,9 @@
                                                 TextColor="#1E1E2E" />
                                         </Border>
                                     </VerticalStackLayout>
-                                    <!-- Series × reps -->
-                                    <Border
-                                        Grid.Column="2"
-                                        BackgroundColor="#313244"
-                                        Padding="11,6"
-                                        StrokeShape="RoundRectangle 9"
-                                        StrokeThickness="0"
-                                        VerticalOptions="Center">
-                                        <Label
-                                            FontSize="14"
-                                            FontAttributes="Bold"
-                                            Text="{Binding Converter={StaticResource SetsReps}}"
-                                            TextColor="#A6E3A1" />
-                                    </Border>
                                     <!-- Menú ⋮ -->
                                     <Border
-                                        Grid.Column="3"
+                                        Grid.Column="2"
                                         BackgroundColor="Transparent"
                                         HeightRequest="36"
                                         WidthRequest="30"
@@ -411,6 +425,111 @@
                 </Border>
             </VerticalStackLayout>
         </Border>
+
+        <!-- ===== PANEL: EDITAR PRESCRIPCIÓN (sistema de diseño) ===== -->
+        <Grid IsVisible="{Binding Editor.IsOpen}" BackgroundColor="#8C0A0A10">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Editor.CloseCommand}" />
+            </Grid.GestureRecognizers>
+
+            <Border Style="{StaticResource SpSheetStyle}" VerticalOptions="End" MaximumHeightRequest="640">
+                <!-- Tocar dentro del panel no lo cierra -->
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                <ScrollView>
+                    <VerticalStackLayout Spacing="14">
+                        <BoxView HeightRequest="4" WidthRequest="40" CornerRadius="2" Color="{StaticResource SpText4}" HorizontalOptions="Center" />
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Editor.ExerciseName}" Style="{StaticResource SpHeading}" />
+                            <Label Text="Vacío = sin indicar" Style="{StaticResource SpSecondary}" FontSize="12" />
+                        </VerticalStackLayout>
+
+                        <!-- Básico: siempre -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Series" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                <Entry Text="{Binding Editor.Sets}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" FontFamily="SpaceGroteskBold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Reps" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                <Entry Text="{Binding Editor.Reps}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" FontFamily="SpaceGroteskBold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4" IsVisible="{Binding Editor.ShowRepRange}">
+                                <Label Text="Hasta (rango)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                <Entry Text="{Binding Editor.RepsMax}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" FontFamily="SpaceGroteskBold" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Intensidad -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding Editor.ShowIntensity}">
+                            <Label Text="Intensidad" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpIntensity}" />
+                            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Peso kg" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.Weight}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="% 1RM" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.Percent1RM}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                    <Label Text="RPE" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.Rpe}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="3" Spacing="4">
+                                    <Label Text="RIR" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.Rir}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Tempo y descanso -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding Editor.ShowTempoAndRest}">
+                            <Label Text="Tempo y descanso" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpRest}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Tempo (3-1-1-0)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.Tempo}" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Descanso (segundos)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.RestSeconds}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Estructura avanzada -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding Editor.ShowStructure}">
+                            <Label Text="Estructura" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpSteel2}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Superserie (A1, A2…)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.GroupLabel}" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Series de calentamiento" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    <Entry Text="{Binding Editor.WarmupSets}" Keyboard="Numeric" Placeholder="—" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Notas: siempre -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Notas" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <Editor Text="{Binding Editor.Notes}" AutoSize="TextChanges" Placeholder="Indicaciones para este ejercicio" BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                        </VerticalStackLayout>
+
+                        <Label Text="{Binding Editor.Error}" TextColor="{StaticResource SpDanger}" FontSize="13" IsVisible="{Binding Editor.Error, Converter={StaticResource NotEmpty}}" />
+
+                        <Grid ColumnDefinitions="*,2*" ColumnSpacing="8">
+                            <Button Text="Cancelar" Style="{StaticResource SpSecondaryButton}" Command="{Binding Editor.CloseCommand}" />
+                            <Button Grid.Column="1" Text="Guardar" Style="{StaticResource SpPrimaryButton}" Command="{Binding Editor.SaveCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
 
     </Grid>
 

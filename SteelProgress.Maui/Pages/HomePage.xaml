@@ -29,7 +29,7 @@
                 <!-- ── Header ── -->
                 <Grid
                     x:Name="HeaderSection"
-                    ColumnDefinitions="52,*"
+                    ColumnDefinitions="52,*,Auto"
                     ColumnSpacing="14"
                     Margin="0,4,0,28"
                     Opacity="0"
@@ -59,6 +59,26 @@
                             FontAttributes="Bold"
                             TextColor="#CDD6F4" />
                     </VerticalStackLayout>
+
+                    <!-- Ajustes -->
+                    <Border
+                        x:Name="SettingsButton"
+                        Grid.Column="2"
+                        Style="{StaticResource SpCardStyle}"
+                        Padding="0"
+                        WidthRequest="42"
+                        HeightRequest="42"
+                        VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSettingsTapped" />
+                        </Border.GestureRecognizers>
+                        <mi:MauiIcon
+                            Icon="{mi:Material Settings}"
+                            IconColor="{StaticResource SpText2}"
+                            IconSize="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
                 </Grid>
 
                 <!-- ── HERO: Sesiones (stat protagonista, rotura del grid idéntico) ── -->

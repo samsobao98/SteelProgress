@@ -24,6 +24,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .Include(ws => ws.RoutineDay)
             .Include(ws => ws.Exercises)
                 .ThenInclude(we => we.Exercise)
+                    .ThenInclude(e => e!.Media)
             .Include(ws => ws.Exercises)
                 .ThenInclude(we => we.Sets)
             .FirstOrDefaultAsync(ws => ws.Id == sessionId);

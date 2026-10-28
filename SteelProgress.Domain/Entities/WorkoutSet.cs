@@ -15,5 +15,11 @@ public class WorkoutSet
 
     public double Weight { get; set; }
 
+    public double? Rpe { get; set; }
+
+    public bool IsWarmup { get; set; }
+
+    public string? Notes { get; set; }
+
     public WorkoutExercise? WorkoutExercise { get; set; }
 }

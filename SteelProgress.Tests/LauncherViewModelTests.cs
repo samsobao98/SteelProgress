@@ -35,7 +35,7 @@ public class LauncherViewModelTests
 
     private static LauncherViewModel NuevoViewModel() =>
         // LoadAsync revienta en el primer await, antes de resolver nada del contenedor.
-        new(new ServiceProviderVacio(), new CurrentUserService());
+        new(new ServiceProviderVacio(), new CurrentUserService(), new ViewOptionsService());
 
     private sealed class ServiceProviderVacio : IServiceProvider
     {

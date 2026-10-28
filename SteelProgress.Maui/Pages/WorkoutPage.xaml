@@ -3,8 +3,14 @@
     x:Class="SteelProgress.Maui.Pages.WorkoutPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
+    xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
     BackgroundColor="#1E1E2E"
     Title="Entreno">
+
+    <ContentPage.Resources>
+        <conv:ExerciseThumbnailConverter x:Key="ExerciseThumb" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto,Auto">
 
@@ -26,6 +32,8 @@
                     FontSize="13"
                     Text="Selecciona rutina y día, luego registra tus series"
                     TextColor="#BAC2DE" />
+                <!-- Con un cliente activo, estos datos son los suyos -->
+                <controls:ActiveClientBanner Margin="0,8,0,0" />
             </VerticalStackLayout>
         </Border>
 
@@ -141,12 +149,50 @@
                         SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
                         SelectionMode="Single">
                         <CollectionView.Header>
-                            <Label
-                                FontAttributes="Bold"
-                                FontSize="15"
-                                Margin="0,0,0,8"
-                                Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
-                                TextColor="#CDD6F4" />
+                            <VerticalStackLayout Spacing="6" Margin="0,0,0,8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="15"
+                                        VerticalOptions="Center"
+                                        Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
+                                        TextColor="#CDD6F4" />
+                                    <!-- Ver el vídeo o la imagen del ejercicio sin salir del entreno -->
+                                    <Border
+                                        Grid.Column="1"
+                                        Style="{StaticResource SpChipStyle}"
+                                        Padding="12,6"
+                                        IsVisible="{Binding SelectedWorkoutExercise.Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnShowMediaTapped" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="▶ Ver cómo se hace" FontSize="13" TextColor="{StaticResource SpSteel2}" />
+                                    </Border>
+                                </Grid>
+                                <!-- Lo que pide la rutina para este ejercicio -->
+                                <Border
+                                    Style="{StaticResource SpChipStyle}"
+                                    HorizontalOptions="Start"
+                                    IsVisible="{Binding HasPrescription}">
+                                    <Label
+                                        FontFamily="SpaceGroteskMedium"
+                                        FontSize="13"
+                                        Text="{Binding PrescriptionText, StringFormat='Objetivo: {0}'}"
+                                        TextColor="{StaticResource SpText}" />
+                                </Border>
+                                <!-- Nota del entrenador o del propio usuario -->
+                                <Border
+                                    BackgroundColor="#1AF9E2AF"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,8"
+                                    IsVisible="{Binding HasPrescriptionNotes}">
+                                    <Label
+                                        FontSize="13"
+                                        Text="{Binding PrescriptionNotes}"
+                                        TextColor="{StaticResource SpText2}" />
+                                </Border>
+                            </VerticalStackLayout>
                         </CollectionView.Header>
                         <CollectionView.EmptyView>
                             <Label

@@ -1,5 +1,7 @@
 using MauiIcons.Core;
 using Microsoft.Extensions.DependencyInjection;
+using SteelProgress.Core.Services;
+using SteelProgress.Core.Sharing;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
 
@@ -19,9 +21,26 @@ public partial class RoutinePage : ContentPage
         _vm.RoutineCreated += () => _ = HideOverlayAsync();
     }
 
+    private ClientContextService? _clientContext;
+
+    // Al entrar o salir de un cliente, la pantalla vuelve a cargar sus datos
+    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        _clientContext ??= _services.GetService<ClientContextService>();
+        if (_clientContext is not null)
+        {
+            _clientContext.Changed -= OnClientChanged;
+            _clientContext.Changed += OnClientChanged;
+        }
         await _vm.RefreshAsync();
         await RunEntryAnimationsAsync();
     }
@@ -50,6 +69,28 @@ public partial class RoutinePage : ContentPage
         var page = _services.GetRequiredService<RoutineDetailPage>();
         await page.LoadAsync(summary.Routine);
         await Navigation.PushAsync(page);
+    }
+
+    // ── Importar (.steel) ──────────────────────────────────────────────────
+
+    private async void OnImportTapped(object? sender, TappedEventArgs e)
+    {
+        var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = "Elige un archivo .steel" });
+        if (file is null) return;
+
+        if (!file.FileName.EndsWith(SteelPackageFormat.Extension, StringComparison.OrdinalIgnoreCase))
+        {
+            NotificationService.Error("Elige un archivo .steel de SteelProgress.");
+            return;
+        }
+
+        // Copia local: el archivo elegido puede no seguir accesible mientras se revisa la vista previa
+        var path = Path.Combine(FileSystem.CacheDirectory, "importar" + SteelPackageFormat.Extension);
+        await using (var source = await file.OpenReadAsync())
+        await using (var target = File.Create(path))
+            await source.CopyToAsync(target);
+
+        await Shell.Current.GoToAsync(nameof(ImportPreviewPage), new Dictionary<string, object> { ["path"] = path });
     }
 
     // ── FAB: abre el sheet de creación ─────────────────────────────────────

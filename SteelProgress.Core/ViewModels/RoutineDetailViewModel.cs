@@ -48,11 +48,19 @@ public partial class RoutineDetailViewModel : ObservableObject
     /// <summary>Se dispara cuando cambian los ejercicios del día (para refrescar la lista).</summary>
     public event Action? ExercisesChanged;
 
-    public RoutineDetailViewModel(RoutineRepository repository, ExerciseRepository exerciseRepository)
+    /// <summary>Panel para editar lo prescrito (series, reps, intensidad, tempo...).</summary>
+    public PrescriptionEditorViewModel Editor { get; }
+
+    // viewOptions es opcional para poder crear el ViewModel a mano (tests)
+    public RoutineDetailViewModel(RoutineRepository repository, ExerciseRepository exerciseRepository, ViewOptionsService? viewOptions = null)
     {
         _repository = repository;
         _exerciseRepository = exerciseRepository;
+        Editor = new PrescriptionEditorViewModel(repository, viewOptions ?? new ViewOptionsService());
+        Editor.Saved += async () => await LoadDayExercisesAsync();
     }
+
+    public void EditPrescription(RoutineDayExercise rde) => Editor.Open(rde);
 
     public async Task InitializeAsync(Routine routine)
     {
@@ -179,14 +187,6 @@ public partial class RoutineDetailViewModel : ObservableObject
         SelectedExerciseToAdd = null;
         NewSets = string.Empty;
         NewReps = string.Empty;
-        await LoadDayExercisesAsync();
-    }
-
-    public async Task UpdateExerciseTargetsAsync(RoutineDayExercise rde, int? sets, int? reps)
-    {
-        rde.TargetSets = sets;
-        rde.TargetReps = reps;
-        await _repository.UpdateRoutineDayExerciseAsync(rde);
         await LoadDayExercisesAsync();
     }
 

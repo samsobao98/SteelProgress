@@ -9,6 +9,8 @@ namespace SteelProgress.Domain.Entities
     public class Exercise
     {
         public int Id { get; set; }
+        // Identidad estable entre dispositivos (exportar/importar); el Id solo vale dentro de esta base de datos
+        public Guid Uid { get; set; } = Guid.NewGuid();
         public int? UserId { get; set; }
         public UserProfile? UserProfile { get; set; }
 
@@ -18,11 +20,14 @@ namespace SteelProgress.Domain.Entities
 
         // Campos de biblioteca (seed con UserId == null; también editables en propios)
         public string? SecondaryMuscles { get; set; }
+        // Material (barra, mancuernas, polea...) e instrucciones de ejecución
         public string? Equipment { get; set; }
         public string? Instructions { get; set; }
 
         // Persistido (no computado): distingue la biblioteca precargada de datos
         // legacy con UserId null, que el seed de perfiles migra a un perfil.
         public bool IsSystem { get; set; }
+
+        public ICollection<ExerciseMedia> Media { get; set; } = new List<ExerciseMedia>();
     }
 }

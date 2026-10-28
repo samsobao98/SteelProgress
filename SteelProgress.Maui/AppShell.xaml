@@ -12,6 +12,10 @@
         <Tab Title="Inicio">
             <ShellContent x:Name="HomeContent" Route="HomePage" />
         </Tab>
+        <!-- Solo en vista entrenador -->
+        <Tab x:Name="ClientsTab" Title="Clientes" IsVisible="False">
+            <ShellContent x:Name="ClientsContent" Route="ClientsPage" />
+        </Tab>
         <Tab Title="Ejercicios">
             <ShellContent x:Name="ExerciseContent" Route="ExercisePage" />
         </Tab>
@@ -21,7 +25,7 @@
         <Tab Title="Entreno">
             <ShellContent x:Name="WorkoutContent" Route="WorkoutPage" />
         </Tab>
-        <Tab Title="Historial">
+        <Tab x:Name="HistoryTab" Title="Historial">
             <ShellContent x:Name="HistoryContent" Route="HistoryPage" />
         </Tab>
     </TabBar>

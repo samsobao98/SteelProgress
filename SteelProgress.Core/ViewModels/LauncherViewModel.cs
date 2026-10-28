@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SteelProgress.Core.Services;
 using SteelProgress.Data.Context;
 using SteelProgress.Domain.Entities;
 using SteelProgress.Domain.Services;
@@ -111,10 +112,13 @@ public partial class LauncherViewModel : ObservableObject
         ProfileUpdated?.Invoke();
     }
 
-    public LauncherViewModel(IServiceProvider sp, ICurrentUserService currentUserService)
+    private readonly ViewOptionsService _viewOptions;
+
+    public LauncherViewModel(IServiceProvider sp, ICurrentUserService currentUserService, ViewOptionsService viewOptions)
     {
         _sp = sp;
         _currentUserService = currentUserService;
+        _viewOptions = viewOptions;
     }
 
     public async Task LoadAsync(Task migrationTask)
@@ -150,6 +154,7 @@ public partial class LauncherViewModel : ObservableObject
     public void SelectProfile(UserProfile profile)
     {
         _currentUserService.SetCurrentUser(profile.Id);
+        _viewOptions.Apply(profile);
         ProfileChosen?.Invoke();
     }
 

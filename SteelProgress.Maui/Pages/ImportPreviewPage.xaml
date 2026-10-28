@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.ImportPreviewPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
+    x:DataType="vm:ImportViewModel"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringNotNullOrEmptyConverter x:Key="NotEmpty" />
+    </ContentPage.Resources>
+
+    <!-- Vista previa de un .steel (maqueta 6: «Cliente · abre lo que le envían») -->
+    <Grid>
+        <Ellipse Fill="{StaticResource SpSteel3}" Opacity="0.08" WidthRequest="320" HeightRequest="320"
+                 HorizontalOptions="Center" VerticalOptions="Start" Margin="0,20,0,0" InputTransparent="True" />
+
+        <ScrollView>
+            <VerticalStackLayout x:Name="PageContent" Padding="20,36,20,32" Spacing="0">
+
+                <!-- Icono -->
+                <Border x:Name="Badge" WidthRequest="68" HeightRequest="68" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 20" Background="{StaticResource SpSteelBrush}" HorizontalOptions="Center">
+                    <Label Text="↓" FontSize="28" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Error al abrir -->
+                <VerticalStackLayout IsVisible="{Binding Error, Converter={StaticResource NotEmpty}}" Spacing="8" Margin="0,18,0,0">
+                    <Label Text="No se puede abrir" Style="{StaticResource SpHeading}" HorizontalOptions="Center" />
+                    <Label Text="{Binding Error}" Style="{StaticResource SpSecondary}" HorizontalTextAlignment="Center" TextColor="{StaticResource SpDanger}" />
+                </VerticalStackLayout>
+
+                <!-- Hecho -->
+                <VerticalStackLayout IsVisible="{Binding IsDone}" Spacing="16" Margin="0,18,0,0">
+                    <Label Text="{Binding DoneMessage}" Style="{StaticResource SpHeading}" HorizontalTextAlignment="Center" />
+                    <Button Text="Ver mis rutinas" Style="{StaticResource SpPrimaryButton}" Clicked="OnCloseClicked" />
+                </VerticalStackLayout>
+
+                <!-- Vista previa -->
+                <VerticalStackLayout x:Name="PreviewSection" IsVisible="False" Spacing="0">
+                    <Label Text="{Binding KindLabel, StringFormat='{0} de'}" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" Margin="0,14,0,0"
+                           IsVisible="{Binding HasAuthor}" />
+                    <Label Text="{Binding AuthorName}" Style="{StaticResource SpHeading}" HorizontalOptions="Center" IsVisible="{Binding HasAuthor}" />
+                    <Label Text="{Binding Title}" Style="{StaticResource SpTitle}" HorizontalTextAlignment="Center" Margin="0,10,0,0" />
+
+                    <Border Style="{StaticResource SpChipStyle}" HorizontalOptions="Center" Margin="0,8,0,0"
+                            BackgroundColor="#26B4BEFE" IsVisible="{Binding IsUpdate}">
+                        <Label Text="{Binding VersionBadge}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpSteel2}" />
+                    </Border>
+
+                    <!-- Resumen -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="14,4" Margin="0,20,0,0">
+                        <VerticalStackLayout>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding HasDays}">
+                                <Label Text="Días" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
+                                <Label Grid.Column="1" Text="{Binding DaysText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                            </Grid>
+                            <BoxView HeightRequest="1" Color="{StaticResource SpLine}" IsVisible="{Binding HasDays}" />
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Text="Ejercicios nuevos" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
+                                <Label Grid.Column="1" Text="{Binding NewExercisesText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                            </Grid>
+                            <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Text="Vídeos" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
+                                <Label Grid.Column="1" Text="{Binding MediaText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                            </Grid>
+                            <BoxView HeightRequest="1" Color="{StaticResource SpLine}" IsVisible="{Binding IsUpdate}" />
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding IsUpdate}">
+                                <Label Text="Tu historial" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
+                                <Label Grid.Column="1" Text="Se conserva" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpOk}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Mensaje del autor -->
+                    <Border BackgroundColor="#14F9E2AF" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="14,10" Margin="0,12,0,0"
+                            IsVisible="{Binding HasMessage}">
+                        <Label FontSize="13" TextColor="{StaticResource SpText2}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding AuthorName, StringFormat='{0}: '}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpRecord}" />
+                                    <Span Text="{Binding Message, StringFormat='«{0}»'}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Border>
+
+                    <Label Text="Ya tienes esta versión o una más nueva. Puedes guardarla como copia."
+                           Style="{StaticResource SpSecondary}" FontSize="12" HorizontalTextAlignment="Center" Margin="0,12,0,0"
+                           IsVisible="{Binding IsOlderOrSameVersion}" />
+
+                    <!-- Acciones -->
+                    <VerticalStackLayout Spacing="8" Margin="0,18,0,0">
+                        <Button Text="Actualizar rutina" Style="{StaticResource SpPrimaryButton}" Command="{Binding UpdateCommand}" IsVisible="{Binding IsUpdate}" />
+                        <Button x:Name="ImportButton" Text="Importar" Style="{StaticResource SpPrimaryButton}" Command="{Binding UpdateCommand}" />
+                        <Button Text="Guardar como copia" Style="{StaticResource SpSecondaryButton}" Command="{Binding SaveCopyCommand}" IsVisible="{Binding IsUpdate}" />
+                        <Button Text="Cancelar" Style="{StaticResource SpDangerTextButton}" TextColor="{StaticResource SpText3}" Clicked="OnCloseClicked" />
+                    </VerticalStackLayout>
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource SpSteel2}" Margin="0,12,0,0" />
+                </VerticalStackLayout>
+
+                <Button Text="Volver" Style="{StaticResource SpSecondaryButton}" Margin="0,24,0,0" Clicked="OnCloseClicked"
+                        IsVisible="{Binding Error, Converter={StaticResource NotEmpty}}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

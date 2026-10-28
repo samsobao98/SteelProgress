@@ -28,5 +28,11 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Para añadir vídeos e imágenes propios a tus ejercicios.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Para grabar un vídeo de cómo se hace un ejercicio.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Para grabar el sonido de los vídeos de tus ejercicios.</string>
 </dict>
 </plist>

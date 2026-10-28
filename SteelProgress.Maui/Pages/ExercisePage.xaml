@@ -12,6 +12,9 @@
         <converters:MuscleGroupColorConverter x:Key="MuscleGroupColor" />
         <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmpty" />
         <converters:InvertedBoolConverter x:Key="InvertedBool" />
+        <converters:MediaImageSourceConverter x:Key="MediaImage" />
+        <converters:MediaIsVideoConverter x:Key="MediaIsVideo" />
+        <converters:ExerciseThumbnailConverter x:Key="ExerciseThumb" />
     </ContentPage.Resources>
 
     <Grid>
@@ -129,8 +132,23 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnExerciseTapped" />
                                 </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                    <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <!-- Miniatura del primer vídeo o imagen -->
+                                    <Border
+                                        WidthRequest="56"
+                                        HeightRequest="56"
+                                        BackgroundColor="{StaticResource SpCardHi}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center"
+                                        IsVisible="{Binding ., Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
+                                        <Grid>
+                                            <Image Source="{Binding ., Converter={StaticResource ExerciseThumb}}" Aspect="AspectFill" />
+                                            <Label Text="▶" FontSize="18" TextColor="{StaticResource SpText}" HorizontalOptions="Center" VerticalOptions="Center"
+                                                   IsVisible="{Binding ., Converter={StaticResource ExerciseThumb}, ConverterParameter=video}" />
+                                        </Grid>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
                                         <Label
                                             FontAttributes="Bold"
                                             FontSize="15"
@@ -177,7 +195,7 @@
                                             IsVisible="{Binding Notes, Converter={StaticResource StringNotNullOrEmpty}}" />
                                     </VerticalStackLayout>
                                     <mi:MauiIcon
-                                        Grid.Column="1"
+                                        Grid.Column="2"
                                         Icon="{mi:Material ChevronRight}"
                                         IconColor="#45475A"
                                         IconSize="20"
@@ -324,6 +342,61 @@
                             Placeholder="Descripción, variantes..."
                             BackgroundColor="Transparent"
                             FontSize="15" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Vídeos e imágenes propios -->
+                <Border
+                    Style="{StaticResource SpCardStyle}"
+                    Padding="16,12"
+                    IsVisible="{Binding MediaEnabled}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label FontSize="11" Text="VÍDEOS E IMÁGENES" TextColor="#6C7086" CharacterSpacing="1" />
+                        <CollectionView ItemsSource="{Binding Media}" HeightRequest="84" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.EmptyView>
+                                <Label Text="Añade un vídeo, GIF o foto de la galería para ver cómo se hace."
+                                       Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid WidthRequest="84" HeightRequest="84">
+                                        <Border BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 12" StrokeThickness="0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnMediaTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Grid>
+                                                <Image Source="{Binding ., Converter={StaticResource MediaImage}}" Aspect="AspectFill"
+                                                       IsAnimationPlaying="{Binding ., Converter={StaticResource MediaIsVideo}, ConverterParameter=gif}" />
+                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2"
+                                                                     IsVisible="{Binding ., Converter={StaticResource MediaIsVideo}}">
+                                                    <Label Text="▶" FontSize="22" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
+                                                    <Label Text="Vídeo" FontSize="10" TextColor="{StaticResource SpText3}" HorizontalOptions="Center" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                        <!-- Quitar -->
+                                        <Border WidthRequest="24" HeightRequest="24" BackgroundColor="#CC161622"
+                                                StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                                                HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,4,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnRemoveMediaTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="✕" FontSize="11" TextColor="{StaticResource SpText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Button
+                            x:Name="AddMediaButton"
+                            Style="{StaticResource SpSecondaryButton}"
+                            Padding="12,10"
+                            Text="+ Añadir vídeo o imagen"
+                            Clicked="OnAddMediaClicked" />
+                        <ActivityIndicator IsRunning="{Binding IsImportingMedia}" IsVisible="{Binding IsImportingMedia}" Color="{StaticResource SpSteel2}" HeightRequest="24" />
                     </VerticalStackLayout>
                 </Border>
 
