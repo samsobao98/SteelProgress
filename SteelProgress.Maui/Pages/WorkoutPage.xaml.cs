@@ -5,6 +5,7 @@ using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
 using SteelProgress.Maui.Controls;
+using SteelProgress.Maui.Services;
 
 namespace SteelProgress.Maui.Pages;
 
@@ -172,7 +173,7 @@ public partial class WorkoutPage : ContentPage
         if (isRecord)
         {
             Vibrate(TimeSpan.FromMilliseconds(120));
-            NotificationService.Success("★ ¡Nuevo récord!");
+            AppToast.Show("★ ¡Nuevo récord!", ToastKind.Record);
         }
         else
             Haptic();
@@ -184,27 +185,24 @@ public partial class WorkoutPage : ContentPage
     {
         if ((sender as BindableObject)?.BindingContext is not DoneSet done) return;
 
-        var action = await DisplayActionSheetAsync($"Serie {done.Number} · {done.Text}", "Cancelar", "Borrar serie");
+        var action = await AppDialogs.ChooseAsync($"Serie {done.Number} · {done.Text}", [], destructive: "Borrar serie");
         if (action == "Borrar serie" && !_vm.DeleteSetCommand.IsRunning)
             await _vm.DeleteSetCommand.ExecuteAsync(done);
     }
 
     private async void OnWeightTapped(object? sender, TappedEventArgs e)
     {
-        var text = await DisplayPromptAsync("Peso", "Kilos de esta serie", accept: "Aceptar", cancel: "Cancelar",
-            initialValue: _vm.WeightText, maxLength: 7, keyboard: Keyboard.Numeric);
-        if (text is null) return;
-        if (!_vm.TrySetWeight(text))
-            NotificationService.Error("Peso: un número entre 0 y 1000.");
+        // TrySetWeight aplica el valor si es válido; si no, el error sale en la misma ventana
+        await AppDialogs.PromptAsync("Peso (kg)", "Kilos de esta serie", initialValue: _vm.WeightText,
+            keyboard: Keyboard.Numeric, maxLength: 7,
+            validate: t => _vm.TrySetWeight(t) ? null : "Un número entre 0 y 1000, p. ej. 72,5.");
     }
 
     private async void OnRepsTapped(object? sender, TappedEventArgs e)
     {
-        var text = await DisplayPromptAsync("Repeticiones", "Repeticiones de esta serie", accept: "Aceptar", cancel: "Cancelar",
-            initialValue: _vm.Reps.ToString(), maxLength: 3, keyboard: Keyboard.Numeric);
-        if (text is null) return;
-        if (!_vm.TrySetReps(text))
-            NotificationService.Error("Repeticiones: un número entre 0 y 999.");
+        await AppDialogs.PromptAsync("Repeticiones", "Repeticiones de esta serie", initialValue: _vm.Reps.ToString(),
+            keyboard: Keyboard.Numeric, maxLength: 3,
+            validate: t => _vm.TrySetReps(t) ? null : "Un número entre 0 y 999.");
     }
 
     // Abre el primer vídeo o imagen del ejercicio con el visor del móvil

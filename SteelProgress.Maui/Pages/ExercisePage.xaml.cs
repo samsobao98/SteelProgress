@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using MauiIcons.Core;
 using Microsoft.Maui.Controls.Shapes;
 using SteelProgress.Core.ViewModels;
@@ -212,7 +213,7 @@ public partial class ExercisePage : ContentPage
         const string record = "Grabar vídeo";
 
         var options = MediaPicker.Default.IsCaptureSupported ? new[] { photo, video, record } : new[] { photo, video };
-        var choice = await DisplayActionSheetAsync("Añadir vídeo o imagen", "Cancelar", null, options);
+        var choice = await AppDialogs.ChooseAsync("Añadir vídeo o imagen", options);
 
         try
         {
@@ -234,7 +235,7 @@ public partial class ExercisePage : ContentPage
         }
         catch (PermissionException)
         {
-            await DisplayAlertAsync("Permiso necesario", "Da permiso a SteelProgress para acceder a tus fotos y vídeos.", "OK");
+            await AppDialogs.AlertAsync("Permiso necesario", "Da permiso a SteelProgress para acceder a tus fotos y vídeos.");
         }
     }
 

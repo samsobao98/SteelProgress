@@ -141,11 +141,12 @@ public partial class RoutineDetailPage : ContentPage
 
     private async Task ShowDayMenuAsync(RoutineDay day)
     {
-        var action = await DisplayActionSheetAsync(day.Name, "Cancelar", "Eliminar día", "Renombrar");
+        var action = await AppDialogs.ChooseAsync(day.Name, ["Renombrar"], destructive: "Eliminar día");
 
         if (action == "Renombrar")
         {
-            var name = await DisplayPromptAsync("Renombrar día", "Nuevo nombre", initialValue: day.Name);
+            var name = await AppDialogs.PromptAsync("Renombrar día", initialValue: day.Name, placeholder: "ej. Empuje", maxLength: 40,
+                accept: "Guardar", validate: t => string.IsNullOrWhiteSpace(t) ? "El nombre es obligatorio." : null);
             if (!string.IsNullOrWhiteSpace(name))
                 await _vm.RenameDayAsync(day, name);
         }
@@ -159,8 +160,8 @@ public partial class RoutineDetailPage : ContentPage
                 1 => " y su entreno del historial",
                 _ => $" y sus {sessions} entrenos del historial"
             };
-            var ok = await DisplayAlertAsync("Eliminar día",
-                $"¿Eliminar «{day.Name}» con sus ejercicios{history}?", "Eliminar", "Cancelar");
+            var ok = await AppDialogs.ConfirmAsync("Eliminar día",
+                $"¿Eliminar «{day.Name}» con sus ejercicios{history}?", "Eliminar", destructive: true);
             if (ok)
                 await _vm.DeleteDayAsync(day);
         }
@@ -179,7 +180,7 @@ public partial class RoutineDetailPage : ContentPage
             return;
 
         var title = rde.Exercise?.Name ?? "Ejercicio";
-        var action = await DisplayActionSheetAsync(title, "Cancelar", "Quitar del día", "Editar series, reps e intensidad");
+        var action = await AppDialogs.ChooseAsync(title, ["Editar series, reps e intensidad"], destructive: "Quitar del día");
 
         if (action == "Editar series, reps e intensidad")
         {
@@ -187,8 +188,8 @@ public partial class RoutineDetailPage : ContentPage
         }
         else if (action == "Quitar del día")
         {
-            var ok = await DisplayAlertAsync("Quitar ejercicio",
-                $"¿Quitar «{title}» de este día?", "Quitar", "Cancelar");
+            var ok = await AppDialogs.ConfirmAsync("Quitar ejercicio",
+                $"¿Quitar «{title}» de este día?", "Quitar", destructive: true);
             if (ok)
                 await _vm.DeleteExerciseAsync(rde);
         }
@@ -259,7 +260,7 @@ public partial class RoutineDetailPage : ContentPage
     {
         if (_vm.SelectedDay is null)
         {
-            await DisplayAlertAsync("Sin día", "Crea o selecciona un día antes de añadir ejercicios.", "Entendido");
+            AppToast.Show("Crea o selecciona un día antes de añadir ejercicios.");
             return;
         }
         _vm.Picker.Reset();
@@ -326,8 +327,8 @@ public partial class RoutineDetailPage : ContentPage
             1 => " Se borrará también su entreno del historial.",
             _ => $" Se borrarán también sus {sessions} entrenos del historial."
         };
-        var ok = await DisplayAlertAsync("Eliminar rutina",
-            $"¿Eliminar «{_vm.RoutineName}» con todos sus días y ejercicios?{history}", "Eliminar", "Cancelar");
+        var ok = await AppDialogs.ConfirmAsync("Eliminar rutina",
+            $"¿Eliminar «{_vm.RoutineName}» con todos sus días y ejercicios?{history}", "Eliminar", destructive: true);
         if (ok)
             await _vm.DeleteRoutineAsync();
     }

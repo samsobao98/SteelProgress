@@ -193,7 +193,7 @@ public class ExerciseMediaTests : IDisposable
         Assert.Empty(check.ExerciseMedia);
     }
 
-    private static Task<bool> AlwaysYes(string title, string message) => Task.FromResult(true);
+    private static Task<bool> AlwaysYes(ConfirmRequest request) => Task.FromResult(true);
 
     [Fact]
     public async Task WorkoutSessionLoadsExerciseMediaForTheVideoButton()

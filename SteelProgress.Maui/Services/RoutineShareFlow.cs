@@ -16,13 +16,13 @@ public static class RoutineShareFlow
         {
             var withVideos = $"Con vídeos ({estimate.MediaCount} · {MediaKinds.FormatSize(estimate.MediaBytes)})";
             const string withoutVideos = "Sin vídeos (solo datos)";
-            var choice = await page.DisplayActionSheetAsync($"Compartir «{routine.Name}»", "Cancelar", null, withVideos, withoutVideos);
+            var choice = await AppDialogs.ChooseAsync($"Compartir «{routine.Name}»", [withVideos, withoutVideos]);
             if (choice != withVideos && choice != withoutVideos) return;
             includeMedia = choice == withVideos;
         }
 
-        var message = await page.DisplayPromptAsync("Mensaje (opcional)", "Lo verá quien abra la rutina.",
-            accept: "Compartir", cancel: "Cancelar", placeholder: "Ej. Empezamos el lunes", maxLength: 300);
+        var message = await AppDialogs.PromptAsync("Mensaje (opcional)", "Lo verá quien abra la rutina.",
+            placeholder: "Ej. Empezamos el lunes", maxLength: 300, accept: "Compartir");
         if (message is null) return; // cancelado
 
         if (button is not null) button.IsEnabled = false;

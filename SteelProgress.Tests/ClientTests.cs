@@ -173,7 +173,7 @@ public class ClientTests : IDisposable
         Assert.Single(check.WorkoutSessions.IgnoreQueryFilters());
     }
 
-    private static Task<bool> Yes(string t, string m) => Task.FromResult(true);
+    private static Task<bool> Yes(ConfirmRequest request) => Task.FromResult(true);
 
     [Fact]
     public async Task OtherProfilesDoNotSeeClients()

@@ -149,7 +149,7 @@ public partial class RoutinePage : ContentPage
         const string delete = "Eliminar";
         var mark = item.Routine.IsMarkedActive ? "Quitar como activa" : "Marcar como activa";
 
-        var choice = await DisplayActionSheetAsync(item.Name, "Cancelar", delete, summary, rename, mark, share);
+        var choice = await AppDialogs.ChooseAsync(item.Name, [summary, rename, mark, share], destructive: delete, subtitle: item.SubtitleText);
         switch (choice)
         {
             case summary:
@@ -172,12 +172,12 @@ public partial class RoutinePage : ContentPage
 
     private async Task RenameAsync(RoutineListItem item)
     {
-        var name = await DisplayPromptAsync("Nombre", "Nombre de la rutina", accept: "Siguiente", cancel: "Cancelar",
-            initialValue: item.Name, maxLength: 60);
-        if (string.IsNullOrWhiteSpace(name)) return;
+        var name = await AppDialogs.PromptAsync("Nombre de la rutina", initialValue: item.Name, maxLength: 60, accept: "Siguiente",
+            validate: t => string.IsNullOrWhiteSpace(t) ? "El nombre es obligatorio." : null);
+        if (name is null) return;
 
-        var notes = await DisplayPromptAsync("Notas (opcional)", "Objetivo, frecuencia…", accept: "Guardar", cancel: "Cancelar",
-            initialValue: item.Routine.Notes ?? "", maxLength: 120);
+        var notes = await AppDialogs.PromptAsync("Notas (opcional)", "Objetivo, frecuencia…", initialValue: item.Routine.Notes ?? "",
+            maxLength: 120, accept: "Guardar");
         if (notes is null) return; // cancelado
 
         await _vm.RenameAsync(item, name, notes);
@@ -247,7 +247,7 @@ public partial class RoutinePage : ContentPage
         const string manual = "Ordenar a mano";
         const string automatic = "Volver al orden automático";
         var options = _vm.IsManualOrder ? new[] { manual, automatic } : new[] { manual };
-        var choice = await DisplayActionSheetAsync("Orden de las rutinas", "Cancelar", null, options);
+        var choice = await AppDialogs.ChooseAsync("Orden de las rutinas", options);
 
         if (choice == manual)
             _vm.StartReorderCommand.Execute(null);
@@ -271,13 +271,16 @@ public partial class RoutinePage : ContentPage
         var sessions = await _vm.CountSessionsAsync(item);
         if (sessions > 0)
         {
-            var ok = await DisplayAlertAsync($"Eliminar «{item.Name}»",
+            var ok = await AppDialogs.ConfirmAsync($"Eliminar «{item.Name}»",
                 $"Se borrarán también {(sessions == 1 ? "su entreno" : $"sus {sessions} entrenos")} del historial.",
-                "Eliminar", "Cancelar");
+                "Eliminar", destructive: true);
             if (!ok) return;
         }
 
         await _vm.DeleteWithUndoAsync(item);
+        if (!_vm.HasPendingDelete) return; // bloqueado (p. ej. entreno en curso)
+        AppToast.Show(_vm.PendingDeleteText, ToastKind.Info, "Deshacer",
+            () => MainThread.BeginInvokeOnMainThread(() => _vm.UndoDeleteCommand.Execute(null)), UndoWindow);
         StartUndoTimer();
     }
 

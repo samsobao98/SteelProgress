@@ -642,7 +642,7 @@ public partial class WorkoutViewModel : ObservableObject
     {
         if (!ExerciseStates.Any(e => e.Sets.Count > 0))
         {
-            var discard = await ConfirmDialogService.ConfirmAsync("Terminar entreno", "No has registrado ninguna serie. ¿Descartar el entreno?");
+            var discard = await ConfirmDialogService.ConfirmAsync("Terminar entreno", "No has registrado ninguna serie. ¿Descartar el entreno?", accept: "Descartar", destructive: true);
             if (discard) await DiscardAsync();
             return;
         }
@@ -712,7 +712,7 @@ public partial class WorkoutViewModel : ObservableObject
     [RelayCommand]
     private async Task DiscardWorkout()
     {
-        var confirmed = await ConfirmDialogService.ConfirmAsync("Descartar entreno", "Se borrarán las series de este entreno. ¿Seguro?");
+        var confirmed = await ConfirmDialogService.ConfirmAsync("Descartar entreno", "Se borrarán las series de este entreno.", accept: "Descartar", destructive: true);
         if (confirmed) await DiscardAsync();
     }
 

@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using SteelProgress.Core.Services;
 using SteelProgress.Maui.Pages;
 
@@ -33,14 +34,16 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(ImportPreviewPage), typeof(ImportPreviewPage));
 
         // Wire static service delegates — AppShell lives for app lifetime, so one subscription is correct
-        ConfirmDialogService.OnConfirmationRequested += (title, msg) =>
-            DisplayAlertAsync(title, msg, "Sí", "No");
+        // Con el diseño de la app (docs/PLAN_VENTANAS.md): confirmación propia y avisos breves que se van solos
+        ConfirmDialogService.OnConfirmationRequested += request =>
+            AppDialogs.ConfirmAsync(request.Title, request.Message, request.Accept, request.Cancel, request.Destructive);
 
         NotificationService.OnNotificationRequested += (msg, type) =>
-        {
-            var title = type == NotificationType.Success ? "Correcto" :
-                        type == NotificationType.Error ? "Error" : "Aviso";
-            _ = DisplayAlertAsync(title, msg, "OK");
-        };
+            AppToast.Show(msg, type switch
+            {
+                NotificationType.Success => ToastKind.Success,
+                NotificationType.Error => ToastKind.Error,
+                _ => ToastKind.Info
+            });
     }
 }

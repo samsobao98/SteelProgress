@@ -143,7 +143,7 @@ public partial class ClientsViewModel : ObservableObject
     public async Task<bool> DeleteAsync(Client client)
     {
         var confirmed = await ConfirmDialogService.ConfirmAsync("Eliminar cliente",
-            $"Se borrarán las rutinas y sesiones de {client.Name}. ¿Seguro?");
+            $"Se borrarán las rutinas y sesiones de {client.Name}.", accept: "Eliminar", destructive: true);
         if (!confirmed) return false;
 
         if (_context.ActiveClient?.Id == client.Id) _context.Clear();

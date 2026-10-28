@@ -210,26 +210,6 @@
 
         </Grid>
 
-        <!-- ── Aviso de deshacer ── -->
-        <Border
-            x:Name="UndoBar"
-            IsVisible="{Binding HasPendingDelete}"
-            BackgroundColor="{StaticResource SpCardHi}"
-            StrokeShape="RoundRectangle 14"
-            StrokeThickness="0"
-            Padding="16,12"
-            Margin="20,0,96,28"
-            VerticalOptions="End">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <Label Text="{Binding PendingDeleteText}" Style="{StaticResource SpBody}" FontSize="14" VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                <Label Grid.Column="1" Text="Deshacer" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpSteel2}" VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding UndoDeleteCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </Grid>
-        </Border>
-
         <!-- ── FAB ── -->
         <!-- Sin animar: Scale/Opacity sobre un elemento con Shadow deja la sombra borrosa en Android -->
         <Border

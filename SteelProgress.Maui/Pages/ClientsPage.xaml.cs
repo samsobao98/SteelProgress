@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using System.ComponentModel;
 using SteelProgress.Core.ViewModels;
 
@@ -38,7 +39,7 @@ public partial class ClientsPage : ContentPage
         var name = item.Client.Name;
         string routines = $"Rutinas de {name}", train = $"Entrenar con {name}", history = $"Historial de {name}";
         const string edit = "Editar", delete = "Eliminar cliente";
-        var choice = await DisplayActionSheetAsync(name, "Cancelar", delete, train, routines, history, edit);
+        var choice = await AppDialogs.ChooseAsync(name, [train, routines, history, edit], destructive: delete);
 
         if (choice == edit) { _vm.StartEdit(item.Client); return; }
         if (choice == delete) { await _vm.DeleteAsync(item.Client); return; }

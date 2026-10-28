@@ -1,3 +1,4 @@
+using SteelProgress.Maui.Services;
 using System.ComponentModel;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
@@ -826,11 +827,11 @@ public partial class LauncherPage : ContentPage
 
     private async Task ConfirmAndDeleteAsync(UserProfile profile)
     {
-        bool confirmed = await DisplayAlertAsync(
+        bool confirmed = await AppDialogs.ConfirmAsync(
             "Eliminar perfil",
-            $"¿Eliminar \"{profile.Name}\"? Se borrarán permanentemente todas sus rutinas y sesiones de entrenamiento.",
+            $"¿Eliminar «{profile.Name}»? Se borrarán para siempre todas sus rutinas y sesiones de entrenamiento.",
             "Eliminar",
-            "Cancelar");
+            destructive: true);
 
         if (confirmed)
             await _vm.DeleteProfileAsync(profile);

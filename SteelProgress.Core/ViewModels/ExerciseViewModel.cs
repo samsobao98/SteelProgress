@@ -219,7 +219,7 @@ public partial class ExerciseViewModel : ObservableObject
         }
 
         var confirmed = await ConfirmDialogService
-            .ConfirmAsync("Eliminar Ejercicio", $"¿Seguro que quieres eliminar '{SelectedExercise.Name}'?");
+            .ConfirmAsync("Eliminar ejercicio", $"¿Eliminar «{SelectedExercise.Name}»?", accept: "Eliminar", destructive: true);
 
         if (!confirmed)
             return;
