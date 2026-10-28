@@ -36,6 +36,7 @@ public class ProgressStatsTests : IDisposable
         _connection.Open();
         _user.SetCurrentUser(1);
         WorkoutStateService.IsWorkoutActive = false;
+        WorkoutStateService.ActiveSessionId = null;
         WorkoutLaunch.Take();
         using var db = Db();
         db.Database.Migrate();
@@ -61,6 +62,7 @@ public class ProgressStatsTests : IDisposable
     public void Dispose()
     {
         WorkoutStateService.IsWorkoutActive = false;
+        WorkoutStateService.ActiveSessionId = null;
         WorkoutLaunch.Take();
         _connection.Dispose();
     }
@@ -336,6 +338,36 @@ public class ProgressStatsTests : IDisposable
 
         Assert.True(vm.IsExercises);
         Assert.Equal(_benchId, vm.SelectedExercise!.Progress.ExerciseId);
+    }
+
+    [Fact]
+    public async Task HistoryTellsInProgressUnsavedAndIncompleteApart()
+    {
+        var incomplete = await SeedAsync(_dayA, Today.AddDays(-3), (60, 8)); // guardado (50 min) con series sin hacer
+        var unsaved = await SeedAsync(_dayA, Today.AddDays(-2), (60, 8));
+        using (var db = Db())
+        {
+            db.WorkoutSessions.Single(s => s.Id == unsaved).DurationMinutes = null; // la app se cerró a medias
+            await db.SaveChangesAsync();
+        }
+
+        var workout = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        await workout.StartDayAsync(_dayA);
+        workout.Weight = 60;
+        workout.Reps = 8;
+        await workout.CompleteSetCommand.ExecuteAsync(null);
+        var current = workout.CurrentSession!.Id;
+
+        var vm = new ProgressViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        await vm.RefreshAsync();
+        string Status(int id) => vm.Sessions.Single(s => s.SessionId == id).StatusText;
+        Assert.Equal(("En curso", "Sin guardar", "Incompleto"), (Status(current), Status(unsaved), Status(incomplete)));
+
+        vm.OpenSessionById(current);
+        Assert.Equal("Entreno en curso: aún no está guardado", vm.SessionDetail!.StatusText);
+
+        await workout.DiscardAsync();
+        Assert.Null(WorkoutStateService.ActiveSessionId);
     }
 
     // ── Notas por serie ──

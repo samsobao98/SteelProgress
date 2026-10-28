@@ -179,12 +179,15 @@
                                 <TapGestureRecognizer Tapped="OnSessionTapped" />
                             </Border.GestureRecognizers>
                             <Grid ColumnDefinitions="32,*,Auto" ColumnSpacing="12">
-                                <!-- ✓ completo, ! a medias -->
+                                <!-- ✓ completo, ! a medias, ▶ en curso -->
                                 <Border WidthRequest="32" HeightRequest="32" StrokeShape="RoundRectangle 16" StrokeThickness="0"
                                         BackgroundColor="#1F3327" VerticalOptions="Center">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsIncomplete}" Value="True">
                                             <Setter Property="BackgroundColor" Value="#3A3322" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="#2E3050" />
                                         </DataTrigger>
                                     </Border.Triggers>
                                     <Label Text="✓" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpOk}"
@@ -193,6 +196,11 @@
                                             <DataTrigger TargetType="Label" Binding="{Binding IsIncomplete}" Value="True">
                                                 <Setter Property="Text" Value="!" />
                                                 <Setter Property="TextColor" Value="{StaticResource SpIntensity}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
+                                                <Setter Property="Text" Value="▶" />
+                                                <Setter Property="FontSize" Value="11" />
+                                                <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>

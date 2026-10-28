@@ -93,6 +93,9 @@ public static class AppDialogs
                 CanBeDismissedByTappingOutsideOfPopup = true
             };
             view.VerticalOptions = bottom ? LayoutOptions.End : LayoutOptions.Center;
+            // El panel inferior, de lado a lado (el Popup se ajusta al ancho de su contenido)
+            if (bottom && view.Content is View sheet && page.Width > 0)
+                sheet.WidthRequest = page.Width;
             var result = await page.ShowPopupAsync<T>(view, options);
             return result.WasDismissedByTappingOutsideOfPopup ? fallback : result.Result ?? fallback;
         }
@@ -285,7 +288,8 @@ internal sealed class ActionSheetView : DialogView<string?>
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(24, 24, 0, 0) },
             Padding = new Thickness(20, 12, 20, 28),
-            Content = new ScrollView { Content = stack, MaximumHeightRequest = 560 }
+            // En Android un ScrollView con tope ocupa siempre el tope: solo se usa si hay muchas opciones
+            Content = options.Count > 6 ? new ScrollView { Content = stack, MaximumHeightRequest = 560 } : stack
         };
     }
 

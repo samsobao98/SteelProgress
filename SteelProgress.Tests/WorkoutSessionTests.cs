@@ -36,6 +36,7 @@ public class WorkoutSessionTests : IDisposable
         _connection.Open();
         _user.SetCurrentUser(1);
         WorkoutStateService.IsWorkoutActive = false;
+        WorkoutStateService.ActiveSessionId = null;
         using var db = Db();
         db.Database.Migrate();
         db.UserProfiles.Add(new UserProfile { Id = 1, Name = "Laura" });

@@ -14,7 +14,27 @@ public class RecentSessionItem
     public string Title => Session.DayName;
     public string RoutineName => Session.RoutineName;
     public bool IsComplete => Session.IsComplete;
-    public bool IsIncomplete => !Session.IsComplete;
+
+    // Estado: en curso, sin guardar (la app se cerró a medias) o guardada con series sin hacer
+    public SessionStatus Status { get; }
+    public bool IsInProgress => Status == SessionStatus.InProgress;
+    public bool IsIncomplete => Status is SessionStatus.Unsaved or SessionStatus.Incomplete;
+    public bool HasStatus => Status != SessionStatus.Complete;
+    public string StatusText => Status switch
+    {
+        SessionStatus.InProgress => "En curso",
+        SessionStatus.Unsaved => "Sin guardar",
+        SessionStatus.Incomplete => "Incompleto",
+        _ => ""
+    };
+
+    public static SessionStatus StatusOf(LoggedSession session)
+    {
+        if (session.Id == WorkoutStateService.ActiveSessionId) return SessionStatus.InProgress;
+        if (session.IsComplete) return SessionStatus.Complete;
+        // Al guardar siempre se anota la duración: sin ella, el entreno nunca se llegó a guardar
+        return session.DurationMinutes is null ? SessionStatus.Unsaved : SessionStatus.Incomplete;
+    }
 
     /// <summary>"Ayer · 58 min · 7,9 t".</summary>
     public string Detail { get; }
@@ -28,6 +48,7 @@ public class RecentSessionItem
     public RecentSessionItem(LoggedSession session, double volume, DateTime today)
     {
         Session = session;
+        Status = StatusOf(session);
         var ago = RoutineSchedule.AgoText(session.Date, today);
         var parts = new List<string> { char.ToUpper(ago[0]) + ago[1..] };
         if (session.DurationMinutes is > 0) parts.Add($"{session.DurationMinutes} min");
@@ -36,3 +57,5 @@ public class RecentSessionItem
         DateText = session.Date.ToString("ddd d MMM", System.Globalization.CultureInfo.GetCultureInfo("es-ES")).Replace(".", "");
     }
 }
+
+public enum SessionStatus { Complete, InProgress, Unsaved, Incomplete }

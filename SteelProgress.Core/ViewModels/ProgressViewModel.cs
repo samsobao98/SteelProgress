@@ -313,7 +313,13 @@ public partial class ProgressViewModel : ObservableObject
         if (volume > 0) parts.Add(TrainingStats.FormatVolume(volume));
 
         return new SessionDetail(session.Id, session.DayName, session.RoutineName, string.Join(" · ", parts),
-            session.Notes ?? "", !session.IsComplete, exercises);
+            session.Notes ?? "", RecentSessionItem.StatusOf(session) switch
+            {
+                SessionStatus.InProgress => "Entreno en curso: aún no está guardado",
+                SessionStatus.Unsaved => "No se llegó a guardar",
+                SessionStatus.Incomplete => "Guardado con series sin hacer",
+                _ => ""
+            }, exercises);
     }
 
     // "Serie 3: molestia en el hombro", una por línea
@@ -393,7 +399,8 @@ public sealed record SessionExerciseDetail(int ExerciseId, string Name, string S
 }
 
 public sealed record SessionDetail(int SessionId, string Title, string RoutineName, string Subtitle, string Notes,
-    bool IsIncomplete, IReadOnlyList<SessionExerciseDetail> Exercises)
+    string StatusText, IReadOnlyList<SessionExerciseDetail> Exercises)
 {
     public bool HasNotes => Notes.Length > 0;
+    public bool HasStatus => StatusText.Length > 0;
 }
