@@ -61,7 +61,7 @@ Ejercicios (añadir vídeo, permiso), Clientes (menú) y selector de perfil (eli
 | 1 — Avisos y confirmaciones centrales | Hecho: `AppShell` conecta `NotificationService` y `ConfirmDialogService`; «Sin día» es un aviso breve; el récord sale en dorado |
 | 2 — Pantallas rediseñadas | Hecho: Entreno, Rutinas (el «Deshacer» es ahora el aviso breve con acción), detalle y Compartir |
 | 3 — Resto | Hecho: Ejercicios, Clientes y selector de perfil |
-| 4 — Pruebas en el móvil | Pendiente |
+| 4 — Pruebas en el móvil | Hecho: probado por el usuario (2026-10-28) |
 
 Ya no queda ningún `DisplayActionSheetAsync`, `DisplayAlertAsync` ni `DisplayPromptAsync` en la app.
 
