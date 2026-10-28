@@ -108,9 +108,87 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateSessionAsync(WorkoutSession session)
+    {
+        _context.WorkoutSessions.Update(session);
+        await _context.SaveChangesAsync();
+    }
+
+    // Historial de un ejercicio en otras sesiones. Se consulta a través de WorkoutSessions para que
+    // el filtro por perfil y cliente se aplique: WorkoutSets no lo tiene y los ejercicios de la
+    // biblioteca comparten ExerciseId entre perfiles. Las series de calentamiento no cuentan.
+    public async Task<ExerciseHistory> GetExerciseHistoryAsync(int exerciseId, int excludeSessionId)
+    {
+        var sets = await _context.WorkoutSessions
+            .Where(ws => ws.Id != excludeSessionId)
+            .SelectMany(ws => ws.Exercises, (ws, we) => new { ws.Date, we.ExerciseId, we.Sets })
+            .Where(x => x.ExerciseId == exerciseId)
+            .SelectMany(x => x.Sets, (x, set) => new { x.Date, set.Id, set.Weight, set.Reps, set.IsWarmup })
+            .Where(x => !x.IsWarmup)
+            .ToListAsync();
+
+        if (sets.Count == 0)
+            return ExerciseHistory.Empty;
+
+        var lastDate = sets.Max(x => x.Date);
+        var last = sets.Where(x => x.Date == lastDate)
+            .OrderBy(x => x.Id)
+            .Select(x => new PreviousSet(x.Weight, x.Reps))
+            .ToList();
+
+        return new ExerciseHistory(last, sets.Max(x => EstimatedOneRepMax(x.Weight, x.Reps)));
+    }
+
+    // Volumen (kg × reps, sin calentamiento) de la última vez que se entrenó este día
+    public async Task<double?> GetPreviousVolumeAsync(int routineDayId, int excludeSessionId)
+    {
+        var last = await _context.WorkoutSessions
+            .Where(ws => ws.RoutineDayId == routineDayId && ws.Id != excludeSessionId)
+            .Where(ws => ws.Exercises.Any(we => we.Sets.Any()))
+            .OrderByDescending(ws => ws.Date)
+            .Select(ws => ws.Id)
+            .FirstOrDefaultAsync();
+
+        if (last == 0)
+            return null;
+
+        var sets = await _context.WorkoutSessions
+            .Where(ws => ws.Id == last)
+            .SelectMany(ws => ws.Exercises)
+            .SelectMany(we => we.Sets)
+            .Where(set => !set.IsWarmup)
+            .Select(set => new { set.Weight, set.Reps })
+            .ToListAsync();
+
+        return sets.Sum(x => x.Weight * x.Reps);
+    }
+
+    // Última vez que se entrenó cada día (solo sesiones con alguna serie)
+    public async Task<Dictionary<int, DateTime>> GetLastSessionDatesAsync(IEnumerable<int> routineDayIds)
+    {
+        var ids = routineDayIds.ToList();
+        return await _context.WorkoutSessions
+            .Where(ws => ids.Contains(ws.RoutineDayId) && ws.Exercises.Any(we => we.Sets.Any()))
+            .GroupBy(ws => ws.RoutineDayId)
+            .Select(g => new { DayId = g.Key, Last = g.Max(ws => ws.Date) })
+            .ToDictionaryAsync(x => x.DayId, x => x.Last);
+    }
+
+    // Fórmula de Epley; con 1 repetición es el propio peso
+    public static double EstimatedOneRepMax(double weight, int reps) =>
+        reps <= 1 ? weight : weight * (1 + reps / 30.0);
+
     public async Task<List<WorkoutSession>> GetAllSessionsAsync()
     {
         return await _context.WorkoutSessions.Include(ws=>ws.RoutineDay).OrderByDescending(ws=>ws.Date).ToListAsync();
     }
 
+}
+
+public sealed record PreviousSet(double Weight, int Reps);
+
+// Lo que se sabe de un ejercicio antes de la sesión actual
+public sealed record ExerciseHistory(IReadOnlyList<PreviousSet> LastSessionSets, double? BestEstimatedOneRepMax)
+{
+    public static ExerciseHistory Empty { get; } = new(Array.Empty<PreviousSet>(), null);
 }

@@ -140,11 +140,34 @@ Cómo se resolvieron los conflictos:
 
 El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantallas antiguas siguen con colores escritos a mano. Orden acordado (§12.3 del documento de diseño), siguiendo las maquetas de `docs/maquetas/propuesta_diseno.html`:
 
-1. Entreno.
+1. Entreno — **hecho, pendiente de probar en el móvil** (ver abajo).
 2. Rutinas (pasar la lista y el detalle a los tokens y a las maquetas).
 3. Progreso (absorbe Historial) e Inicio.
 4. Ejercicios (filtro «Propios», ficha con vídeo, mejor marca, 1RM estimado).
 5. Respuesta táctil y animaciones en toda la app.
+
+### Rediseño 1 — Entreno
+
+**Qué hace**
+* **Preparar** («¿Qué entrenas hoy?»): rutinas en chips, días en tarjetas con «Hace N días» y vista previa del día con lo prescrito.
+* **Registrando**: ejercicio N de M con barra de progreso (tocar un tramo cambia de ejercicio), cronómetro y «Terminar» discreto arriba. Chips de objetivo, intensidad y vídeo. Números grandes con − / + (2,5 kg y 1 rep por pulsación; tocar el número para escribirlo). Empieza con lo de la última vez (misma serie) o, si no hay, con lo prescrito.
+* **Cada serie se guarda al marcarla** (antes solo al finalizar): si la app se cierra, las series no se pierden. Tocar una serie hecha permite borrarla.
+* **Récord**: la serie supera el 1RM estimado (Epley) de todo tu historial anterior de ese ejercicio y de las series previas de hoy. Sin historial no hay récord. Vibra y muestra «★ Récord».
+* **Descanso**: anillo con cuenta atrás (lo prescrito o 90 s), −15 s / +15 s / Saltar, qué viene después y volumen de hoy frente a la última vez que hiciste ese día. Vibra al acabar.
+* **Finalizar**: se abre al pulsar «Terminar» o solo al hacer la última serie. Duración, volumen, series, récords, «¿Cómo te has sentido?», nota y aviso de series sin hacer (se guarda como incompleto). Seguir entrenando o Descartar.
+* El historial (sugerencias, récords, volumen) es solo del perfil y cliente activos.
+
+**Probar**
+1. Entreno → elegir rutina y día → ver la vista previa → Empezar.
+2. Ajustar peso y reps con − / + y escribiendo; «Serie hecha»: vibra y empieza el descanso.
+3. En el descanso: −15 / +15 / Saltar; dejar que acabe y comprobar que vibra.
+4. Repetir el mismo día otro día: debe proponer los pesos de la última vez y marcar récord al superarlos.
+5. «Terminar» a medias: aviso de series pendientes; guardar y ver la sesión en Historial.
+6. Cambiar de pestaña con el descanso en marcha y volver: el tiempo debe seguir bien.
+
+**Aún no está**
+* Si la app se cierra a mitad de entreno, las series están guardadas pero la sesión no se retoma al volver a abrirla.
+* «Entreno libre» (sin rutina) y la tarjeta «Hoy toca» (fase de Inicio).
 
 ---
 

@@ -5,322 +5,496 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
     xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
-    BackgroundColor="#1E1E2E"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False"
     Title="Entreno">
 
     <ContentPage.Resources>
         <conv:ExerciseThumbnailConverter x:Key="ExerciseThumb" />
+        <conv:PrescriptionTextConverter x:Key="PrescriptionText" />
+        <conv:StringNotNullOrEmptyConverter x:Key="NotEmpty" />
+        <conv:InvertedBoolConverter x:Key="Not" />
+
+        <!-- Botón grande de acción, con el degradado acero -->
+        <Style x:Key="BigAction" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource SpSteelBrush}" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="Padding" Value="0,17" />
+        </Style>
+        <Style x:Key="BigActionLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="TextColor" Value="{StaticResource SpOnAccent}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
+        <!-- Botones − / + -->
+        <Style x:Key="StepButton" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="WidthRequest" Value="52" />
+            <Setter Property="HeightRequest" Value="44" />
+        </Style>
+        <Style x:Key="StepLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="SpaceGroteskBold" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="TextColor" Value="{StaticResource SpText}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="GhostButton" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="Padding" Value="18,12" />
+        </Style>
+        <Style x:Key="GhostLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextColor" Value="{StaticResource SpText}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto">
+    <Grid>
 
-        <!-- Header -->
-        <Border
-            Grid.Row="0"
-            BackgroundColor="#313244"
-            Margin="12,12,12,0"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <VerticalStackLayout Spacing="4">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="22"
-                    Text="Entrenamiento"
-                    TextColor="#CDD6F4" />
-                <Label
-                    FontSize="13"
-                    Text="Selecciona rutina y día, luego registra tus series"
-                    TextColor="#BAC2DE" />
+        <!-- ═════════════ PREPARAR ═════════════ -->
+        <ScrollView IsVisible="{Binding IsSessionActive, Converter={StaticResource Not}}">
+            <VerticalStackLayout Padding="20,20,20,28" Spacing="0">
+
+                <Label Text="¿Qué entrenas hoy?" Style="{StaticResource SpTitle}" />
                 <!-- Con un cliente activo, estos datos son los suyos -->
-                <controls:ActiveClientBanner Margin="0,8,0,0" />
-            </VerticalStackLayout>
-        </Border>
+                <controls:ActiveClientBanner Margin="0,12,0,0" />
 
-        <!-- ===== VISTA PREPARACIÓN (IsSessionActive = false) ===== -->
-        <ScrollView Grid.Row="1" Grid.RowSpan="2">
-            <Grid>
-                <Border
-                    BackgroundColor="#313244"
-                    Margin="12,12,12,0"
-                    Padding="24"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
-                    <Border.Triggers>
-                        <DataTrigger
-                            Binding="{Binding IsSessionActive}"
-                            TargetType="Border"
-                            Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <VerticalStackLayout Spacing="16">
-                        <Label
-                            FontAttributes="Bold"
-                            FontSize="20"
-                            HorizontalTextAlignment="Center"
-                            Text="Preparar entrenamiento"
-                            TextColor="#CDD6F4" />
-                        <Label
-                            FontSize="13"
-                            HorizontalTextAlignment="Center"
-                            Text="Elige la rutina y el día que vas a entrenar hoy"
-                            TextColor="#BAC2DE" />
-
-                        <VerticalStackLayout Spacing="4">
-                            <Label FontSize="12" Text="Rutina" TextColor="#BAC2DE" />
-                            <Picker
-                                BackgroundColor="#45475A"
-                                ItemDisplayBinding="{Binding Name}"
-                                ItemsSource="{Binding Routines}"
-                                SelectedItem="{Binding SelectedRoutine}"
-                                Title="Selecciona una rutina"
-                                TitleColor="#585B70"
-                                TextColor="#CDD6F4" />
-                        </VerticalStackLayout>
-
-                        <VerticalStackLayout Spacing="4">
-                            <Label FontSize="12" Text="Día de rutina" TextColor="#BAC2DE" />
-                            <Picker
-                                BackgroundColor="#45475A"
-                                ItemDisplayBinding="{Binding Name}"
-                                ItemsSource="{Binding RoutineDays}"
-                                SelectedItem="{Binding SelectedRoutineDay}"
-                                Title="Selecciona un día"
-                                TitleColor="#585B70"
-                                TextColor="#CDD6F4" />
-                        </VerticalStackLayout>
-
-                        <Button
-                            BackgroundColor="#A6E3A1"
-                            Command="{Binding StartWorkoutCommand}"
-                            FontAttributes="Bold"
-                            FontSize="16"
-                            Text="Iniciar entrenamiento"
-                            TextColor="#1E1E2E" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- ===== VISTA ACTIVA (IsSessionActive = true) ===== -->
-                <Grid IsVisible="False" RowDefinitions="Auto,*,Auto">
-                    <Grid.Triggers>
-                        <DataTrigger
-                            Binding="{Binding IsSessionActive}"
-                            TargetType="Grid"
-                            Value="True">
+                <!-- Sin rutinas -->
+                <VerticalStackLayout Margin="0,48,0,0" Spacing="10" IsVisible="False">
+                    <VerticalStackLayout.Triggers>
+                        <MultiTrigger TargetType="VerticalStackLayout">
+                            <MultiTrigger.Conditions>
+                                <BindingCondition Binding="{Binding RoutinesLoaded}" Value="True" />
+                                <BindingCondition Binding="{Binding HasRoutines}" Value="False" />
+                            </MultiTrigger.Conditions>
                             <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                    </Grid.Triggers>
+                        </MultiTrigger>
+                    </VerticalStackLayout.Triggers>
+                    <Label Text="Aún no tienes rutinas" Style="{StaticResource SpHeading}" HorizontalOptions="Center" />
+                    <Label Text="Crea una en la pestaña Rutinas para empezar a entrenar." Style="{StaticResource SpSecondary}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
-                    <!-- Lista de ejercicios de la sesión -->
-                    <CollectionView
-                        Grid.Row="0"
-                        ItemsSource="{Binding Exercises}"
-                        Margin="12,12,12,0"
-                        SelectedItem="{Binding SelectedWorkoutExercise, Mode=TwoWay}"
-                        SelectionMode="Single">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout ItemSpacing="8" Orientation="Horizontal" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
+                <VerticalStackLayout IsVisible="{Binding HasRoutines}" Spacing="0">
+                    <!-- Rutinas como chips -->
+                    <Label Text="Rutina" Style="{StaticResource SpOverline}" Margin="0,20,0,8" />
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout x:Name="RoutineChips" Spacing="8" />
+                    </ScrollView>
+
+                    <!-- Días en tarjetas -->
+                    <Label Text="Día" Style="{StaticResource SpOverline}" Margin="0,20,0,8" />
+                    <FlexLayout x:Name="DayCards" Wrap="Wrap" JustifyContent="SpaceBetween" BindableLayout.ItemsSource="{Binding DayOptions}">
+                        <BindableLayout.ItemTemplate>
                             <DataTemplate>
-                                <Border
-                                    BackgroundColor="#313244"
-                                    Padding="12,8"
-                                    StrokeShape="RoundRectangle 8"
-                                    StrokeThickness="0"
-                                    WidthRequest="130">
-                                    <Label
-                                        FontSize="13"
-                                        LineBreakMode="WordWrap"
-                                        Text="{Binding Exercise.Name}"
-                                        TextColor="#CDD6F4" />
+                                <Border FlexLayout.Basis="48.5%" Margin="0,0,0,8" Padding="14" StrokeShape="RoundRectangle 14"
+                                        BackgroundColor="{StaticResource SpCard}" StrokeThickness="0">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="#2E3050" />
+                                            <Setter Property="Stroke" Value="#B4BEFE" />
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnDayTapped" />
+                                    </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding LastDoneText}" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                    </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
 
-                    <!-- Series del ejercicio seleccionado -->
-                    <CollectionView
-                        Grid.Row="1"
-                        ItemsSource="{Binding SelectedExerciseSets}"
-                        Margin="12,10,12,0"
-                        SelectedItem="{Binding SelectedWorkoutSet, Mode=TwoWay}"
-                        SelectionMode="Single">
-                        <CollectionView.Header>
-                            <VerticalStackLayout Spacing="6" Margin="0,0,0,8">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Label
-                                        FontAttributes="Bold"
-                                        FontSize="15"
-                                        VerticalOptions="Center"
-                                        Text="{Binding SelectedWorkoutExercise.Exercise.Name, TargetNullValue='Selecciona un ejercicio'}"
-                                        TextColor="#CDD6F4" />
-                                    <!-- Ver el vídeo o la imagen del ejercicio sin salir del entreno -->
-                                    <Border
-                                        Grid.Column="1"
-                                        Style="{StaticResource SpChipStyle}"
-                                        Padding="12,6"
-                                        IsVisible="{Binding SelectedWorkoutExercise.Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnShowMediaTapped" />
-                                        </Border.GestureRecognizers>
-                                        <Label Text="▶ Ver cómo se hace" FontSize="13" TextColor="{StaticResource SpSteel2}" />
-                                    </Border>
-                                </Grid>
-                                <!-- Lo que pide la rutina para este ejercicio -->
-                                <Border
-                                    Style="{StaticResource SpChipStyle}"
-                                    HorizontalOptions="Start"
-                                    IsVisible="{Binding HasPrescription}">
-                                    <Label
-                                        FontFamily="SpaceGroteskMedium"
-                                        FontSize="13"
-                                        Text="{Binding PrescriptionText, StringFormat='Objetivo: {0}'}"
-                                        TextColor="{StaticResource SpText}" />
-                                </Border>
-                                <!-- Nota del entrenador o del propio usuario -->
-                                <Border
-                                    BackgroundColor="#1AF9E2AF"
-                                    StrokeThickness="0"
-                                    StrokeShape="RoundRectangle 8"
-                                    Padding="12,8"
-                                    IsVisible="{Binding HasPrescriptionNotes}">
-                                    <Label
-                                        FontSize="13"
-                                        Text="{Binding PrescriptionNotes}"
-                                        TextColor="{StaticResource SpText2}" />
-                                </Border>
+                    <!-- Vista previa del día -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,4,0,0" Padding="16,14" IsVisible="{Binding HasSelectedDay}">
+                        <VerticalStackLayout Spacing="0">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding SelectedRoutineDay.Name}" Style="{StaticResource SpHeading}" />
+                                <Label Grid.Column="1" Text="{Binding DayPreviewSummary}" Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding DayPreview}" Margin="0,6,0,0">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                                            <Label Text="{Binding Exercise.Name}" Style="{StaticResource SpBody}" FontSize="14" LineBreakMode="TailTruncation" />
+                                            <Label Grid.Column="1" Text="{Binding ., Converter={StaticResource PrescriptionText}}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                                <BindableLayout.EmptyView>
+                                    <Label Text="Este día no tiene ejercicios. Añádelos en Rutinas." Style="{StaticResource SpSecondary}" Margin="0,8" />
+                                </BindableLayout.EmptyView>
                             </VerticalStackLayout>
-                        </CollectionView.Header>
-                        <CollectionView.EmptyView>
-                            <Label
-                                HorizontalTextAlignment="Center"
-                                Text="Sin series aún"
-                                TextColor="#585B70" />
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource BigAction}" Margin="0,16,0,0" IsVisible="{Binding HasSelectedDay}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStartTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding StartButtonText}" Style="{StaticResource BigActionLabel}" />
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ═════════════ REGISTRANDO ═════════════ -->
+        <Grid IsVisible="{Binding IsSessionActive}" RowDefinitions="Auto,*,Auto">
+            <!-- Orb decorativo -->
+            <AbsoluteLayout Grid.RowSpan="3" InputTransparent="True" IsClippedToBounds="True">
+                <Ellipse AbsoluteLayout.LayoutBounds="-140,120,300,300" Fill="#CBA6F7" Opacity="0.05" />
+            </AbsoluteLayout>
+
+            <!-- Cabecera: posición, nombre, cronómetro y Terminar -->
+            <VerticalStackLayout Grid.Row="0" Padding="20,16,20,0" Spacing="0">
+                <controls:ActiveClientBanner Margin="0,0,0,10" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding PositionText}" Style="{StaticResource SpSecondary}" />
+                        <Label Text="{Binding CurrentExercise.Name}" FontFamily="SpaceGroteskBold" FontSize="24" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="End">
+                        <Label Text="{Binding ElapsedText, StringFormat='● {0}'}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpOk}" HorizontalOptions="End" />
+                        <Border BackgroundColor="{StaticResource SpCard}" Stroke="#34354A" StrokeThickness="1" StrokeShape="RoundRectangle 10" Padding="12,6">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnFinishTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Terminar" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpText2}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Progreso por ejercicio: tocar un tramo cambia de ejercicio -->
+                <FlexLayout Margin="0,12,0,0" HeightRequest="16" BindableLayout.ItemsSource="{Binding ExerciseStates}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid FlexLayout.Grow="1" FlexLayout.Basis="0" Padding="2,6" BackgroundColor="Transparent">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnSegmentTapped" />
+                                </Grid.GestureRecognizers>
+                                <Border HeightRequest="4" StrokeThickness="0" StrokeShape="RoundRectangle 2" BackgroundColor="{StaticResource SpLine}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsDone}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource SpOk}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrent}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource SpSteelBrush}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Padding="20,8,20,12" Spacing="0">
+                    <!-- Objetivo, intensidad y vídeo -->
+                    <FlexLayout Wrap="Wrap">
+                        <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" IsVisible="{Binding CurrentExercise.TargetText, Converter={StaticResource NotEmpty}}">
+                            <Label Text="{Binding CurrentExercise.TargetText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpText2}" />
+                        </Border>
+                        <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" BackgroundColor="#26FAB387" IsVisible="{Binding CurrentExercise.IntensityText, Converter={StaticResource NotEmpty}}">
+                            <Label Text="{Binding CurrentExercise.IntensityText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpIntensity}" />
+                        </Border>
+                        <!-- Ver el vídeo o la imagen del ejercicio sin salir del entreno -->
+                        <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" IsVisible="{Binding CurrentExercise.Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnShowMediaTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="▶ Vídeo" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel2}" />
+                        </Border>
+                    </FlexLayout>
+
+                    <!-- Nota del entrenador o del propio usuario -->
+                    <Border BackgroundColor="#1AF9E2AF" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12,8" Margin="0,2,0,0" IsVisible="{Binding HasPrescriptionNotes}">
+                        <Label Text="{Binding PrescriptionNotes}" FontSize="13" TextColor="{StaticResource SpText2}" />
+                    </Border>
+
+                    <!-- Series hechas: tocar una para borrarla -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentExercise.Sets}" Spacing="8" Margin="0,12,0,0">
+                        <BindableLayout.ItemTemplate>
                             <DataTemplate>
-                                <Border
-                                    BackgroundColor="#313244"
-                                    Margin="0,0,0,6"
-                                    Padding="14,10"
-                                    StrokeShape="RoundRectangle 8"
-                                    StrokeThickness="0">
-                                    <Grid ColumnDefinitions="*,*">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label FontSize="11" Text="Peso" TextColor="#585B70" />
-                                            <Label
-                                                FontAttributes="Bold"
-                                                FontSize="20"
-                                                Text="{Binding Weight, StringFormat='{0} kg'}"
-                                                TextColor="#89B4FA" />
-                                        </VerticalStackLayout>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                            <Label FontSize="11" Text="Reps" TextColor="#585B70" />
-                                            <Label
-                                                FontAttributes="Bold"
-                                                FontSize="20"
-                                                Text="{Binding Reps, StringFormat='x{0}'}"
-                                                TextColor="#A6E3A1" />
-                                        </VerticalStackLayout>
+                                <Border BackgroundColor="#14A6E3A1" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="14,11">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnDoneSetTapped" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Border WidthRequest="24" HeightRequest="24" StrokeThickness="0" StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource SpOk}" VerticalOptions="Center">
+                                            <Label Text="✓" FontSize="13" FontAttributes="Bold" TextColor="#1B2B1B" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                        <Label Grid.Column="1" Text="{Binding Text}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                                        <Border Grid.Column="2" BackgroundColor="{StaticResource SpRecord}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,3" VerticalOptions="Center" IsVisible="{Binding IsRecord}">
+                                            <Label Text="★ Récord" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
 
-                    <!-- Botón eliminar serie -->
-                    <Button
-                        Grid.Row="2"
-                        BackgroundColor="#45475A"
-                        Command="{Binding DeleteSetCommand}"
-                        FontSize="13"
-                        Margin="12,8,12,0"
-                        Text="Eliminar serie seleccionada"
-                        TextColor="#F38BA8" />
-                </Grid>
-            </Grid>
-        </ScrollView>
+                    <!-- Serie actual: números grandes con − / + -->
+                    <Border Margin="0,14,0,0" Padding="16,18" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
+                                <GradientStop Color="#2C2D45" Offset="0" />
+                                <GradientStop Color="#252536" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <VerticalStackLayout Spacing="0">
+                            <Label Text="{Binding CurrentSetLabel}" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,0">
+                                <VerticalStackLayout HorizontalOptions="Center">
+                                    <Label Text="{Binding WeightText}" Style="{StaticResource SpNumberLarge}" HorizontalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnWeightTapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="kg" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout Spacing="8" HorizontalOptions="Center" Margin="0,10,0,0">
+                                        <Border Style="{StaticResource StepButton}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding DecreaseWeightCommand}" Tapped="OnPressTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="−" Style="{StaticResource StepLabel}" />
+                                        </Border>
+                                        <Border Style="{StaticResource StepButton}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding IncreaseWeightCommand}" Tapped="OnPressTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="+" Style="{StaticResource StepLabel}" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                                    <Label Text="{Binding Reps}" Style="{StaticResource SpNumberLarge}" HorizontalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRepsTapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="reps" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                                    <HorizontalStackLayout Spacing="8" HorizontalOptions="Center" Margin="0,10,0,0">
+                                        <Border Style="{StaticResource StepButton}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding DecreaseRepsCommand}" Tapped="OnPressTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="−" Style="{StaticResource StepLabel}" />
+                                        </Border>
+                                        <Border Style="{StaticResource StepButton}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding IncreaseRepsCommand}" Tapped="OnPressTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="+" Style="{StaticResource StepLabel}" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Label Text="{Binding CurrentExercise.LastTimeText}" Style="{StaticResource SpSecondary}" FontSize="12" HorizontalOptions="Center" Margin="0,12,0,0"
+                                   IsVisible="{Binding CurrentExercise.LastTimeText, Converter={StaticResource NotEmpty}}" />
+                            <Label Text="Toca un número para escribirlo · +2,5 kg por pulsación" Style="{StaticResource SpSecondary}" FontSize="11" TextColor="{StaticResource SpText4}" HorizontalOptions="Center" Margin="0,4,0,0" />
+                        </VerticalStackLayout>
+                    </Border>
 
-        <!-- Formulario añadir serie (solo en activo) -->
-        <Border
-            Grid.Row="2"
-            BackgroundColor="#313244"
-            IsVisible="False"
-            Margin="12,0,12,0"
-            Padding="16"
-            StrokeShape="RoundRectangle 10"
-            StrokeThickness="0">
-            <Border.Triggers>
-                <DataTrigger
-                    Binding="{Binding IsSessionActive}"
-                    TargetType="Border"
-                    Value="True">
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </Border.Triggers>
-            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label FontSize="12" Text="Reps" TextColor="#BAC2DE" />
-                    <Entry
-                        BackgroundColor="#45475A"
-                        Keyboard="Numeric"
-                        Placeholder="0"
-                        PlaceholderColor="#585B70"
-                        Text="{Binding Reps}"
-                        TextColor="#CDD6F4" />
+                    <!-- Cambiar de ejercicio -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,12,0,0">
+                        <Border Style="{StaticResource GhostButton}" Padding="0,10">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding PreviousExerciseCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="‹ Anterior" Style="{StaticResource GhostLabel}" TextColor="{StaticResource SpText2}" />
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource GhostButton}" Padding="0,10">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NextExerciseCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Siguiente ›" Style="{StaticResource GhostLabel}" TextColor="{StaticResource SpText2}" />
+                        </Border>
+                    </Grid>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label FontSize="12" Text="Peso (kg)" TextColor="#BAC2DE" />
-                    <Entry
-                        BackgroundColor="#45475A"
-                        Keyboard="Numeric"
-                        Placeholder="0"
-                        PlaceholderColor="#585B70"
-                        Text="{Binding Weight}"
-                        TextColor="#CDD6F4" />
-                </VerticalStackLayout>
-                <Button
-                    Grid.Column="2"
-                    BackgroundColor="#89B4FA"
-                    Command="{Binding AddSetCommand}"
-                    FontAttributes="Bold"
-                    Margin="0,20,0,0"
-                    Text="+ Serie"
-                    TextColor="#1E1E2E" />
-            </Grid>
-        </Border>
+            </ScrollView>
 
-        <!-- Botones Cancelar / Finalizar (solo en activo) -->
-        <Grid
-            Grid.Row="3"
-            ColumnDefinitions="*,*"
-            ColumnSpacing="8"
-            IsVisible="False"
-            Margin="12,8,12,12">
-            <Grid.Triggers>
-                <DataTrigger
-                    Binding="{Binding IsSessionActive}"
-                    TargetType="Grid"
-                    Value="True">
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </Grid.Triggers>
-            <Button
-                Grid.Column="0"
-                BackgroundColor="#45475A"
-                Command="{Binding CancelWorkoutCommand}"
-                Text="Cancelar"
-                TextColor="#F38BA8" />
-            <Button
-                Grid.Column="1"
-                BackgroundColor="#A6E3A1"
-                Command="{Binding FinishWorkoutCommand}"
-                FontAttributes="Bold"
-                Text="Finalizar"
-                TextColor="#1E1E2E" />
+            <Border Grid.Row="2" x:Name="CompleteSetButton" Style="{StaticResource BigAction}" Margin="20,4,20,16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCompleteSetTapped" />
+                </Border.GestureRecognizers>
+                <Label Text="✓ Serie hecha" Style="{StaticResource BigActionLabel}" />
+            </Border>
+        </Grid>
+
+        <!-- ═════════════ DESCANSO ═════════════ -->
+        <Grid IsVisible="{Binding IsResting}" BackgroundColor="{StaticResource SpBg}">
+            <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
+                <Ellipse AbsoluteLayout.LayoutBounds="0.5,0.2,340,340" AbsoluteLayout.LayoutFlags="PositionProportional" Fill="#94E2D5" Opacity="0.07" />
+            </AbsoluteLayout>
+            <ScrollView>
+                <VerticalStackLayout Padding="20,36,20,24" Spacing="0">
+                    <Label Text="Descanso" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                    <Grid WidthRequest="240" HeightRequest="240" Margin="0,18,0,0" HorizontalOptions="Center">
+                        <GraphicsView x:Name="RestRing" />
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="{Binding RestRemainingText}" FontFamily="SpaceGroteskBold" FontSize="54" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
+                            <Label Text="{Binding RestTotalText}" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Margin="0,22,0,0">
+                        <Border Style="{StaticResource GhostButton}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SubtractRestTimeCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="−15 s" Style="{StaticResource GhostLabel}" />
+                        </Border>
+                        <Border Style="{StaticResource GhostButton}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AddRestTimeCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="+15 s" Style="{StaticResource GhostLabel}" />
+                        </Border>
+                        <Border Style="{StaticResource GhostButton}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SkipRestCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Saltar" Style="{StaticResource GhostLabel}" />
+                        </Border>
+                    </HorizontalStackLayout>
+
+                    <!-- Qué viene -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,30,0,0">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Siguiente" Style="{StaticResource SpSecondary}" />
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border WidthRequest="52" HeightRequest="52" StrokeThickness="0" StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource SpCardHi}">
+                                    <Grid>
+                                        <Image Source="{Binding CurrentExercise.Exercise, Converter={StaticResource ExerciseThumb}}" Aspect="AspectFill" />
+                                        <Label Text="▶" TextColor="{StaticResource SpText3}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label Text="{Binding NextTitle}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding NextDetail}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Cómo vas -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,10,0,0" Padding="16,14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label Text="Volumen hoy" Style="{StaticResource SpSecondary}" />
+                                <Label Text="{Binding TodayVolumeText}" Style="{StaticResource SpNumber}" FontSize="20" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" IsVisible="{Binding HasVolumeComparison}">
+                                <Label Text="vs. última vez" Style="{StaticResource SpSecondary}" HorizontalOptions="End" />
+                                <Label Text="{Binding VolumeDeltaText}" Style="{StaticResource SpNumber}" FontSize="20" HorizontalOptions="End" TextColor="{StaticResource SpText2}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsVolumeUp}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource SpOk}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+
+        <!-- ═════════════ FINALIZAR ═════════════ -->
+        <Grid IsVisible="{Binding IsFinishing}" BackgroundColor="{StaticResource SpBg}">
+            <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
+                <Ellipse AbsoluteLayout.LayoutBounds="0.5,0,320,320" AbsoluteLayout.LayoutFlags="PositionProportional" Fill="#B4BEFE" Opacity="0.08" />
+            </AbsoluteLayout>
+            <ScrollView>
+                <VerticalStackLayout Padding="20,30,20,24" Spacing="0">
+                    <Border x:Name="FinishCheck" WidthRequest="74" HeightRequest="74" StrokeThickness="0" StrokeShape="RoundRectangle 37"
+                            Background="{StaticResource SpSteelBrush}" HorizontalOptions="Center">
+                        <Label Text="✓" FontSize="34" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Label Text="¡Entreno completado!" Style="{StaticResource SpTitle}" FontSize="26" HorizontalOptions="Center" Margin="0,14,0,0" />
+                    <Label Text="{Binding SummaryTitle}" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" Margin="0,4,0,0" />
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,22,0,0">
+                        <Border Style="{StaticResource SpCardStyle}" Padding="8,12">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding SummaryDuration}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                <Label Text="Duración" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding SummaryVolume}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                <Label Text="Volumen" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding SummarySets}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                <Label Text="Series" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Récords -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,12,0,0" Padding="14,12" IsVisible="{Binding HasRecords}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border BackgroundColor="{StaticResource SpRecord}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4" VerticalOptions="Center">
+                                <Label Text="{Binding RecordBadgeText}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding RecordsText}" Style="{StaticResource SpSecondary}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Cómo te has sentido y nota -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,12,0,0" Padding="14,12">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="¿Cómo te has sentido?" Style="{StaticResource SpSecondary}" />
+                            <Grid x:Name="FeelingRow" ColumnDefinitions="*,*,*,*,*" />
+                            <Editor Text="{Binding FinishNotes}" AutoSize="TextChanges" Placeholder="Añadir una nota (opcional)…" FontSize="14"
+                                    BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText3}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Series sin hacer -->
+                    <Border BackgroundColor="#14FAB387" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="14,12" Margin="0,12,0,0" IsVisible="{Binding IsIncomplete}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Label Text="!" FontFamily="SpaceGroteskBold" FontSize="18" TextColor="{StaticResource SpIntensity}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding MissingText}" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource BigAction}" Margin="0,14,0,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSaveTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Text="Guardar entreno" Style="{StaticResource BigActionLabel}" />
+                    </Border>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,8,0,0">
+                        <Border Style="{StaticResource GhostButton}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ContinueWorkoutCommand}" Tapped="OnPressTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Seguir entrenando" Style="{StaticResource GhostLabel}" />
+                        </Border>
+                        <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0" Padding="0,12">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DiscardWorkoutCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Descartar" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
         </Grid>
 
     </Grid>

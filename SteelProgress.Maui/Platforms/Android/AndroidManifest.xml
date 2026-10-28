@@ -3,6 +3,8 @@
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- Vibración al marcar series y al acabar el descanso -->
+	<uses-permission android:name="android.permission.VIBRATE" />
 	<!-- Vídeos e imágenes de los ejercicios: la galería usa el selector de Android (sin permiso en Android 13+);
 	     en versiones antiguas hace falta leer el almacenamiento, y la cámara para grabar un vídeo -->
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
