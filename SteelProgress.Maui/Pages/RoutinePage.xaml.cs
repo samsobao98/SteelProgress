@@ -1,9 +1,11 @@
 using System.ComponentModel;
+using CommunityToolkit.Maui.Behaviors;
 using MauiIcons.Core;
 using Microsoft.Extensions.DependencyInjection;
 using SteelProgress.Core.Services;
 using SteelProgress.Core.Sharing;
 using SteelProgress.Core.ViewModels;
+using SteelProgress.Maui.Services;
 
 namespace SteelProgress.Maui.Pages;
 
@@ -14,6 +16,9 @@ public partial class RoutinePage : ContentPage
     private readonly RoutineViewModel _vm;
     private readonly IServiceProvider _services;
     private CancellationTokenSource? _undoTimer;
+
+    // Un TouchBehavior por tarjeta; se desactivan al ordenar para no robarle el arrastre a la lista
+    private readonly List<WeakReference<TouchBehavior>> _cardTouches = new();
 
     public RoutinePage(RoutineViewModel vm, IServiceProvider services)
     {
@@ -34,6 +39,9 @@ public partial class RoutinePage : ContentPage
     {
         base.OnDisappearing();
         if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
+
+        PreviewLayer.IsVisible = false;
+        _vm.ClosePreviewCommand.Execute(null);
 
         // Al salir (otra pestaña o el detalle) ya no se puede deshacer: se borra de verdad
         _undoTimer?.Cancel();
@@ -58,7 +66,11 @@ public partial class RoutinePage : ContentPage
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(RoutineViewModel.IsReordering))
+        {
             OrderButtonLabel.Text = _vm.IsReordering ? "Hecho" : "Ordenar";
+            foreach (var weak in _cardTouches)
+                if (weak.TryGetTarget(out var touch)) touch.IsEnabled = !_vm.IsReordering;
+        }
     }
 
     private async Task RunEntryAnimationsAsync()
@@ -78,18 +90,146 @@ public partial class RoutinePage : ContentPage
             RoutineList.TranslateToAsync(0, 0, 280, Easing.CubicOut));
     }
 
-    // ── Navegación al detalle ──────────────────────────────────────────────
+    // ── Tocar y mantener pulsado ──────────────────────────────────────────
 
-    private async void OnRoutineTapped(object? sender, TappedEventArgs e)
+    // MAUI no tiene «mantener pulsado»: se usa TouchBehavior del Toolkit. Se crea aquí, no en la
+    // plantilla, para no depender de que herede el BindingContext; los comandos leen la rutina
+    // que muestra la tarjeta en ese momento (la lista recicla tarjetas al desplazarse).
+    private void OnCardLoaded(object? sender, EventArgs e)
+    {
+        if (sender is not Border card || card.Behaviors.OfType<TouchBehavior>().Any()) return;
+
+        var touch = new TouchBehavior
+        {
+            PressedScale = 0.97,
+            DefaultAnimationDuration = 150,
+            LongPressDuration = 450,
+            IsEnabled = !_vm.IsReordering,
+            Command = new Command(async () =>
+            {
+                if (card.BindingContext is RoutineListItem item) await OpenRoutineAsync(item);
+            }),
+            LongPressCommand = new Command(async () =>
+            {
+                if (card.BindingContext is not RoutineListItem item) return;
+                Haptic();
+                await ShowPreviewAsync(item);
+            })
+        };
+        card.Behaviors.Add(touch);
+        _cardTouches.RemoveAll(w => !w.TryGetTarget(out _));
+        _cardTouches.Add(new WeakReference<TouchBehavior>(touch));
+    }
+
+    private bool _opening;
+
+    private async Task OpenRoutineAsync(RoutineListItem item)
+    {
+        if (_vm.IsReordering || _opening) return;
+        _opening = true;
+        try
+        {
+            var page = _services.GetRequiredService<RoutineDetailPage>();
+            await page.LoadAsync(item.Routine);
+            await Navigation.PushAsync(page);
+        }
+        finally { _opening = false; }
+    }
+
+    // ── Menú ⋮ ─────────────────────────────────────────────────────────────
+
+    private async void OnMoreTapped(object? sender, TappedEventArgs e)
+    {
+        if ((sender as BindableObject)?.BindingContext is not RoutineListItem item) return;
+        await PressAsync(sender as VisualElement);
+
+        const string summary = "Ver resumen";
+        const string rename = "Cambiar nombre y notas";
+        const string share = "Compartir";
+        const string delete = "Eliminar";
+        var mark = item.Routine.IsMarkedActive ? "Quitar como activa" : "Marcar como activa";
+
+        var choice = await DisplayActionSheetAsync(item.Name, "Cancelar", delete, summary, rename, mark, share);
+        switch (choice)
+        {
+            case summary:
+                await ShowPreviewAsync(item);
+                break;
+            case rename:
+                await RenameAsync(item);
+                break;
+            case share:
+                await RoutineShareFlow.ShareAsync(this, _services.GetRequiredService<RoutineSharingService>(), item.Routine);
+                break;
+            case delete:
+                await DeleteAsync(item);
+                break;
+            default:
+                if (choice == mark) await _vm.ToggleMarkedActiveAsync(item);
+                break;
+        }
+    }
+
+    private async Task RenameAsync(RoutineListItem item)
+    {
+        var name = await DisplayPromptAsync("Nombre", "Nombre de la rutina", accept: "Siguiente", cancel: "Cancelar",
+            initialValue: item.Name, maxLength: 60);
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        var notes = await DisplayPromptAsync("Notas (opcional)", "Objetivo, frecuencia…", accept: "Guardar", cancel: "Cancelar",
+            initialValue: item.Routine.Notes ?? "", maxLength: 120);
+        if (notes is null) return; // cancelado
+
+        await _vm.RenameAsync(item, name, notes);
+    }
+
+    // ── Vista previa ───────────────────────────────────────────────────────
+
+    private async Task ShowPreviewAsync(RoutineListItem item)
     {
         if (_vm.IsReordering) return;
-        if ((sender as BindableObject)?.BindingContext is not RoutineListItem item)
-            return;
+        await _vm.OpenPreviewAsync(item);
 
+        PreviewLayer.IsVisible = true;
+        if (IsReduceMotionEnabled())
+        {
+            PreviewBackdrop.Opacity = 0.6;
+            PreviewCard.Scale = 1;
+            PreviewCard.Opacity = 1;
+            return;
+        }
+
+        PreviewBackdrop.Opacity = 0;
+        PreviewCard.Scale = 0.92;
+        PreviewCard.Opacity = 0;
+        await Task.WhenAll(
+            PreviewBackdrop.FadeToAsync(0.6, 200, Easing.CubicOut),
+            PreviewCard.FadeToAsync(1, 200, Easing.CubicOut),
+            PreviewCard.ScaleToAsync(1, 260, Easing.SpringOut));
+    }
+
+    private async Task HidePreviewAsync()
+    {
+        if (!PreviewLayer.IsVisible) return;
+        if (!IsReduceMotionEnabled())
+        {
+            await Task.WhenAll(
+                PreviewBackdrop.FadeToAsync(0, 160, Easing.CubicIn),
+                PreviewCard.FadeToAsync(0, 160, Easing.CubicIn),
+                PreviewCard.ScaleToAsync(0.95, 160, Easing.CubicIn));
+        }
+        PreviewLayer.IsVisible = false;
+        _vm.ClosePreviewCommand.Execute(null);
+    }
+
+    private void OnPreviewBackdropTapped(object? sender, TappedEventArgs e) => _ = HidePreviewAsync();
+
+    private async void OnPreviewEnterTapped(object? sender, TappedEventArgs e)
+    {
+        if (_vm.Preview?.Item is not { } item) return;
         await PressAsync(sender as VisualElement);
-        var page = _services.GetRequiredService<RoutineDetailPage>();
-        await page.LoadAsync(item.Routine);
-        await Navigation.PushAsync(page);
+        await HidePreviewAsync();
+        await OpenRoutineAsync(item);
     }
 
     // ── Ordenar ────────────────────────────────────────────────────────────
@@ -119,7 +259,12 @@ public partial class RoutinePage : ContentPage
 
     private async void OnSwipeDeleteInvoked(object? sender, EventArgs e)
     {
-        if ((sender as BindableObject)?.BindingContext is not RoutineListItem item) return;
+        if ((sender as BindableObject)?.BindingContext is RoutineListItem item)
+            await DeleteAsync(item);
+    }
+
+    private async Task DeleteAsync(RoutineListItem item)
+    {
         if (!RoutineSchedule.CanDeleteNow()) return;
 
         // Borrar una rutina borra también su historial: si lo hay, se avisa antes
@@ -237,6 +382,12 @@ public partial class RoutinePage : ContentPage
         if (element is null || IsReduceMotionEnabled()) return;
         await element.ScaleToAsync(0.96, 60, Easing.CubicIn);
         await element.ScaleToAsync(1.0, 150, Easing.SpringOut);
+    }
+
+    private static void Haptic()
+    {
+        try { HapticFeedback.Default.Perform(HapticFeedbackType.LongPress); }
+        catch (Exception) { /* sin vibración en este dispositivo (p. ej. escritorio) */ }
     }
 
     private static bool IsReduceMotionEnabled()

@@ -47,18 +47,21 @@ public static class RoutineSchedule
         return days[(last + 1) % days.Count];
     }
 
+    /// <summary>"última vez hace 3 semanas" o "sin entrenar aún".</summary>
+    public static string LastTrainedText(DateTime? last, DateTime today) =>
+        last is DateTime date ? $"última vez {AgoText(date, today)}" : "sin entrenar aún";
+
     /// <summary>"hoy", "ayer", "hace 5 días", "hace 3 semanas", "hace 2 meses".</summary>
-    public static string LastTrainedText(DateTime? last, DateTime today)
+    public static string AgoText(DateTime date, DateTime today)
     {
-        if (last is not DateTime date) return "sin entrenar aún";
         var days = (today.Date - date.Date).Days;
         return days switch
         {
-            <= 0 => "última vez hoy",
-            1 => "última vez ayer",
-            < 14 => $"última vez hace {days} días",
-            < 60 => $"última vez hace {days / 7} semanas",
-            _ => $"última vez hace {days / 30} meses"
+            <= 0 => "hoy",
+            1 => "ayer",
+            < 14 => $"hace {days} días",
+            < 60 => $"hace {days / 7} semanas",
+            _ => $"hace {days / 30} meses"
         };
     }
 }

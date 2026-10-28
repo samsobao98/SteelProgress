@@ -63,6 +63,33 @@ public class RoutineRepository
         return new RoutineWeek(days, doneThisWeek, lastDayId);
     }
 
+    // Resumen de una rutina para la vista previa: sus días y sus entrenos con alguna serie
+    // (vía WorkoutSessions para que se apliquen los filtros de perfil y cliente)
+    public async Task<RoutineOverview> GetRoutineOverviewAsync(int routineId)
+    {
+        var days = await _context.RoutineDays
+            .Where(d => d.RoutineId == routineId)
+            .OrderBy(d => d.Order)
+            .Select(d => new { d.Id, d.Name, Exercises = d.Exercises.Count })
+            .ToListAsync();
+
+        var sessions = await _context.WorkoutSessions
+            .Where(s => s.RoutineDay!.RoutineId == routineId && s.Exercises.Any(e => e.Sets.Any()))
+            .Select(s => new SessionOverview(
+                s.Date,
+                s.RoutineDayId,
+                s.DurationMinutes,
+                s.Exercises.SelectMany(e => e.Sets).Where(x => !x.IsWarmup).Sum(x => x.Weight * x.Reps)))
+            .ToListAsync();
+
+        var lastByDay = sessions.GroupBy(s => s.RoutineDayId).ToDictionary(g => g.Key, g => g.Max(s => s.Date));
+        var overviewDays = days
+            .Select(d => new DayOverview(d.Id, d.Name, d.Exercises, lastByDay.TryGetValue(d.Id, out var last) ? last : null))
+            .ToList();
+
+        return new RoutineOverview(overviewDays, sessions.OrderByDescending(s => s.Date).ToList());
+    }
+
     // Entrenos que se borrarían en cascada con la rutina o el día
     public Task<int> CountSessionsOfRoutineAsync(int routineId) =>
         _context.WorkoutSessions.CountAsync(s => s.RoutineDay!.RoutineId == routineId);
@@ -190,3 +217,9 @@ public class RoutineRepository
 }
 
 public sealed record RoutineWeek(IReadOnlyList<RoutineDay> Days, IReadOnlyCollection<int> DoneThisWeek, int? LastTrainedDayId);
+
+public sealed record DayOverview(int Id, string Name, int ExerciseCount, DateTime? LastDone);
+public sealed record SessionOverview(DateTime Date, int RoutineDayId, int? DurationMinutes, double Volume);
+
+/// <summary>Días de una rutina y sus entrenos con alguna serie, del más reciente al más antiguo.</summary>
+public sealed record RoutineOverview(IReadOnlyList<DayOverview> Days, IReadOnlyList<SessionOverview> Sessions);

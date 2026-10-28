@@ -5,6 +5,7 @@ using SteelProgress.Core.Services;
 using SteelProgress.Core.Sharing;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Maui.Services;
 
 namespace SteelProgress.Maui.Pages;
 
@@ -204,41 +205,7 @@ public partial class RoutineDetailPage : ContentPage
     private async void OnShareTapped(object? sender, TappedEventArgs e)
     {
         await PressAsync(ShareButton);
-        var routine = _vm.Routine;
-        var estimate = await _sharing.EstimateAsync(routine.Id);
-        bool includeMedia = false;
-        if (estimate.MediaCount > 0)
-        {
-            var withVideos = $"Con vídeos ({estimate.MediaCount} · {MediaKinds.FormatSize(estimate.MediaBytes)})";
-            const string withoutVideos = "Sin vídeos (solo datos)";
-            var choice = await DisplayActionSheetAsync($"Compartir «{routine.Name}»", "Cancelar", null, withVideos, withoutVideos);
-            if (choice != withVideos && choice != withoutVideos) return;
-            includeMedia = choice == withVideos;
-        }
-
-        var message = await DisplayPromptAsync("Mensaje (opcional)", "Lo verá quien abra la rutina.",
-            accept: "Compartir", cancel: "Cancelar", placeholder: "Ej. Empezamos el lunes", maxLength: 300);
-        if (message is null) return; // cancelado
-
-        ShareButton.IsEnabled = false;
-        try
-        {
-            var folder = System.IO.Path.Combine(FileSystem.CacheDirectory, "compartir");
-            var path = await _sharing.ExportRoutineToFileAsync(routine.Id, routine.Name, includeMedia, message, folder);
-            await Share.Default.RequestAsync(new ShareFileRequest
-            {
-                Title = $"Compartir «{routine.Name}»",
-                File = new ShareFile(path, "application/octet-stream")
-            });
-        }
-        catch (Exception ex) when (ex is SteelPackageException or IOException)
-        {
-            NotificationService.Error($"No se pudo crear el archivo: {ex.Message}");
-        }
-        finally
-        {
-            ShareButton.IsEnabled = true;
-        }
+        await RoutineShareFlow.ShareAsync(this, _sharing, _vm.Routine, ShareButton);
     }
 
     // ── Panel «Añadir ejercicio» ───────────────────────────────────────────

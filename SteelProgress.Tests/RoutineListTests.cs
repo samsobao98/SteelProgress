@@ -377,6 +377,72 @@ public class RoutineListTests : IDisposable
         Assert.Equal(new[] { 1, 2 }, orders.Last()); // lo que ve la lista al refrescarse
     }
 
+    // ── Vista previa y acciones rápidas ───────────────────────────────────
+
+    [Fact]
+    public async Task PreviewSummarisesDaysAndWorkouts()
+    {
+        var tp = AddRoutine("Torso / Pierna", "Torso A", "Pierna A");
+        await TrainAsync(tp, "Torso A", new DateTime(2026, 9, 30, 18, 0, 0));  // septiembre
+        await TrainAsync(tp, "Torso A", new DateTime(2026, 10, 26, 18, 0, 0)); // lunes de esta semana
+        using (var db = Db())
+        {
+            var last = db.WorkoutSessions.OrderByDescending(x => x.Date).First();
+            last.DurationMinutes = 58;
+            db.WorkoutSessions.OrderBy(x => x.Date).First().DurationMinutes = 42;
+            db.SaveChanges();
+        }
+
+        var vm = Vm();
+        await vm.RefreshAsync();
+        await vm.OpenPreviewAsync(vm.Items[0]);
+
+        var p = vm.Preview!;
+        Assert.True(vm.IsPreviewOpen);
+        Assert.Equal(new[] { "1 ejercicio · hace 2 días", "1 ejercicio · sin hacer" }, p.Days.Select(d => d.Detail));
+        Assert.Equal(("2", "1", "50 min"), (p.TotalText, p.MonthText, p.AverageDurationText));
+        Assert.Equal("Torso A · hace 2 días", p.LastSessionTitle);
+        Assert.Equal("lun 26 oct · 58 min · 480 kg", p.LastSessionDetail);
+
+        vm.ClosePreviewCommand.Execute(null);
+        Assert.False(vm.IsPreviewOpen);
+    }
+
+    [Fact]
+    public async Task PreviewOfANeverTrainedRoutine()
+    {
+        AddRoutine("Nueva", "Día 1");
+        var vm = Vm();
+        await vm.RefreshAsync();
+
+        await vm.OpenPreviewAsync(vm.Items[0]);
+
+        Assert.False(vm.Preview!.HasLastSession);
+        Assert.Equal("Aún no la has entrenado", vm.Preview.LastSessionTitle);
+        Assert.Equal(("0", "—"), (vm.Preview.TotalText, vm.Preview.AverageDurationText));
+    }
+
+    [Fact]
+    public async Task QuickActionsRenameAndMarkActiveFromTheList()
+    {
+        AddRoutine("A", "Día");
+        AddRoutine("B", "Día");
+        var vm = Vm();
+        await vm.RefreshAsync();
+
+        await vm.RenameAsync(vm.Items.Single(i => i.Name == "B"), "  Fuerza 5x5 ", " Lunes y jueves ");
+        var renamed = vm.Items.Single(i => i.Name == "Fuerza 5x5");
+        Assert.Equal("Lunes y jueves", renamed.Routine.Notes);
+        Assert.Equal("5×5", renamed.Monogram);
+
+        await vm.ToggleMarkedActiveAsync(renamed);
+        Assert.Equal("Fuerza 5x5", vm.Items[0].Name);
+        Assert.Equal("● ACTIVA · ELEGIDA", vm.Items[0].ActiveLabel);
+
+        await vm.ToggleMarkedActiveAsync(vm.Items[0]);
+        Assert.False(vm.Items.Any(i => i.IsActive)); // nadie ha entrenado: no hay activa
+    }
+
     // ── Panel «Añadir ejercicio» ──────────────────────────────────────────
 
     [Fact]

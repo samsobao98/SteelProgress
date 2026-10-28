@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using LiveChartsCore.SkiaSharpView.Maui;
 using MauiIcons.Material;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,8 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            // Mantener pulsado (TouchBehavior) en la lista de rutinas
+            .UseMauiCommunityToolkit()
             .UseLiveCharts()
             .UseMaterialMauiIcons()
             .ConfigureFonts(fonts =>

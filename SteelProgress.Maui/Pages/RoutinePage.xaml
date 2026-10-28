@@ -23,16 +23,15 @@
                             <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
                         </SwipeItems>
                     </SwipeView.RightItems>
-                    <Border Padding="18" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                    <Grid>
+                    <!-- Tocar entra; mantener pulsado abre el resumen (TouchBehavior, se añade en OnCardLoaded) -->
+                    <Border Padding="18" StrokeThickness="0" StrokeShape="RoundRectangle 20" Loaded="OnCardLoaded">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
                                 <GradientStop Color="#2C2D45" Offset="0" />
                                 <GradientStop Color="#252536" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnRoutineTapped" />
-                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="Auto,*">
                                 <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4">
@@ -75,6 +74,15 @@
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
+                        <!-- ⋮: hermano de la tarjeta (no hijo) para que tocarlo no abra la rutina -->
+                        <Border WidthRequest="44" HeightRequest="44" BackgroundColor="Transparent" StrokeThickness="0"
+                                HorizontalOptions="End" VerticalOptions="Start" Margin="0,6,6,0" IsVisible="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMoreTapped" />
+                            </Border.GestureRecognizers>
+                            <mi:MauiIcon Icon="{mi:Material MoreVert}" IconColor="{StaticResource SpText3}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
                 </SwipeView>
             </Grid>
         </DataTemplate>
@@ -88,10 +96,9 @@
                             <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
                         </SwipeItems>
                     </SwipeView.RightItems>
-                    <Border Style="{StaticResource SpCardStyle}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnRoutineTapped" />
-                        </Border.GestureRecognizers>
+                    <Grid>
+                    <!-- Tocar entra; mantener pulsado abre el resumen (TouchBehavior, se añade en OnCardLoaded) -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16,16,52,16" Loaded="OnCardLoaded">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
                             <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
                                     BackgroundColor="{Binding AccentIndex, Converter={StaticResource Accent}, ConverterParameter=bg}">
@@ -102,12 +109,19 @@
                                 <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                 <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
                             </VerticalStackLayout>
-                            <Grid Grid.Column="2" VerticalOptions="Center">
-                                <Label Text="›" FontSize="22" TextColor="{StaticResource SpText4}" IsVisible="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
-                                <mi:MauiIcon Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
-                            </Grid>
                         </Grid>
                     </Border>
+                        <!-- ⋮: hermano de la tarjeta (no hijo) para que tocarlo no abra la rutina -->
+                        <Border WidthRequest="44" HeightRequest="44" BackgroundColor="Transparent" StrokeThickness="0"
+                                HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,4,0" IsVisible="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMoreTapped" />
+                            </Border.GestureRecognizers>
+                            <mi:MauiIcon Icon="{mi:Material MoreVert}" IconColor="{StaticResource SpText3}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    <mi:MauiIcon Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22" HorizontalOptions="End" VerticalOptions="Center"
+                                 Margin="0,0,16,0" InputTransparent="True" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
+                    </Grid>
                 </SwipeView>
             </Grid>
         </DataTemplate>
@@ -179,7 +193,7 @@
                                     <Setter Property="Text" Value="Mantén pulsada una rutina y arrástrala · Hecho para guardar" />
                                 </DataTrigger>
                                 <DataTrigger TargetType="Label" Binding="{Binding IsReordering}" Value="False">
-                                    <Setter Property="Text" Value="← Desliza para eliminar · «Ordenar» para cambiar el orden" />
+                                    <Setter Property="Text" Value="Mantén pulsada para ver el resumen · ← desliza para eliminar" />
                                 </DataTrigger>
                             </Label.Triggers>
                         </Label>
@@ -235,6 +249,80 @@
             </Border.GestureRecognizers>
             <mi:MauiIcon Icon="{mi:Material Add}" IconColor="{StaticResource SpOnAccent}" IconSize="28" HorizontalOptions="Center" VerticalOptions="Center" />
         </Border>
+
+        <!-- ── Vista previa de una rutina (mantener pulsada o ⋮ → Ver resumen) ── -->
+        <Grid x:Name="PreviewLayer" IsVisible="False">
+            <BoxView x:Name="PreviewBackdrop" BackgroundColor="#0A0A10" Opacity="0">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPreviewBackdropTapped" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <Border x:Name="PreviewCard" BackgroundColor="{StaticResource SpSheet}" StrokeThickness="1" Stroke="#34354A" StrokeShape="RoundRectangle 22"
+                    Padding="20" Margin="20,0" VerticalOptions="Center" MaximumHeightRequest="620"
+                    Shadow="{Shadow Brush='#000000', Offset='0,12', Radius=30, Opacity=0.5}">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="0" BindingContext="{Binding Preview}">
+                        <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4" HorizontalOptions="Start"
+                                Margin="0,0,0,8" IsVisible="{Binding IsActive}">
+                            <Label Text="{Binding ActiveLabel}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
+                        </Border>
+                        <Label Text="{Binding Name}" FontFamily="SpaceGroteskBold" FontSize="24" TextColor="{StaticResource SpText}" />
+                        <Label Text="{Binding Notes}" Style="{StaticResource SpSecondary}" Margin="0,2,0,0" IsVisible="{Binding HasNotes}" />
+
+                        <!-- Números de la rutina -->
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,16,0,0">
+                            <Border Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding TotalText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                    <Label Text="Entrenos" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding MonthText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                    <Label Text="Este mes" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding AverageDurationText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                    <Label Text="Duración media" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+
+                        <!-- Días -->
+                        <Label Text="Días" Style="{StaticResource SpOverline}" Margin="0,18,0,6" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Days}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="0,8">
+                                        <Label Text="{Binding Name}" Style="{StaticResource SpBody}" FontSize="14" LineBreakMode="TailTruncation" />
+                                        <Label Grid.Column="1" Text="{Binding Detail}" Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                            <BindableLayout.EmptyView>
+                                <Label Text="Sin días todavía" Style="{StaticResource SpSecondary}" Margin="0,4" />
+                            </BindableLayout.EmptyView>
+                        </VerticalStackLayout>
+
+                        <!-- Último entreno -->
+                        <Label Text="Último entreno" Style="{StaticResource SpOverline}" Margin="0,14,0,6" />
+                        <Label Text="{Binding LastSessionTitle}" Style="{StaticResource SpBody}" FontSize="14" />
+                        <Label Text="{Binding LastSessionDetail}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}"
+                               Margin="0,2,0,0" IsVisible="{Binding HasLastSession}" />
+
+                        <Border Background="{StaticResource SpSteelBrush}" Padding="0,15" StrokeShape="RoundRectangle 14" StrokeThickness="0" Margin="0,20,0,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPreviewEnterTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Entrar en la rutina" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                        </Border>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
 
         <!-- ── Overlay backdrop ── -->
         <BoxView

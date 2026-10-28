@@ -189,6 +189,62 @@ public partial class RoutineViewModel : ObservableObject
         NotificationService.Info("Orden automático: la activa primero y el resto por última vez entrenada.");
     }
 
+    // ── Vista previa y acciones rápidas (⋮) ──────────────────────────────
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPreviewOpen))]
+    private RoutinePreview? _preview;
+
+    public bool IsPreviewOpen => Preview is not null;
+
+    public async Task OpenPreviewAsync(RoutineListItem item)
+    {
+        if (IsReordering) return;
+        RoutineOverview overview;
+        await _dbLock.WaitAsync();
+        try { overview = await _repository.GetRoutineOverviewAsync(item.Routine.Id); }
+        finally { _dbLock.Release(); }
+        Preview = RoutinePreview.Build(item, overview, _clock.GetLocalNow().DateTime);
+    }
+
+    [RelayCommand]
+    private void ClosePreview() => Preview = null;
+
+    public async Task RenameAsync(RoutineListItem item, string name, string? notes)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return;
+        var routine = item.Routine;
+        routine.Name = name.Trim();
+        routine.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+
+        await _dbLock.WaitAsync();
+        try
+        {
+            await _repository.UpdateAsync(routine);
+            await LoadAsync();
+        }
+        finally { _dbLock.Release(); }
+    }
+
+    /// <summary>Marca la rutina como activa (desmarcando la anterior) o le quita la marca.</summary>
+    public async Task ToggleMarkedActiveAsync(RoutineListItem item)
+    {
+        var mark = !item.Routine.IsMarkedActive;
+        await _dbLock.WaitAsync();
+        try
+        {
+            await _repository.SetMarkedActiveAsync(mark ? item.Routine.Id : null);
+            foreach (var other in Items) other.Routine.IsMarkedActive = false;
+            item.Routine.IsMarkedActive = mark;
+            await LoadAsync();
+        }
+        finally { _dbLock.Release(); }
+
+        NotificationService.Info(mark
+            ? $"«{item.Name}» es ahora tu rutina activa."
+            : "Sin rutina elegida: la activa será la última que entrenes.");
+    }
+
     // ── Eliminar con deshacer ─────────────────────────────────────────────
 
     // Borrar una rutina borra en cascada sus días y su historial de entrenos: el borrado real

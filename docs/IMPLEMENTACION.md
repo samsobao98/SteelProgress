@@ -180,6 +180,9 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
   * La placa muestra su semana: un tramo por día, «Esta semana: 2 de 4» y «Toca: Pierna B». El resto, en tarjetas con insignia («5×5», «FB») y «última vez hace 3 semanas».
   * **Orden**: automático (activa primero y el resto por última vez entrenada) o a mano con «Ordenar» → arrastrar → «Hecho». «Volver al orden automático» deshace el orden manual. Con orden manual, las rutinas nuevas o importadas van al final. Migración `AddRoutineSortOrder`.
   * **Eliminar deslizando** a la izquierda, con «Deshacer» durante 5 s. El borrado real ocurre al caducar el aviso o al salir de la pantalla.
+  * **Tocar** una rutina entra en ella. **Mantenerla pulsada** abre su resumen sin entrar: días con su nº de ejercicios y cuándo se hicieron, entrenos totales y de este mes, duración media y el último entreno; abajo, «Entrar en la rutina».
+  * **⋮** en cada tarjeta: Ver resumen, Cambiar nombre y notas, Marcar/Quitar como activa, Compartir y Eliminar (mismo aviso y Deshacer). Es la forma visible de llegar a todo y la que funciona en Windows; deslizar y mantener pulsado son atajos.
+  * Mantener pulsado usa `TouchBehavior` de **CommunityToolkit.Maui 13.0.0** (MAUI 10.0.20 no lo trae). Es la última versión compatible con MAUI 10.0.20; las siguientes piden 10.0.41 o más. El mismo paquete sirve para la decisión D1 (vídeo dentro de la app).
 * **Detalle**: título con notas y nº de días, días en chips (el activo con el degradado acero), ejercicios con su superserie (A1) o posición y lo prescrito. Los que no tienen series indicadas muestran «+ Añadir series y reps», porque en Entreno sin objetivo no se sabe cuándo está hecho.
 * **Añadir ejercicios**: panel con buscador (sin distinguir tildes), filtro por grupo, miniatura y selección múltiple; se añaden en el orden en que se tocaron. Se puede repetir un ejercicio en el mismo día.
 * **Ojo, comportamiento que ya existía**: borrar una rutina o un día borra también sus entrenos del historial. Ahora se avisa con el número de entrenos antes de borrar. Conservar el historial exigiría cambiar el esquema de la base de datos.
@@ -191,7 +194,10 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 2. «Ordenar» → «Ordenar a mano» → arrastrar → «Hecho»; salir y volver: se mantiene. Crear una rutina: va al final. «Volver al orden automático».
 3. Deslizar una rutina a la izquierda → Eliminar (si tiene entrenos, avisa cuántos) → «Deshacer». Repetir sin deshacer y cambiar de pestaña: ya no está.
 4. Entrar en una rutina → + → buscar «biceps», filtrar por grupo, marcar varios → «Añadir N ejercicios». Deben salir en ese orden y con «+ Añadir series y reps».
-5. En Windows: deslizar con el ratón puede no funcionar; eliminar desde el detalle (lápiz → Eliminar rutina).
+5. Mantener pulsada una rutina: vibra y sale el resumen; tocar fuera lo cierra; «Entrar en la rutina» entra. Tocar normal sigue entrando directamente.
+6. ⋮ de una tarjeta: probar cada opción. Comprobar que tocar el ⋮ no entra en la rutina.
+7. Con «Ordenar» activo, arrastrar debe seguir funcionando (mantener pulsado no abre el resumen en ese modo).
+8. En Windows: deslizar y mantener pulsado con el ratón pueden no funcionar; el ⋮ sí.
 
 **Aún no está**
 * «Semana 3 de 8» de la maqueta: haría falta guardar la duración del programa.
@@ -201,7 +207,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 
 ## Pendiente de decidir
 
-* **D1** — reproductor de vídeo dentro de la app (`CommunityToolkit.Maui.MediaElement`, dependencia nueva) o seguir con el del sistema.
+* **D1** — reproductor de vídeo dentro de la app (`CommunityToolkit.Maui.MediaElement`, paquete aparte del Toolkit que ya usamos) o seguir con el del sistema.
 * Límite de vídeo configurable en Ajustes (hoy fijo en 50 MB).
 
 ## Notas técnicas
