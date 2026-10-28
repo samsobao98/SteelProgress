@@ -138,7 +138,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource BigAction}" Margin="0,16,0,0" IsVisible="{Binding HasSelectedDay}">
+                    <Border Style="{StaticResource BigAction}" Margin="0,16,0,0" IsVisible="{Binding CanStart}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnStartTapped" />
                         </Border.GestureRecognizers>

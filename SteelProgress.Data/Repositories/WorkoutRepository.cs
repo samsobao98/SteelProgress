@@ -45,7 +45,9 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         var session = new WorkoutSession
         {
             Date = DateTime.Now,
-            RoutineDayId = routineDayId
+            RoutineDayId = routineDayId,
+            // Incompleta hasta que se guarda desde el resumen: un entreno abandonado no cuenta como terminado
+            IsComplete = false
         };
 
         await _context.WorkoutSessions.AddAsync(session);

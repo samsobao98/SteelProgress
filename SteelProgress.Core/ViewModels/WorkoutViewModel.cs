@@ -31,8 +31,9 @@ public partial class WorkoutViewModel : ObservableObject
         _clock = clock ?? TimeProvider.System;
     }
 
-    // Las cargas de preparar comparten DbContext: una cada vez
-    private readonly SemaphoreSlim _loadLock = new(1, 1);
+    // En la app todos los repositorios comparten un DbContext, que no admite dos operaciones
+    // a la vez: toda operación de base de datos de esta pantalla pasa por este cerrojo
+    private readonly SemaphoreSlim _dbLock = new(1, 1);
     private Task _dayOptionsLoad = Task.CompletedTask;
 
     /// <summary>La página lo llama al aparecer.</summary>
@@ -64,15 +65,16 @@ public partial class WorkoutViewModel : ObservableObject
     [ObservableProperty] private string _dayPreviewSummary = "";
 
     public bool HasSelectedDay => SelectedRoutineDay is not null;
+    public bool CanStart => SelectedRoutineDay is not null && DayPreview.Count > 0;
     public string StartButtonText => SelectedRoutineDay is null ? "Elige un día" : $"▶ Empezar {SelectedRoutineDay.Name}";
 
     private async Task LoadRoutinesAsync()
     {
         var previous = SelectedRoutine?.Id;
         List<Routine> routines;
-        await _loadLock.WaitAsync();
+        await _dbLock.WaitAsync();
         try { routines = await _routineRepository.GetAllAsync(); }
-        finally { _loadLock.Release(); }
+        finally { _dbLock.Release(); }
 
         Routines.Clear();
         foreach (var routine in routines)
@@ -103,13 +105,13 @@ public partial class WorkoutViewModel : ObservableObject
 
         List<RoutineDay> days;
         Dictionary<int, DateTime> lastDone;
-        await _loadLock.WaitAsync();
+        await _dbLock.WaitAsync();
         try
         {
             days = await _routineRepository.GetDaysByRoutineIdAsync(routine.Id);
             lastDone = await _workoutRepository.GetLastSessionDatesAsync(days.Select(d => d.Id));
         }
-        finally { _loadLock.Release(); }
+        finally { _dbLock.Release(); }
         if (!ReferenceEquals(routine, SelectedRoutine)) return; // se eligió otra mientras tanto
 
         var today = _clock.GetLocalNow().Date;
@@ -133,17 +135,19 @@ public partial class WorkoutViewModel : ObservableObject
         var day = SelectedRoutineDay;
         DayPreview.Clear();
         DayPreviewSummary = "";
+        OnPropertyChanged(nameof(CanStart));
         if (day is null) return;
 
         List<RoutineDayExercise> exercises;
-        await _loadLock.WaitAsync();
+        await _dbLock.WaitAsync();
         try { exercises = await _routineRepository.GetExercisesByDayIdAsync(day.Id); }
-        finally { _loadLock.Release(); }
+        finally { _dbLock.Release(); }
         if (!ReferenceEquals(day, SelectedRoutineDay)) return;
 
         foreach (var e in exercises)
             DayPreview.Add(e);
         DayPreviewSummary = exercises.Count == 1 ? "1 ejercicio" : $"{exercises.Count} ejercicios";
+        OnPropertyChanged(nameof(CanStart));
     }
 
     internal static string LastDoneText(DateTime date, DateTime today)
@@ -198,11 +202,33 @@ public partial class WorkoutViewModel : ObservableObject
             return;
         }
 
-        var session = await _workoutRepository.CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id);
-        await LoadSessionAsync(session.Id);
+        if (IsSessionActive) return; // doble toque
+
+        await _dbLock.WaitAsync();
+        try
+        {
+            if (IsSessionActive) return;
+            var exercises = await _routineRepository.GetExercisesByDayIdAsync(SelectedRoutineDay.Id);
+            if (exercises.Count == 0)
+            {
+                NotificationService.Error("Este día no tiene ejercicios. Añádelos en Rutinas.");
+                return;
+            }
+
+            var session = await _workoutRepository.CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id);
+            await LoadSessionCoreAsync(session.Id);
+        }
+        finally { _dbLock.Release(); }
     }
 
     public async Task LoadSessionAsync(int sessionId)
+    {
+        await _dbLock.WaitAsync();
+        try { await LoadSessionCoreAsync(sessionId); }
+        finally { _dbLock.Release(); }
+    }
+
+    private async Task LoadSessionCoreAsync(int sessionId)
     {
         var session = await _workoutRepository.GetSessionByIdAsync(sessionId);
         if (session is null)
@@ -327,11 +353,13 @@ public partial class WorkoutViewModel : ObservableObject
         return true;
     }
 
+    private bool _completingSet;
+
     [RelayCommand]
     private async Task CompleteSet()
     {
         var state = CurrentExercise;
-        if (state is null) return;
+        if (state is null || _completingSet) return; // un doble toque no registra dos series
 
         if (Reps <= 0)
         {
@@ -339,8 +367,16 @@ public partial class WorkoutViewModel : ObservableObject
             return;
         }
 
+        var wasAllDone = ExerciseStates.All(e => e.IsDone);
         var set = new WorkoutSet { WorkoutExerciseId = state.Entry.Id, Reps = Reps, Weight = Weight };
-        await _workoutRepository.AddSetAsync(set);
+        _completingSet = true;
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.AddSetAsync(set); }
+        finally
+        {
+            _dbLock.Release();
+            _completingSet = false;
+        }
 
         var done = new DoneSet(set, state.Sets.Count + 1, false);
         state.Sets.Add(done);
@@ -350,9 +386,9 @@ public partial class WorkoutViewModel : ObservableObject
 
         SetCompleted?.Invoke(done.IsRecord);
 
-        if (ExerciseStates.All(e => e.IsDone))
+        if (!wasAllDone && ExerciseStates.All(e => e.IsDone))
         {
-            // Última serie del último ejercicio: directo al resumen
+            // Esta serie completa el entreno: directo al resumen (no si ya estaba todo y se sigue entrenando)
             OpenFinish();
             return;
         }
@@ -372,7 +408,9 @@ public partial class WorkoutViewModel : ObservableObject
         var state = ExerciseStates.FirstOrDefault(e => e.Sets.Contains(done));
         if (state is null) return;
 
-        await _workoutRepository.DeleteSetAsync(done.Set);
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.DeleteSetAsync(done.Set); }
+        finally { _dbLock.Release(); }
         state.Sets.Remove(done);
 
         // Renumerar: las series se muestran como 1, 2, 3...
@@ -607,14 +645,17 @@ public partial class WorkoutViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveWorkout()
     {
-        if (CurrentSession is not { } session || !CanSave) return;
+        if (CurrentSession is not { } session || !CanSave || !IsFinishing) return;
+        IsFinishing = false; // un doble toque no guarda dos veces
 
         var minutes = (int)Math.Round((_clock.GetLocalNow().DateTime - session.Date).TotalMinutes);
         session.DurationMinutes = Math.Max(1, minutes);
         session.Feeling = Feeling;
         session.Notes = string.IsNullOrWhiteSpace(FinishNotes) ? null : FinishNotes.Trim();
         session.IsComplete = !IsIncomplete;
-        await _workoutRepository.UpdateSessionAsync(session);
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.UpdateSessionAsync(session); }
+        finally { _dbLock.Release(); }
 
         ResetSession();
         NotificationService.Success("Entreno guardado.");
@@ -629,8 +670,11 @@ public partial class WorkoutViewModel : ObservableObject
 
     public async Task DiscardAsync()
     {
-        if (CurrentSession is not null)
-            await _workoutRepository.DeleteSessionAsync(CurrentSession);
+        if (CurrentSession is not { } session) return;
+        CurrentSession = null; // un doble toque no borra dos veces
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.DeleteSessionAsync(session); }
+        finally { _dbLock.Release(); }
         ResetSession();
         NotificationService.Info("Entreno descartado.");
     }

@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Context;
@@ -49,6 +50,16 @@ public class WorkoutSessionTests : IDisposable
     }
 
     private AppDbContext Db() => new(new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options, _user);
+
+    // Guardado lento, como en el móvil: con SQLite en memoria terminaría antes del segundo toque
+    private sealed class SlowSave : SaveChangesInterceptor
+    {
+        public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(50, cancellationToken);
+            return result;
+        }
+    }
 
     public void Dispose() => _connection.Dispose();
 
@@ -272,6 +283,76 @@ public class WorkoutSessionTests : IDisposable
         Assert.Equal(3, vm.SummarySets);
         Assert.Equal("1,4 t", vm.SummaryVolume); // 60·8·2 + 40·10 = 1360 kg
         Assert.Equal("25:00", vm.SummaryDuration);
+    }
+
+    [Fact]
+    public async Task ContinuingAfterTheSummaryDoesNotReopenIt()
+    {
+        var vm = await StartedVmAsync();
+        await DoSetAsync(vm, 60, 8);
+        await DoSetAsync(vm, 60, 8);
+        await DoSetAsync(vm, 40, 10);
+        Assert.True(vm.IsFinishing);
+
+        vm.ContinueWorkoutCommand.Execute(null);
+        await DoSetAsync(vm, 40, 10); // una serie de más
+
+        Assert.False(vm.IsFinishing);
+        Assert.True(vm.IsResting);
+    }
+
+    [Fact]
+    public async Task DoubleTapOnSharedContextRecordsOneSet()
+    {
+        // En la app los dos repositorios comparten el mismo DbContext
+        var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).AddInterceptors(new SlowSave()).Options, _user);
+        var vm = new WorkoutViewModel(new WorkoutRepository(db), new RoutineRepository(db), _clock);
+        var session = await new WorkoutRepository(Db()).CreateSessionFromRoutineDayAsync(_dayId);
+        await vm.LoadSessionAsync(session.Id);
+        vm.Weight = 60;
+        vm.Reps = 8;
+
+        var first = vm.CompleteSetCommand.ExecuteAsync(null);
+        var second = vm.CompleteSetCommand.ExecuteAsync(null);
+        await Task.WhenAll(first, second);
+
+        using var check = Db();
+        Assert.Single(check.WorkoutSets);
+        Assert.Single(vm.ExerciseStates[0].Sets);
+    }
+
+    [Fact]
+    public async Task DayWithoutExercisesCannotStart()
+    {
+        int routineId;
+        using (var db = Db())
+        {
+            var emptyDay = AddDay(db, 1);
+            routineId = db.RoutineDays.Single(d => d.Id == emptyDay).RoutineId;
+        }
+        var vm = Vm();
+        await vm.RefreshAsync();
+        vm.SelectedRoutine = vm.Routines.Single(r => r.Id == routineId);
+        await vm.RefreshAsync();
+        Assert.Equal(routineId, vm.SelectedRoutineDay!.RoutineId);
+
+        Assert.False(vm.CanStart);
+        await vm.StartWorkoutCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsSessionActive);
+        using var check = Db();
+        Assert.Empty(check.WorkoutSessions);
+    }
+
+    [Fact]
+    public async Task AbandonedSessionIsNotComplete()
+    {
+        var vm = await StartedVmAsync();
+        await DoSetAsync(vm, 60, 8);
+
+        // La app se cierra aquí: la sesión queda guardada pero sin terminar
+        using var db = Db();
+        Assert.False(db.WorkoutSessions.Single().IsComplete);
     }
 
     [Fact]

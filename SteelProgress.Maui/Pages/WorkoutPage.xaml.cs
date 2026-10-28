@@ -140,6 +140,7 @@ public partial class WorkoutPage : ContentPage
 
     private async void OnStartTapped(object? sender, TappedEventArgs e)
     {
+        if (_vm.StartWorkoutCommand.IsRunning) return;
         await PressAsync(sender as VisualElement);
         await _vm.StartWorkoutCommand.ExecuteAsync(null);
     }
@@ -154,12 +155,14 @@ public partial class WorkoutPage : ContentPage
 
     private async void OnFinishTapped(object? sender, TappedEventArgs e)
     {
+        if (_vm.FinishCommand.IsRunning) return;
         await PressAsync(sender as VisualElement);
         await _vm.FinishCommand.ExecuteAsync(null);
     }
 
     private async void OnCompleteSetTapped(object? sender, TappedEventArgs e)
     {
+        if (_vm.CompleteSetCommand.IsRunning) return;
         await PressAsync(CompleteSetButton);
         await _vm.CompleteSetCommand.ExecuteAsync(null);
     }
@@ -182,7 +185,7 @@ public partial class WorkoutPage : ContentPage
         if ((sender as BindableObject)?.BindingContext is not DoneSet done) return;
 
         var action = await DisplayActionSheetAsync($"Serie {done.Number} · {done.Text}", "Cancelar", "Borrar serie");
-        if (action == "Borrar serie")
+        if (action == "Borrar serie" && !_vm.DeleteSetCommand.IsRunning)
             await _vm.DeleteSetCommand.ExecuteAsync(done);
     }
 
@@ -261,6 +264,7 @@ public partial class WorkoutPage : ContentPage
 
     private async void OnSaveTapped(object? sender, TappedEventArgs e)
     {
+        if (_vm.SaveWorkoutCommand.IsRunning) return;
         await PressAsync(sender as VisualElement);
         await _vm.SaveWorkoutCommand.ExecuteAsync(null);
     }
