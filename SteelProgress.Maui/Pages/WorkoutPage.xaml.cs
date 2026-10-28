@@ -64,10 +64,43 @@ public partial class WorkoutPage : ContentPage
         _timer ??= CreateTimer();
         _timer.Start();
 
+        // Si la app se cerró en mitad de un entreno, antes de nada: ¿continuarlo o descartarlo?
+        if (await AskAboutUnsavedAsync())
+        {
+            WorkoutLaunch.Take(); // se sigue con el que quedó a medias, no se empieza otro
+            return;
+        }
+
         // Inicio o Rutinas han pedido empezar un día: se empieza directamente, sin pasar por preparar
         if (WorkoutLaunch.Take() is int dayId)
             await _vm.StartDayAsync(dayId);
         await _vm.RefreshAsync();
+    }
+
+    // Devuelve true si se ha retomado el entreno a medias
+    private async Task<bool> AskAboutUnsavedAsync()
+    {
+        if (await _vm.FindUnsavedAsync() is not { } unsaved) return false;
+
+        const string resume = "Continuar entreno";
+        const string discard = "Descartarlo";
+        var when = RoutineSchedule.AgoText(unsaved.Date, DateTime.Today);
+        var sets = unsaved.SetCount == 1 ? "1 serie" : $"{unsaved.SetCount} series";
+        var choice = await AppDialogs.ChooseAsync("Tienes un entreno sin guardar", [resume], destructive: discard,
+            subtitle: $"{unsaved.DayName} · {when} a las {unsaved.Date:HH:mm} · {sets}. La app se cerró antes de guardarlo.");
+
+        if (choice == resume)
+        {
+            await _vm.LoadSessionAsync(unsaved.Id);
+            return true;
+        }
+        if (choice == discard &&
+            await AppDialogs.ConfirmAsync("Descartar entreno", unsaved.SetCount == 1 ? $"Se borrará la serie de {unsaved.DayName}." : $"Se borrarán las {sets} de {unsaved.DayName}.", accept: "Descartar", destructive: true))
+        {
+            await _vm.DiscardUnsavedAsync(unsaved.Id);
+            NotificationService.Info("Entreno descartado.");
+        }
+        return false;
     }
 
     private IDispatcherTimer CreateTimer()

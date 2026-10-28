@@ -94,8 +94,10 @@ public static class AppDialogs
             };
             view.VerticalOptions = bottom ? LayoutOptions.End : LayoutOptions.Center;
             // El panel inferior, de lado a lado (el Popup se ajusta al ancho de su contenido)
-            if (bottom && view.Content is View sheet && page.Width > 0)
-                sheet.WidthRequest = page.Width;
+            // (al aparecer una pantalla aún no tiene ancho: entonces, el de la ventana)
+            var width = page.Width > 0 ? page.Width : page.Window?.Width ?? 0;
+            if (bottom && view.Content is View sheet && width > 0)
+                sheet.WidthRequest = width;
             var result = await page.ShowPopupAsync<T>(view, options);
             return result.WasDismissedByTappingOutsideOfPopup ? fallback : result.Result ?? fallback;
         }

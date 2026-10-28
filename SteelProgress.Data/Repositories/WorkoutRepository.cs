@@ -223,6 +223,16 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
                 .ToList());
     }
 
+    // Entrenos empezados que nunca se guardaron (la app se cerró a medias): al guardar
+    // siempre se anota la duración. Las sesiones antiguas tienen IsComplete = true.
+    public Task<List<UnsavedSession>> GetUnsavedSessionsAsync() =>
+        _context.WorkoutSessions
+            .Where(ws => ws.DurationMinutes == null && !ws.IsComplete)
+            .OrderByDescending(ws => ws.Date)
+            .Select(ws => new UnsavedSession(ws.Id, ws.Date, ws.RoutineDay!.Name,
+                ws.Exercises.SelectMany(we => we.Sets).Count(s => !s.IsWarmup)))
+            .ToListAsync();
+
     public async Task<List<WorkoutSession>> GetAllSessionsAsync()
     {
         return await _context.WorkoutSessions.Include(ws=>ws.RoutineDay).OrderByDescending(ws=>ws.Date).ToListAsync();
@@ -231,6 +241,8 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
 }
 
 // Notes: la nota que se apuntó en esa serie (solo en LastSessionSets)
+public sealed record UnsavedSession(int Id, DateTime Date, string DayName, int SetCount);
+
 public sealed record PreviousSet(double Weight, int Reps, string? Notes = null);
 
 // Historial para estadísticas: sesiones (la más reciente primero) y sus series en orden

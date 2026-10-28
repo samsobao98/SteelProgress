@@ -370,6 +370,46 @@ public class ProgressStatsTests : IDisposable
         Assert.Null(WorkoutStateService.ActiveSessionId);
     }
 
+    [Fact]
+    public async Task AWorkoutLeftUnsavedCanBeResumedOrDiscarded()
+    {
+        // La app se cerró dos veces a medias: una sin ninguna serie y otra con dos
+        int Unsaved(int dayId, DateTime date, params (double, int)[] sets)
+        {
+            var id = SeedAsync(dayId, date, sets).GetAwaiter().GetResult();
+            using var db = Db();
+            db.WorkoutSessions.Single(s => s.Id == id).DurationMinutes = null;
+            db.SaveChanges();
+            return id;
+        }
+        var empty = Unsaved(_dayB, Today.AddHours(8));
+        var halfDone = Unsaved(_dayA, Today.AddHours(9), (60, 8), (60, 7));
+        var saved = await SeedAsync(_dayA, Today.AddDays(-2), (60, 8));
+
+        var workout = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        var found = await workout.FindUnsavedAsync();
+        Assert.Equal((halfDone, "Torso A", 2), (found!.Id, found.DayName, found.SetCount));
+        using (var db = Db())
+            Assert.Equal(new[] { halfDone, saved }.Order(), db.WorkoutSessions.Select(s => s.Id).ToList().Order()); // la vacía, borrada
+
+        // Continuar: vuelve con sus series y ya no se ofrece
+        await workout.LoadSessionAsync(found.Id);
+        Assert.True(workout.IsSessionActive);
+        Assert.Equal(2, workout.ExerciseStates[0].DoneCount);
+        Assert.Null(await workout.FindUnsavedAsync());
+
+        // Otra pantalla de Entreno no ofrece el que está en curso
+        var other = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock);
+        Assert.Null(await other.FindUnsavedAsync());
+
+        // Descartarlo
+        await workout.DiscardAsync();
+        var again = Unsaved(_dayA, Today.AddHours(9), (60, 8));
+        await other.DiscardUnsavedAsync((await other.FindUnsavedAsync())!.Id);
+        using (var db = Db())
+            Assert.False(db.WorkoutSessions.Any(s => s.Id == again));
+    }
+
     // ── Notas por serie ──
 
     private static ViewOptionsService Options(ProfileViewMode mode, SimpleViewBlocks blocks = SimpleViewBlocks.None)

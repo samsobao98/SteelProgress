@@ -279,6 +279,34 @@ public partial class WorkoutViewModel : ObservableObject
         finally { _dbLock.Release(); }
     }
 
+    /// <summary>
+    /// Un entreno que la app dejó a medias (se cerró sin guardar), para ofrecer continuarlo o
+    /// descartarlo. Los que no llegaron a tener ninguna serie se borran sin preguntar.
+    /// </summary>
+    public async Task<UnsavedSession?> FindUnsavedAsync()
+    {
+        if (IsSessionActive) return null;
+        await _dbLock.WaitAsync();
+        try
+        {
+            var unsaved = (await _workoutRepository.GetUnsavedSessionsAsync())
+                .Where(u => u.Id != WorkoutStateService.ActiveSessionId)
+                .ToList();
+            foreach (var empty in unsaved.Where(u => u.SetCount == 0))
+                await _workoutRepository.DeleteSessionAsync(new WorkoutSession { Id = empty.Id });
+            return unsaved.FirstOrDefault(u => u.SetCount > 0);
+        }
+        finally { _dbLock.Release(); }
+    }
+
+    public async Task DiscardUnsavedAsync(int sessionId)
+    {
+        await _dbLock.WaitAsync();
+        try { await _workoutRepository.DeleteSessionAsync(new WorkoutSession { Id = sessionId }); }
+        finally { _dbLock.Release(); }
+        _dayOptionsLoad = LoadRoutinesAsync(); // cambian «Hace N días» y lo que toca
+    }
+
     public async Task LoadSessionAsync(int sessionId)
     {
         await _dbLock.WaitAsync();
