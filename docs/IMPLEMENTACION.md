@@ -149,7 +149,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 ### Rediseño 1 — Entreno
 
 **Qué hace**
-* **Preparar** («¿Qué entrenas hoy?»): rutinas en chips, días en tarjetas con «Hace N días» y vista previa del día con lo prescrito.
+* **Preparar** («¿Qué entrenas hoy?»): rutinas en chips, días en tarjetas con «Hace N días» y vista previa del día con lo prescrito. Se abre con la rutina activa (la última entrenada) y el día que toca, marcado con «Toca». Lo que elijas a mano se respeta mientras estés en la pantalla; al terminar un entreno vuelve a proponer el siguiente.
 * **Registrando**: ejercicio N de M con barra de progreso (tocar un tramo cambia de ejercicio), cronómetro y «Terminar» discreto arriba. Chips de objetivo, intensidad y vídeo. Números grandes con − / + (2,5 kg y 1 rep por pulsación; tocar el número para escribirlo). Empieza con lo de la última vez (misma serie) o, si no hay, con lo prescrito.
 * **Cada serie se guarda al marcarla** (antes solo al finalizar): si la app se cierra, las series no se pierden. Tocar una serie hecha permite borrarla.
 * **Récords**, frente a todo tu historial de ese ejercicio y las series previas de hoy (sin historial no hay récord); vibra y muestra la insignia:

@@ -68,12 +68,29 @@ public partial class WorkoutViewModel : ObservableObject
     public bool CanStart => SelectedRoutineDay is not null && DayPreview.Count > 0;
     public string StartButtonText => SelectedRoutineDay is null ? "Elige un día" : $"▶ Empezar {SelectedRoutineDay.Name}";
 
+    // Lo elegido a mano se respeta mientras se está en la pantalla; sin elección, se propone
+    // la rutina activa (la última entrenada) y el día que toca. Al empezar un entreno se olvida.
+    private int? _pickedRoutineId;
+    private int? _pickedDayId;
+
+    /// <summary>El usuario toca una rutina.</summary>
+    public void PickRoutine(Routine routine)
+    {
+        _pickedRoutineId = routine.Id;
+        _pickedDayId = null;
+        SelectedRoutine = routine;
+    }
+
     private async Task LoadRoutinesAsync()
     {
-        var previous = SelectedRoutine?.Id;
         List<Routine> routines;
+        int? activeId;
         await _dbLock.WaitAsync();
-        try { routines = await _routineRepository.GetAllAsync(); }
+        try
+        {
+            routines = await _routineRepository.GetAllAsync();
+            activeId = await _workoutRepository.GetLastTrainedRoutineIdAsync();
+        }
         finally { _dbLock.Release(); }
 
         Routines.Clear();
@@ -82,7 +99,9 @@ public partial class WorkoutViewModel : ObservableObject
 
         RoutinesLoaded = true;
         OnPropertyChanged(nameof(HasRoutines));
-        var selected = Routines.FirstOrDefault(r => r.Id == previous) ?? Routines.FirstOrDefault();
+        var selected = Routines.FirstOrDefault(r => r.Id == _pickedRoutineId)
+                       ?? Routines.FirstOrDefault(r => r.Id == activeId)
+                       ?? Routines.FirstOrDefault();
         if (ReferenceEquals(selected, SelectedRoutine) || selected?.Id == SelectedRoutine?.Id)
         {
             _selectedRoutine = selected; // misma rutina: solo refrescar sus días
@@ -98,30 +117,41 @@ public partial class WorkoutViewModel : ObservableObject
     private async Task LoadDayOptionsAsync()
     {
         var routine = SelectedRoutine;
-        var previousDay = SelectedRoutineDay?.Id;
         DayOptions.Clear();
         SelectedRoutineDay = null;
         if (routine is null) return;
 
-        List<RoutineDay> days;
+        var today = _clock.GetLocalNow().Date;
+        RoutineWeek week;
         Dictionary<int, DateTime> lastDone;
         await _dbLock.WaitAsync();
         try
         {
-            days = await _routineRepository.GetDaysByRoutineIdAsync(routine.Id);
-            lastDone = await _workoutRepository.GetLastSessionDatesAsync(days.Select(d => d.Id));
+            week = await _routineRepository.GetRoutineWeekAsync(routine.Id, RoutineSchedule.WeekStart(today));
+            lastDone = await _workoutRepository.GetLastSessionDatesAsync(week.Days.Select(d => d.Id));
         }
         finally { _dbLock.Release(); }
         if (!ReferenceEquals(routine, SelectedRoutine)) return; // se eligió otra mientras tanto
 
-        var today = _clock.GetLocalNow().Date;
-        foreach (var day in days)
-            DayOptions.Add(new WorkoutDayOption(day, lastDone.TryGetValue(day.Id, out var d) ? LastDoneText(d, today) : "Sin hacer"));
+        var next = RoutineSchedule.NextDay(week);
+        foreach (var day in week.Days)
+            DayOptions.Add(new WorkoutDayOption(day,
+                lastDone.TryGetValue(day.Id, out var d) ? LastDoneText(d, today) : "Sin hacer",
+                isNext: day.Id == next?.Id));
 
-        SelectDay(DayOptions.FirstOrDefault(o => o.Day.Id == previousDay) ?? DayOptions.FirstOrDefault());
+        ApplyDaySelection(DayOptions.FirstOrDefault(o => o.Day.Id == _pickedDayId)
+                          ?? DayOptions.FirstOrDefault(o => o.IsNext)
+                          ?? DayOptions.FirstOrDefault());
     }
 
+    /// <summary>El usuario toca un día.</summary>
     public void SelectDay(WorkoutDayOption? option)
+    {
+        _pickedDayId = option?.Day.Id;
+        ApplyDaySelection(option);
+    }
+
+    private void ApplyDaySelection(WorkoutDayOption? option)
     {
         foreach (var o in DayOptions)
             o.IsSelected = ReferenceEquals(o, option);
@@ -217,6 +247,9 @@ public partial class WorkoutViewModel : ObservableObject
 
             var session = await _workoutRepository.CreateSessionFromRoutineDayAsync(SelectedRoutineDay.Id);
             await LoadSessionCoreAsync(session.Id);
+            // Al terminar se vuelve a proponer la activa y el día que toca
+            _pickedRoutineId = null;
+            _pickedDayId = null;
         }
         finally { _dbLock.Release(); }
     }
@@ -704,7 +737,7 @@ public partial class WorkoutViewModel : ObservableObject
         FinishNotes = "";
         _previousVolume = null;
         WorkoutStateService.IsWorkoutActive = false;
-        _ = LoadDayOptionsAsync(); // "Hace N días" cambia tras entrenar
+        _dayOptionsLoad = LoadRoutinesAsync(); // cambian la activa, «Toca» y «Hace N días»
     }
 
     internal static string FormatDuration(TimeSpan t)
@@ -720,12 +753,16 @@ public partial class WorkoutDayOption : ObservableObject
     public RoutineDay Day { get; }
     public string LastDoneText { get; }
 
+    /// <summary>Es el día que toca según la semana de la rutina.</summary>
+    public bool IsNext { get; }
+
     [ObservableProperty] private bool _isSelected;
 
-    public WorkoutDayOption(RoutineDay day, string lastDoneText)
+    public WorkoutDayOption(RoutineDay day, string lastDoneText, bool isNext = false)
     {
         Day = day;
         LastDoneText = lastDoneText;
+        IsNext = isNext;
     }
 
     public string Name => Day.Name;

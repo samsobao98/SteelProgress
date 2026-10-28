@@ -107,7 +107,14 @@
                                         <TapGestureRecognizer Tapped="OnDayTapped" />
                                     </Border.GestureRecognizers>
                                     <VerticalStackLayout Spacing="2">
-                                        <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                            <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                            <!-- El día que toca según la semana -->
+                                            <Border Grid.Column="1" Background="{StaticResource SpSteelBrush}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="7,2"
+                                                    VerticalOptions="Center" IsVisible="{Binding IsNext}">
+                                                <Label Text="Toca" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpOnAccent}" />
+                                            </Border>
+                                        </Grid>
                                         <Label Text="{Binding LastDoneText}" Style="{StaticResource SpSecondary}" FontSize="12" />
                                     </VerticalStackLayout>
                                 </Border>

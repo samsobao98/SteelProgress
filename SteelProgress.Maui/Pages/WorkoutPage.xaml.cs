@@ -108,7 +108,7 @@ public partial class WorkoutPage : ContentPage
                 Content = label
             };
             var tap = new TapGestureRecognizer();
-            tap.Tapped += (_, _) => _vm.SelectedRoutine = captured;
+            tap.Tapped += (_, _) => _vm.PickRoutine(captured);
             chip.GestureRecognizers.Add(tap);
 
             _routineChips.Add((captured, chip, label));

@@ -170,6 +170,14 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
         return sets.Sum(x => x.Weight * x.Reps);
     }
 
+    // Rutina de la última sesión con alguna serie: la «activa» (null = nunca se ha entrenado)
+    public Task<int?> GetLastTrainedRoutineIdAsync() =>
+        _context.WorkoutSessions
+            .Where(ws => ws.Exercises.Any(we => we.Sets.Any()))
+            .OrderByDescending(ws => ws.Date)
+            .Select(ws => (int?)ws.RoutineDay!.RoutineId)
+            .FirstOrDefaultAsync();
+
     // Última vez que se entrenó cada día (solo sesiones con alguna serie)
     public async Task<Dictionary<int, DateTime>> GetLastSessionDatesAsync(IEnumerable<int> routineDayIds)
     {

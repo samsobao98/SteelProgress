@@ -378,7 +378,7 @@ public class WorkoutSessionTests : IDisposable
         }
         var vm = Vm();
         await vm.RefreshAsync();
-        vm.SelectedRoutine = vm.Routines.Single(r => r.Id == routineId);
+        vm.PickRoutine(vm.Routines.Single(r => r.Id == routineId));
         await vm.RefreshAsync();
         Assert.Equal(routineId, vm.SelectedRoutineDay!.RoutineId);
 
@@ -490,6 +490,73 @@ public class WorkoutSessionTests : IDisposable
         Assert.False(vm.TrySetWeight("mucho"));
         vm.DecreaseWeightCommand.Execute(null);
         Assert.Equal(70, vm.Weight);
+    }
+
+    [Fact]
+    public async Task PrepareProposesTheActiveRoutineAndTheDayThatIsNext()
+    {
+        int otherRoutine, nextDay;
+        using (var db = Db())
+        {
+            // «A Full body» va antes por nombre, pero la última entrenada es «Mi rutina»
+            var full = AddDay(db, 1, (_benchId, 3, 5, null));
+            otherRoutine = db.RoutineDays.Single(d => d.Id == full).RoutineId;
+            db.Routines.Single(r => r.Id == otherRoutine).Name = "A Full body";
+            var mine = db.RoutineDays.Single(d => d.Id == _dayId);
+            nextDay = AddDayTo(db, mine.RoutineId, "Pierna A", 2);
+            db.SaveChanges();
+        }
+        await SeedFinishedSessionAsync(_dayId, DateTime.Now.AddHours(-3), (60, 8));
+
+        var vm = Vm();
+        await vm.RefreshAsync();
+
+        Assert.Equal("Mi rutina", vm.SelectedRoutine!.Name);
+        Assert.Equal(nextDay, vm.SelectedRoutineDay!.Id);
+        Assert.True(vm.DayOptions.Single(o => o.Day.Id == nextDay).IsNext);
+
+        // Lo elegido a mano se respeta al volver a la pestaña
+        vm.PickRoutine(vm.Routines.Single(r => r.Id == otherRoutine));
+        await vm.RefreshAsync();
+        Assert.Equal("A Full body", vm.SelectedRoutine!.Name);
+
+        vm.PickRoutine(vm.Routines.Single(r => r.Name == "Mi rutina"));
+        await vm.RefreshAsync();
+        vm.SelectDay(vm.DayOptions.Single(o => o.Day.Id == _dayId));
+        await vm.RefreshAsync();
+        Assert.Equal(_dayId, vm.SelectedRoutineDay!.Id);
+    }
+
+    [Fact]
+    public async Task AfterAWorkoutItProposesTheNextDay()
+    {
+        int nextDay;
+        using (var db = Db())
+        {
+            var mine = db.RoutineDays.Single(d => d.Id == _dayId);
+            nextDay = AddDayTo(db, mine.RoutineId, "Pierna A", 2);
+        }
+        var vm = Vm();
+        await vm.RefreshAsync();
+        Assert.Equal(_dayId, vm.SelectedRoutineDay!.Id); // nunca entrenada: el primero
+
+        _clock.Now = FakeClock.At(DateTime.Now);
+        await vm.StartWorkoutCommand.ExecuteAsync(null);
+        await DoSetAsync(vm, 60, 8);
+        await vm.FinishCommand.ExecuteAsync(null);
+        await vm.SaveWorkoutCommand.ExecuteAsync(null);
+        await vm.RefreshAsync();
+
+        Assert.Equal(nextDay, vm.SelectedRoutineDay!.Id);
+    }
+
+    private static int AddDayTo(AppDbContext db, int routineId, string name, int order)
+    {
+        var day = new RoutineDay { RoutineId = routineId, Name = name, Order = order };
+        day.Exercises.Add(new RoutineDayExercise { ExerciseId = db.Exercises.First().Id, Order = 1, TargetSets = 1 });
+        db.RoutineDays.Add(day);
+        db.SaveChanges();
+        return day.Id;
     }
 
     [Fact]
