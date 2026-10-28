@@ -300,7 +300,7 @@ public partial class ProgressViewModel : ObservableObject
                     : _log.Sets.Where(s => s.SessionId == previous.Id && s.ExerciseId == g.Key).ToList();
                 var record = _records.FirstOrDefault(r => r.SessionId == session.Id && r.ExerciseId == g.Key);
                 return new SessionExerciseDetail(g.Key, sets[0].ExerciseName,
-                    string.Join("   ", sets.Select(s => WorkoutExerciseState.FormatSet(s.Weight, s.Reps))),
+                    string.Join("   ", sets.Select(s => WorkoutExerciseState.FormatSet(s.Weight, s.Reps).Replace(' ', (char)0xA0))), // la línea solo se corta entre series
                     ComparisonText(sets, before),
                     record is null ? "" : RecordItem.KindText(record.Kind));
             })

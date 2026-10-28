@@ -320,7 +320,7 @@ public class ProgressStatsTests : IDisposable
         Assert.True(vm.IsHistory);
         var detail = vm.SessionDetail!;
         var ex = Assert.Single(detail.Exercises);
-        Assert.Equal("62,5 kg × 6   60 kg × 9", ex.SetsText);
+        Assert.Equal("62,5 kg × 6   60 kg × 9", ex.SetsText.Replace((char)0xA0, ' '));
         Assert.Equal("+2,5 kg respecto a la anterior", ex.ComparisonText);
         Assert.Equal("★ Récord de peso", ex.RecordText);
     }

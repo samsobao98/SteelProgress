@@ -249,7 +249,7 @@
                                     <Label Text="1RM estimado" Style="{StaticResource StatCaption}" />
                                 </HorizontalStackLayout>
                             </HorizontalStackLayout>
-                            <lvc:CartesianChart HeightRequest="220" Margin="0,6,0,0" Series="{Binding Series}" XAxes="{Binding XAxes}"
+                            <lvc:CartesianChart HeightRequest="220" Margin="0,6,0,0" BackgroundColor="Transparent" Series="{Binding Series}" XAxes="{Binding XAxes}"
                                                 YAxes="{Binding YAxes}" TooltipPosition="Hidden" LegendPosition="Hidden" />
                             <Label Text="El 1RM estimado (fórmula de Epley) es orientativo: los récords se cuentan por peso y repeticiones reales."
                                    Style="{StaticResource StatCaption}" FontSize="11" Margin="0,6,0,0" />

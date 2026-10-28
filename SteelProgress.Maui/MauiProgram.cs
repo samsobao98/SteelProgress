@@ -1,9 +1,11 @@
 using CommunityToolkit.Maui;
+using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Maui;
 using MauiIcons.Material;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using SteelProgress.Core.Services;
 using SteelProgress.Core.Sharing;
 using SteelProgress.Domain.Services;
@@ -23,7 +25,9 @@ public static class MauiProgram
             .UseMauiApp<App>()
             // Mantener pulsado (TouchBehavior) en la lista de rutinas
             .UseMauiCommunityToolkit()
-            .UseLiveCharts()
+            // LiveCharts dibuja sobre un lienzo de SkiaSharp: sin esto la gráfica de Progreso no tiene handler
+            .UseSkiaSharp()
+            .UseLiveCharts(charts => charts.AddDarkTheme())
             .UseMaterialMauiIcons()
             .ConfigureFonts(fonts =>
             {
