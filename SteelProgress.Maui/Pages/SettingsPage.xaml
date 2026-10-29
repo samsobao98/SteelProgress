@@ -4,9 +4,15 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    xmlns:converters="clr-namespace:SteelProgress.Maui.Converters"
     x:DataType="vm:SettingsViewModel"
     BackgroundColor="{StaticResource SpBg}"
     Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <converters:PlateColorConverter x:Key="PlateColor" />
+        <converters:PlateHeightConverter x:Key="PlateHeight" />
+    </ContentPage.Resources>
 
     <!-- Primera pantalla hecha con el sistema de diseño (Resources/Styles/Tokens.xaml) -->
     <Grid>
@@ -113,6 +119,48 @@
                 <Label Text="En vista entrenador todas las opciones están siempre visibles."
                        Style="{StaticResource SpSecondary}" FontSize="12" Margin="4,8,0,0"
                        IsVisible="{Binding IsTrainer}" />
+
+                <!-- ── Tu gimnasio: discos que hay y peso de la barra (para enseñar cómo cargarla) ── -->
+                <Label Text="Tu gimnasio" Style="{StaticResource SpOverline}" Margin="4,24,0,4" />
+                <Label Text="Los discos que hay, para calcular cómo cargar la barra" Style="{StaticResource SpSecondary}" FontSize="12" Margin="4,0,0,10" />
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Plates}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PlateOption">
+                            <Border HeightRequest="40" Padding="10,0" Margin="0,0,8,8"
+                                    BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                                    Stroke="{StaticResource SpText4}" StrokeDashArray="3,3">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsAvailable}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                        <Setter Property="StrokeThickness" Value="1.5" />
+                                        <Setter Property="Opacity" Value="0.6" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=TogglePlateCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                    <BoxView WidthRequest="8" CornerRadius="2" VerticalOptions="Center"
+                                             HeightRequest="{Binding Weight, Converter={StaticResource PlateHeight}, ConverterParameter=22}"
+                                             Color="{Binding Weight, Converter={StaticResource PlateColor}}" />
+                                    <Label Text="{Binding Label}" FontFamily="SpaceGroteskBold" FontSize="14" TextColor="{StaticResource SpText}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+                <Border Style="{StaticResource SpCardStyle}" Padding="16,6" Margin="0,4,0,0">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+                        <Label Text="Peso de la barra" Style="{StaticResource SpBody}" VerticalOptions="Center" />
+                        <Button Grid.Column="1" Text="−" Style="{StaticResource SpSecondaryButton}" Padding="0" WidthRequest="40" HeightRequest="40" MinimumHeightRequest="40"
+                                Command="{Binding ChangeBarWeightCommand}" CommandParameter="-" />
+                        <Label Grid.Column="2" Text="{Binding BarWeightText}" FontFamily="SpaceGroteskBold" FontSize="16" TextColor="{StaticResource SpText}"
+                               MinimumWidthRequest="64" HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                        <Button Grid.Column="3" Text="+" Style="{StaticResource SpSecondaryButton}" Padding="0" WidthRequest="40" HeightRequest="40" MinimumHeightRequest="40"
+                                Command="{Binding ChangeBarWeightCommand}" CommandParameter="+" />
+                    </Grid>
+                </Border>
 
                 <!-- ── Vista entrenador ── -->
                 <Label Text="Vista entrenador" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />

@@ -44,8 +44,8 @@ public class WorkoutSessionTests : IDisposable
         db.SaveChanges();
 
         // Press banca es de la biblioteca: lo comparten los dos perfiles
-        var bench = new Exercise { Name = "Press banca", MuscleGroup = "Pecho", IsSystem = true };
-        var row = new Exercise { Name = "Remo", MuscleGroup = "Espalda", IsSystem = true };
+        var bench = new Exercise { Name = "Press banca", MuscleGroup = "Pecho", IsSystem = true, EquipmentType = EquipmentType.Barbell };
+        var row = new Exercise { Name = "Remo", MuscleGroup = "Espalda", IsSystem = true, EquipmentType = EquipmentType.PlateMachine };
         db.Exercises.AddRange(bench, row);
         db.SaveChanges();
         _benchId = bench.Id;
@@ -109,6 +109,32 @@ public class WorkoutSessionTests : IDisposable
         vm.Weight = weight;
         vm.Reps = reps;
         await vm.CompleteSetCommand.ExecuteAsync(null);
+    }
+
+    [Fact]
+    public async Task ShowsHowToLoadTheBarWithTheGymPlates()
+    {
+        var vm = await StartedVmAsync();
+
+        vm.Weight = 72.5;
+        Assert.True(vm.ShowsPlates);
+        // Sin discos de 1,25 (lo de siempre) no sale justo
+        Assert.Equal("Por lado: 25, en barra de 20 · con tus discos sale 70 kg", vm.LoadText);
+        vm.Weight = 100;
+        Assert.Equal("Por lado: 25 + 15, en barra de 20", vm.LoadText);
+        Assert.Equal(new[] { 25.0, 15 }, vm.Load!.PerSide);
+        vm.Weight = 20;
+        Assert.Equal("Solo la barra", vm.LoadText);
+        vm.Weight = 10;
+        Assert.Equal("Menos que la barra sola (20 kg)", vm.LoadText);
+
+        // Máquina de discos: solo los discos, sin barra
+        vm.NextExerciseCommand.Execute(null);
+        Assert.True(vm.IsPlateMachine);
+        vm.Weight = 110;
+        Assert.Equal("Por lado: 25 + 25 + 5", vm.LoadText);
+        vm.Weight = 0;
+        Assert.False(vm.ShowsPlates);
     }
 
     [Fact]

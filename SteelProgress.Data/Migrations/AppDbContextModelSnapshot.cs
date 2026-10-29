@@ -298,7 +298,13 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("#89B4FA");
 
+                    b.Property<double?>("BarWeight")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GymPlates")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")

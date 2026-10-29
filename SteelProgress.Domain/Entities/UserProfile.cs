@@ -16,6 +16,11 @@ public class UserProfile
     // Solo en vista entrenador: si el perfil también registra sus propios entrenos
     public bool TrainsSelf { get; set; }
 
+    // Tu gimnasio: discos que hay (kg separados por «;», p. ej. «25;20;15;10;5;2.5») y lo que pesa la barra.
+    // Null = lo de siempre (GymSetup.Default). Sirve para enseñar cómo cargar la barra.
+    public string? GymPlates { get; set; }
+    public double? BarWeight { get; set; }
+
     public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
     public ICollection<Routine> Routines { get; set; } = new List<Routine>();
     public ICollection<WorkoutSession> WorkoutSessions { get; set; } = new List<WorkoutSession>();

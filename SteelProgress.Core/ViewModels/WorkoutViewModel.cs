@@ -215,7 +215,8 @@ public partial class WorkoutViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PositionText), nameof(PrescriptionText), nameof(PrescriptionNotes),
-        nameof(HasPrescription), nameof(HasPrescriptionNotes), nameof(CurrentSetLabel))]
+        nameof(HasPrescription), nameof(HasPrescriptionNotes), nameof(CurrentSetLabel),
+        nameof(Load), nameof(ShowsPlates), nameof(LoadText), nameof(IsPlateMachine))]
     private WorkoutExerciseState? _currentExercise;
 
     [ObservableProperty] private string _elapsedText = "0:00";
@@ -391,12 +392,46 @@ public partial class WorkoutViewModel : ObservableObject
     // ── Serie actual ──────────────────────────────────────────────────────
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(WeightText))]
+    [NotifyPropertyChangedFor(nameof(WeightText), nameof(Load), nameof(ShowsPlates), nameof(LoadText))]
     private double _weight;
 
     [ObservableProperty] private int _reps;
 
     public string WeightText => WorkoutExerciseState.FormatKg(Weight);
+
+    // ── Discos: cómo cargar la barra o la máquina de discos con los de «Tu gimnasio» ──
+
+    private GymSetup Gym => _viewOptions?.Current.Gym ?? GymSetup.Default;
+    private EquipmentType? CurrentEquipment => CurrentExercise?.Exercise?.EquipmentType;
+    public bool IsPlateMachine => CurrentEquipment == EquipmentType.PlateMachine;
+
+    /// <summary>
+    /// Discos por lado para el peso actual; null si el ejercicio no se carga con discos.
+    /// En la máquina de discos se cuentan solo los discos (aún no se guarda lo que pesa el carro).
+    /// </summary>
+    public PlateLoad? Load => CurrentEquipment switch
+    {
+        EquipmentType.Barbell => PlateLoading.For(Weight, Gym.BarWeight, Gym.Plates),
+        EquipmentType.PlateMachine when Weight > 0 => PlateLoading.For(Weight, 0, Gym.Plates),
+        _ => null
+    };
+
+    public bool ShowsPlates => Load is not null;
+
+    /// <summary>«Por lado: 25 + 1,25, en barra de 20»; si no sale justo, cuánto sale con tus discos.</summary>
+    public string LoadText
+    {
+        get
+        {
+            if (Load is not { } load) return "";
+            var bar = WorkoutExerciseState.FormatKg(load.Base);
+            if (load.BelowBase) return $"Menos que la barra sola ({bar} kg)";
+            if (load.PerSide.Count == 0) return "Solo la barra";
+            var text = $"Por lado: {string.Join(" + ", load.PerSide.Select(WorkoutExerciseState.FormatKg))}"
+                + (IsPlateMachine ? "" : $", en barra de {bar}");
+            return load.IsExact ? text : $"{text} · con tus discos sale {WorkoutExerciseState.FormatKg(load.Achieved)} kg";
+        }
+    }
 
     public string CurrentSetLabel
     {

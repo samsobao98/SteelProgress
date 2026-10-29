@@ -10,7 +10,13 @@ public sealed record ViewOptions(ProfileViewMode Mode, SimpleViewBlocks Blocks, 
     public static ViewOptions Default { get; } = new(ProfileViewMode.Simple, SimpleViewBlocks.None, false);
 
     public static ViewOptions For(UserProfile profile) =>
-        new(profile.ViewMode, profile.SimpleViewBlocks, profile.TrainsSelf);
+        new(profile.ViewMode, profile.SimpleViewBlocks, profile.TrainsSelf)
+        {
+            Gym = GymSetup.From(profile.GymPlates, profile.BarWeight)
+        };
+
+    /// <summary>Discos y barra del gimnasio del perfil.</summary>
+    public GymSetup Gym { get; init; } = GymSetup.Default;
 
     public bool IsTrainer => Mode == ProfileViewMode.Trainer;
 

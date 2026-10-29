@@ -32,6 +32,32 @@ public partial class SettingsViewModel : ObservableObject
 
     public bool IsSimple => !IsTrainer;
 
+    // ── Tu gimnasio: discos que hay y peso de la barra ──
+
+    public IReadOnlyList<PlateOption> Plates { get; } = GymSetup.AllPlates.Select(p => new PlateOption(p, false)).ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BarWeightText))]
+    private double _barWeight = GymSetup.DefaultBarWeight;
+
+    public string BarWeightText => $"{WorkoutExerciseState.FormatKg(BarWeight)} kg";
+
+    /// <summary>Marca o quita un disco. Siempre queda al menos uno.</summary>
+    [RelayCommand]
+    private void TogglePlate(PlateOption plate)
+    {
+        if (plate.IsAvailable && Plates.Count(p => p.IsAvailable) == 1) return;
+        plate.IsAvailable = !plate.IsAvailable;
+        _ = SaveAsync();
+    }
+
+    /// <summary>−/+ en el peso de la barra, de 2,5 en 2,5 (entre 0 y 50 kg).</summary>
+    [RelayCommand]
+    private void ChangeBarWeight(string step) =>
+        BarWeight = Math.Clamp(BarWeight + (step == "-" ? -2.5 : 2.5), 0, 50);
+
+    partial void OnBarWeightChanged(double value) => _ = SaveAsync();
+
     public string ModeDescription => IsTrainer
         ? "Todas las opciones de edición, notas en cada serie, material e instrucciones de los ejercicios, ficha de clientes y envío de rutinas."
         : "Solo lo necesario para entrenar y editar rutinas de forma sencilla. Los datos que tenga una rutina se ven siempre.";
@@ -57,6 +83,10 @@ public partial class SettingsViewModel : ObservableObject
         ShowRepRanges = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.RepRanges);
         ShowDetailedNotes = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.DetailedNotes);
         TrainsSelf = profile.TrainsSelf;
+        var gym = GymSetup.From(profile.GymPlates, profile.BarWeight);
+        foreach (var plate in Plates)
+            plate.IsAvailable = gym.Plates.Contains(plate.Weight);
+        BarWeight = gym.BarWeight;
         _loading = false;
 
         _viewOptions.Apply(profile);
@@ -97,6 +127,8 @@ public partial class SettingsViewModel : ObservableObject
             profile.ViewMode = IsTrainer ? ProfileViewMode.Trainer : ProfileViewMode.Simple;
             profile.SimpleViewBlocks = CurrentBlocks;
             profile.TrainsSelf = TrainsSelf;
+            profile.GymPlates = GymSetup.Format(Plates.Where(p => p.IsAvailable).Select(p => p.Weight));
+            profile.BarWeight = BarWeight;
             await _dbContext.SaveChangesAsync();
 
             _viewOptions.Apply(profile);

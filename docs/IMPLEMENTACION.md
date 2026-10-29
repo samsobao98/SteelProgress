@@ -291,7 +291,7 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 
 1. **Tipo de material obligatorio** — hecho, pendiente de probar en el móvil.
 2. Colores y tipografía del estilo nuevo en los tokens.
-3. «Tu gimnasio» (discos y peso de la barra) y cálculo de cómo cargar la barra.
+3. **«Tu gimnasio» y la barra cargada en Entreno** — hecho, pendiente de probar en el móvil.
 4. Pantallas una a una.
 
 #### 1. Tipo de material
@@ -310,6 +310,22 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 2. «+»: sin elegir «Con qué se hace», «Añadir» avisa y no guarda. Elegir «Otro» → sale «¿Cuál?»; guardar con «Gomas»: la fila dice «Gomas».
 3. Editar un ejercicio propio antiguo: viene con el tipo deducido marcado.
 4. Revisar que las máquinas de la biblioteca (prensa, curl femoral…) tienen el tipo que corresponde a tu gimnasio.
+
+#### 3. «Tu gimnasio» y la barra cargada
+
+**Qué hace**
+* **Ajustes → Tu gimnasio**: los discos que hay (25, 20, 15, 10, 5, 2,5 y 1,25, cada uno con su color; tocar uno lo quita o lo pone, siempre queda al menos uno) y el **peso de la barra** con − / + de 2,5 en 2,5. Por defecto, todos menos el de 1,25 y barra de 20. Es de cada perfil (`UserProfile.GymPlates` y `BarWeight`, migración `AddProfileGym`).
+* **Entreno**, en ejercicios de **barra** o **máquina de discos**: encima del peso se dibuja la barra con los discos de cada lado (colores de siempre: rojo 25, azul 20, amarillo 15, verde 10, blanco 5) y debajo «Por lado: 25 + 1,25, en barra de 20». Cambia al tocar − / + o al escribir el peso.
+* Si con tus discos no sale justo, dice cuánto sale: «Por lado: 25, en barra de 20 · con tus discos sale 70 kg». Por debajo de la barra: «Menos que la barra sola (20 kg)».
+* El cálculo (`PlateLoading`, Core) usa los menos discos posibles y, a igualdad, los más pesados dentro; encuentra combinaciones que un reparto «del más grande al más pequeño» no vería (con solo discos de 20 y 15, 30 por lado son 15 + 15).
+* **Máquina de discos**: cuenta solo los discos, porque aún no se guarda lo que pesa el carro de cada máquina (siguiente paso posible: un campo por ejercicio).
+
+**Probar**
+1. Ajustes → Tu gimnasio: quitar el 15 y añadir el 1,25; bajar la barra a 15 kg. Salir y volver: se mantiene. Otro perfil sigue con lo de siempre.
+2. Entreno con un ejercicio de barra (press banca): la barra dibujada y «Por lado» cambian al tocar − / +. Probar 72,5 con y sin el disco de 1,25.
+3. Un ejercicio de máquina de discos (prensa): el carro en el centro y los discos sin barra.
+4. Un ejercicio de mancuernas o polea: no sale la barra.
+5. Si cambias los discos en Ajustes con un entreno abierto, la barra se recalcula al tocar el peso.
 
 ---
 

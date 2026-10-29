@@ -111,4 +111,36 @@ public class SettingsViewModelTests : IDisposable
         using var check = CreateContext();
         Assert.Equal(SimpleViewBlocks.All, check.UserProfiles.Single(p => p.Id == 1).SimpleViewBlocks);
     }
+
+    [Fact]
+    public async Task GymPlatesAndBarAreSavedPerProfile()
+    {
+        var options = new ViewOptionsService();
+        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        await vm.LoadAsync();
+
+        // Por defecto: todos menos el de 1,25, y barra de 20
+        Assert.Equal(new[] { 25, 20, 15, 10, 5, 2.5 }, vm.Plates.Where(p => p.IsAvailable).Select(p => p.Weight));
+        Assert.Equal("20 kg", vm.BarWeightText);
+
+        vm.TogglePlateCommand.Execute(vm.Plates.Single(p => p.Weight == 1.25));
+        vm.TogglePlateCommand.Execute(vm.Plates.Single(p => p.Weight == 15));
+        vm.ChangeBarWeightCommand.Execute("-");
+        await vm.SaveAsync();
+
+        Assert.Equal("17,5 kg", vm.BarWeightText);
+        Assert.Equal(new[] { 25, 20, 10, 5, 2.5, 1.25 }, options.Current.Gym.Plates);
+        Assert.Equal(17.5, options.Current.Gym.BarWeight);
+
+        using (var check = CreateContext())
+        {
+            Assert.Equal(("25;20;10;5;2.5;1.25", (double?)17.5), (check.UserProfiles.Single(p => p.Id == 1).GymPlates, check.UserProfiles.Single(p => p.Id == 1).BarWeight));
+            Assert.Null(check.UserProfiles.Single(p => p.Id == 2).GymPlates);
+        }
+
+        // Siempre queda al menos un disco
+        foreach (var plate in vm.Plates.Where(p => p.IsAvailable).ToList())
+            vm.TogglePlateCommand.Execute(plate);
+        Assert.Single(vm.Plates, p => p.IsAvailable);
+    }
 }
