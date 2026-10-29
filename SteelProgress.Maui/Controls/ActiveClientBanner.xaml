@@ -14,12 +14,12 @@
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
             <Border x:Name="Avatar" WidthRequest="28" HeightRequest="28" StrokeThickness="0" StrokeShape="RoundRectangle 14"
                     BackgroundColor="{StaticResource SpIntensity}" VerticalOptions="Center">
-                <Label x:Name="InitialLabel" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpOnAccent}"
+                <Label x:Name="InitialLabel" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpOnAccent}"
                        HorizontalOptions="Center" VerticalOptions="Center" />
             </Border>
             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
                 <Label Text="Trabajando con" FontSize="11" TextColor="{StaticResource SpText3}" />
-                <Label x:Name="NameLabel" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpText}" />
+                <Label x:Name="NameLabel" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpText}" />
             </VerticalStackLayout>
             <Border x:Name="ExitButton" Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 10"
                     BackgroundColor="{StaticResource SpCardHi}" Padding="12,6" VerticalOptions="Center">

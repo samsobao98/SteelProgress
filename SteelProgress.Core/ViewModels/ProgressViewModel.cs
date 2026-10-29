@@ -192,9 +192,9 @@ public partial class ProgressViewModel : ObservableObject
         }
 
         // Colores del sistema de diseño (Tokens.xaml): acero para el peso, lila para el 1RM estimado
-        var weight = SKColor.Parse("#89B4FA");
-        var e1rm = SKColor.Parse("#CBA6F7");
-        var card = SKColor.Parse("#252536");
+        var weight = SKColor.Parse("#9DB4E6");
+        var e1rm = SKColor.Parse("#C9B9F2");
+        var card = SKColor.Parse("#1B1E28");
 
         Series = new ISeries[]
         {
@@ -222,7 +222,7 @@ public partial class ProgressViewModel : ObservableObject
             }
         };
 
-        var labels = new SolidColorPaint(SKColor.Parse("#6C7086")) { SKTypeface = SKTypeface.FromFamilyName("sans-serif") };
+        var labels = new SolidColorPaint(SKColor.Parse("#8A91A8")) { SKTypeface = SKTypeface.FromFamilyName("sans-serif") };
         XAxes = new[]
         {
             new Axis
@@ -239,7 +239,7 @@ public partial class ProgressViewModel : ObservableObject
             {
                 LabelsPaint = labels,
                 TextSize = 11,
-                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#34354A")) { StrokeThickness = 1 }
+                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#2A2E3C")) { StrokeThickness = 1 }
             }
         };
     }

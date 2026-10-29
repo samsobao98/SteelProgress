@@ -133,7 +133,7 @@ public partial class ExerciseDetailViewModel : ObservableObject
     private static (ISeries[], Axis[], Axis[]) BuildChart(IReadOnlyList<ExercisePoint> points)
     {
         // Colores del sistema de diseño (Tokens.xaml): lila del 1RM estimado y degradado hacia el fondo
-        var line = SKColor.Parse("#CBA6F7");
+        var line = SKColor.Parse("#C9B9F2");
         var series = new ISeries[]
         {
             new LineSeries<ObservablePoint>
@@ -148,9 +148,9 @@ public partial class ExerciseDetailViewModel : ObservableObject
                 Fill = new LinearGradientPaint(new[] { line.WithAlpha(90), line.WithAlpha(0) }, new SKPoint(0.5f, 0), new SKPoint(0.5f, 1))
             }
         };
-        var labels = new SolidColorPaint(SKColor.Parse("#6C7086")) { SKTypeface = SKTypeface.FromFamilyName("sans-serif") };
+        var labels = new SolidColorPaint(SKColor.Parse("#8A91A8")) { SKTypeface = SKTypeface.FromFamilyName("sans-serif") };
         var x = new[] { new Axis { Labeler = v => new DateTime((long)Math.Max(0, v)).ToString("dd/MM"), LabelsPaint = labels, TextSize = 10, SeparatorsPaint = null } };
-        var y = new[] { new Axis { LabelsPaint = labels, TextSize = 10, SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#34354A")) { StrokeThickness = 1 } } };
+        var y = new[] { new Axis { LabelsPaint = labels, TextSize = 10, SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#2A2E3C")) { StrokeThickness = 1 } } };
         return (series, x, y);
     }
 }

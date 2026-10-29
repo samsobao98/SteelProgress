@@ -23,7 +23,7 @@
             <Setter Property="Padding" Value="0,17" />
         </Style>
         <Style x:Key="BigActionLabel" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontFamily" Value="SpaceGroteskMedium" />
             <Setter Property="FontSize" Value="16" />
             <Setter Property="TextColor" Value="{StaticResource SpOnAccent}" />
             <Setter Property="HorizontalOptions" Value="Center" />
@@ -50,7 +50,7 @@
             <Setter Property="Padding" Value="18,12" />
         </Style>
         <Style x:Key="GhostLabel" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontFamily" Value="SpaceGroteskMedium" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="TextColor" Value="{StaticResource SpText}" />
             <Setter Property="HorizontalOptions" Value="Center" />
@@ -98,8 +98,8 @@
                                         BackgroundColor="{StaticResource SpCard}" StrokeThickness="0">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="#2E3050" />
-                                            <Setter Property="Stroke" Value="#B4BEFE" />
+                                            <Setter Property="BackgroundColor" Value="#262B40" />
+                                            <Setter Property="Stroke" Value="#B3B7EC" />
                                             <Setter Property="StrokeThickness" Value="2" />
                                         </DataTrigger>
                                     </Border.Triggers>
@@ -108,11 +108,11 @@
                                     </Border.GestureRecognizers>
                                     <VerticalStackLayout Spacing="2">
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                            <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                            <Label Text="{Binding Name}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                             <!-- El día que toca según la semana -->
                                             <Border Grid.Column="1" Background="{StaticResource SpSteelBrush}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="7,2"
                                                     VerticalOptions="Center" IsVisible="{Binding IsNext}">
-                                                <Label Text="Toca" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpOnAccent}" />
+                                                <Label Text="Toca" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="{StaticResource SpOnAccent}" />
                                             </Border>
                                         </Grid>
                                         <Label Text="{Binding LastDoneText}" Style="{StaticResource SpSecondary}" FontSize="12" />
@@ -159,7 +159,7 @@
         <Grid IsVisible="{Binding IsSessionActive}" RowDefinitions="Auto,*,Auto">
             <!-- Orb decorativo -->
             <AbsoluteLayout Grid.RowSpan="3" InputTransparent="True" IsClippedToBounds="True">
-                <Ellipse AbsoluteLayout.LayoutBounds="-140,120,300,300" Fill="#CBA6F7" Opacity="0.05" />
+                <Ellipse AbsoluteLayout.LayoutBounds="-140,120,300,300" Fill="#C9B9F2" Opacity="0.05" />
             </AbsoluteLayout>
 
             <!-- Cabecera: posición, nombre, cronómetro y Terminar -->
@@ -172,11 +172,11 @@
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="End">
                         <Label Text="{Binding ElapsedText, StringFormat='● {0}'}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpOk}" HorizontalOptions="End" />
-                        <Border BackgroundColor="{StaticResource SpCard}" Stroke="#34354A" StrokeThickness="1" StrokeShape="RoundRectangle 10" Padding="12,6">
+                        <Border BackgroundColor="{StaticResource SpCard}" Stroke="#2A2E3C" StrokeThickness="1" StrokeShape="RoundRectangle 10" Padding="12,6">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnFinishTapped" />
                             </Border.GestureRecognizers>
-                            <Label Text="Terminar" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpText2}" />
+                            <Label Text="Terminar" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText2}" />
                         </Border>
                     </VerticalStackLayout>
                 </Grid>
@@ -210,22 +210,22 @@
                     <!-- Objetivo, intensidad y vídeo -->
                     <FlexLayout Wrap="Wrap">
                         <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" IsVisible="{Binding CurrentExercise.TargetText, Converter={StaticResource NotEmpty}}">
-                            <Label Text="{Binding CurrentExercise.TargetText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpText2}" />
+                            <Label Text="{Binding CurrentExercise.TargetText}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText2}" />
                         </Border>
                         <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" BackgroundColor="#26FAB387" IsVisible="{Binding CurrentExercise.IntensityText, Converter={StaticResource NotEmpty}}">
-                            <Label Text="{Binding CurrentExercise.IntensityText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpIntensity}" />
+                            <Label Text="{Binding CurrentExercise.IntensityText}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpIntensity}" />
                         </Border>
                         <!-- Ver el vídeo o la imagen del ejercicio sin salir del entreno -->
                         <Border Style="{StaticResource SpChipStyle}" Padding="10,5" Margin="0,0,6,6" IsVisible="{Binding CurrentExercise.Exercise, Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnShowMediaTapped" />
                             </Border.GestureRecognizers>
-                            <Label Text="▶ Vídeo" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel2}" />
+                            <Label Text="▶ Vídeo" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpSteel2}" />
                         </Border>
                     </FlexLayout>
 
                     <!-- Nota del entrenador o del propio usuario -->
-                    <Border BackgroundColor="#1AF9E2AF" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12,8" Margin="0,2,0,0" IsVisible="{Binding HasPrescriptionNotes}">
+                    <Border BackgroundColor="#1AF0C46A" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12,8" Margin="0,2,0,0" IsVisible="{Binding HasPrescriptionNotes}">
                         <Label Text="{Binding PrescriptionNotes}" FontSize="13" TextColor="{StaticResource SpText2}" />
                     </Border>
 
@@ -244,7 +244,7 @@
                                         </Border>
                                         <Label Grid.Column="1" Text="{Binding Text}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
                                         <Border Grid.Column="2" BackgroundColor="{StaticResource SpRecord}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,3" VerticalOptions="Center" IsVisible="{Binding IsRecord}">
-                                            <Label Text="{Binding RecordText}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
+                                            <Label Text="{Binding RecordText}" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="#2A2210" />
                                         </Border>
                                     </Grid>
                                     <Label Text="{Binding Notes, StringFormat='📝 {0}'}" FontSize="13" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
@@ -259,8 +259,8 @@
                     <Border Margin="0,14,0,0" Padding="16,18" StrokeThickness="0" StrokeShape="RoundRectangle 20">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
-                                <GradientStop Color="#2C2D45" Offset="0" />
-                                <GradientStop Color="#252536" Offset="1" />
+                                <GradientStop Color="#262A37" Offset="0" />
+                                <GradientStop Color="#1B1E28" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                         <VerticalStackLayout Spacing="0">
@@ -398,7 +398,7 @@
                                     </Grid>
                                 </Border>
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                    <Label Text="{Binding NextTitle}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding NextTitle}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                     <Label Text="{Binding NextDetail}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}" />
                                 </VerticalStackLayout>
                             </Grid>
@@ -431,7 +431,7 @@
         <!-- ═════════════ FINALIZAR ═════════════ -->
         <Grid IsVisible="{Binding IsFinishing}" BackgroundColor="{StaticResource SpBg}">
             <AbsoluteLayout InputTransparent="True" IsClippedToBounds="True">
-                <Ellipse AbsoluteLayout.LayoutBounds="0.5,0,320,320" AbsoluteLayout.LayoutFlags="PositionProportional" Fill="#B4BEFE" Opacity="0.08" />
+                <Ellipse AbsoluteLayout.LayoutBounds="0.5,0,320,320" AbsoluteLayout.LayoutFlags="PositionProportional" Fill="#B3B7EC" Opacity="0.08" />
             </AbsoluteLayout>
             <ScrollView>
                 <VerticalStackLayout Padding="20,30,20,24" Spacing="0">
@@ -467,7 +467,7 @@
                     <Border Style="{StaticResource SpCardStyle}" Margin="0,12,0,0" Padding="14,12" IsVisible="{Binding HasRecords}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                             <Border BackgroundColor="{StaticResource SpRecord}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4" VerticalOptions="Center">
-                                <Label Text="{Binding RecordBadgeText}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="#2A2210" />
+                                <Label Text="{Binding RecordBadgeText}" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="#2A2210" />
                             </Border>
                             <Label Grid.Column="1" Text="{Binding RecordsText}" Style="{StaticResource SpSecondary}" VerticalOptions="Center" />
                         </Grid>
@@ -508,7 +508,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding DiscardWorkoutCommand}" />
                             </Border.GestureRecognizers>
-                            <Label Text="Descartar" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
+                            <Label Text="Descartar" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
                         </Border>
                     </Grid>
                 </VerticalStackLayout>

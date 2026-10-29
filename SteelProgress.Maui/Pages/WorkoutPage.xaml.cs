@@ -141,7 +141,7 @@ public partial class WorkoutPage : ContentPage
         foreach (var routine in _vm.Routines)
         {
             var captured = routine;
-            var label = new Label { Text = routine.Name, FontFamily = "OpenSansSemibold", FontSize = 14, VerticalOptions = LayoutOptions.Center };
+            var label = new Label { Text = routine.Name, FontFamily = "SpaceGroteskMedium", FontSize = 14, VerticalOptions = LayoutOptions.Center };
             var chip = new Border
             {
                 Padding = new Thickness(16, 9),
@@ -166,8 +166,8 @@ public partial class WorkoutPage : ContentPage
             var selected = routine.Id == _vm.SelectedRoutine?.Id;
             chip.Background = selected && Application.Current?.Resources.TryGetValue("SpSteelBrush", out var steel) == true
                 ? (Brush)steel
-                : new SolidColorBrush(Color.FromArgb(selected ? "#B4BEFE" : "#252536"));
-            label.TextColor = Color.FromArgb(selected ? "#1B1B2B" : "#A6ADC8");
+                : new SolidColorBrush(Color.FromArgb(selected ? "#B3B7EC" : "#1B1E28"));
+            label.TextColor = Color.FromArgb(selected ? "#14161E" : "#A0A7BD");
         }
     }
 
@@ -314,7 +314,7 @@ public partial class WorkoutPage : ContentPage
         for (var i = 0; i < _feelingButtons.Count; i++)
         {
             var selected = _vm.Feeling == i + 1;
-            _feelingButtons[i].BackgroundColor = selected ? Color.FromArgb("#2EB4BEFE") : Colors.Transparent;
+            _feelingButtons[i].BackgroundColor = selected ? Color.FromArgb("#2EB3B7EC") : Colors.Transparent;
             _feelingButtons[i].Opacity = _vm.Feeling is null || selected ? 1 : 0.45;
         }
     }

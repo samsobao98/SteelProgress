@@ -107,8 +107,8 @@ public partial class ExercisePage : ContentPage
         foreach (var (value, chip, label) in _groupChips)
         {
             var selected = value == _vm.SelectedGroupFilter;
-            chip.BackgroundColor = selected ? Color.FromArgb("#CBA6F7") : Color.FromArgb("#252536");
-            label.TextColor = selected ? Color.FromArgb("#1E1E2E") : Color.FromArgb("#BAC2DE");
+            chip.BackgroundColor = selected ? Color.FromArgb("#C9B9F2") : Color.FromArgb("#1B1E28");
+            label.TextColor = selected ? Color.FromArgb("#14161E") : Color.FromArgb("#C6CBDA");
         }
     }
 
@@ -142,8 +142,8 @@ public partial class ExercisePage : ContentPage
         foreach (var (value, chip, label) in _formChips)
         {
             var selected = value == _vm.MuscleGroup;
-            chip.BackgroundColor = selected ? Color.FromArgb("#CBA6F7") : Color.FromArgb("#252536");
-            label.TextColor = selected ? Color.FromArgb("#1E1E2E") : Color.FromArgb("#BAC2DE");
+            chip.BackgroundColor = selected ? Color.FromArgb("#C9B9F2") : Color.FromArgb("#1B1E28");
+            label.TextColor = selected ? Color.FromArgb("#14161E") : Color.FromArgb("#C6CBDA");
         }
     }
 
@@ -189,10 +189,10 @@ public partial class ExercisePage : ContentPage
         foreach (var (value, chip, label) in _equipmentChips)
         {
             var selected = value == _vm.SelectedEquipment;
-            chip.BackgroundColor = selected ? Color.FromArgb("#2C2D42") : Color.FromArgb("#252536");
-            chip.Stroke = selected ? Color.FromArgb("#CBA6F7") : Colors.Transparent;
+            chip.BackgroundColor = selected ? Color.FromArgb("#262A37") : Color.FromArgb("#1B1E28");
+            chip.Stroke = selected ? Color.FromArgb("#C9B9F2") : Colors.Transparent;
             chip.StrokeThickness = selected ? 2 : 0;
-            label.TextColor = selected ? Color.FromArgb("#CDD6F4") : Color.FromArgb("#BAC2DE");
+            label.TextColor = selected ? Color.FromArgb("#E8EAF2") : Color.FromArgb("#C6CBDA");
             label.FontAttributes = selected ? FontAttributes.Bold : FontAttributes.None;
         }
     }

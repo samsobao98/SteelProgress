@@ -121,22 +121,22 @@ public static class AppDialogs
         Application.Current?.Resources.TryGetValue(key, out var v) == true && v is Color c ? c : Color.FromArgb(fallback);
 
     internal static Brush SteelBrush =>
-        Application.Current?.Resources.TryGetValue("SpSteelBrush", out var b) == true && b is Brush brush ? brush : new SolidColorBrush(Color.FromArgb("#B4BEFE"));
+        Application.Current?.Resources.TryGetValue("SpSteelBrush", out var b) == true && b is Brush brush ? brush : new SolidColorBrush(Color.FromArgb("#B3B7EC"));
 
     internal static Border Button(string text, ButtonKind kind, Action onTap)
     {
         var label = new Label
         {
             Text = text,
-            FontFamily = "OpenSansSemibold",
+            FontFamily = "SpaceGroteskMedium",
             FontSize = 15,
             HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center,
             TextColor = kind switch
             {
-                ButtonKind.Primary => Token("SpOnAccent", "#1B1B2B"),
-                ButtonKind.Danger => Color.FromArgb("#1B1B2B"),
-                _ => Token("SpText", "#CDD6F4")
+                ButtonKind.Primary => Token("SpOnAccent", "#14161E"),
+                ButtonKind.Danger => Color.FromArgb("#14161E"),
+                _ => Token("SpText", "#E8EAF2")
             }
         };
         var button = new Border
@@ -148,8 +148,8 @@ public static class AppDialogs
             Background = kind switch
             {
                 ButtonKind.Primary => SteelBrush,
-                ButtonKind.Danger => new SolidColorBrush(Token("SpDanger", "#F38BA8")),
-                _ => new SolidColorBrush(Token("SpCardHi", "#2C2D42"))
+                ButtonKind.Danger => new SolidColorBrush(Token("SpDanger", "#EF8A8A")),
+                _ => new SolidColorBrush(Token("SpCardHi", "#262A37"))
             }
         };
         SemanticProperties.SetDescription(button, text);
@@ -167,18 +167,18 @@ public static class AppDialogs
     internal static Label Title(string text) => new()
     {
         Text = text,
-        FontFamily = "OpenSansSemibold",
+        FontFamily = "SpaceGroteskMedium",
         FontSize = 18,
-        TextColor = Token("SpText", "#CDD6F4"),
+        TextColor = Token("SpText", "#E8EAF2"),
         LineBreakMode = LineBreakMode.WordWrap
     };
 
     internal static Label Secondary(string text) => new()
     {
         Text = text,
-        FontFamily = "OpenSansRegular",
+        FontFamily = "SpaceGroteskRegular",
         FontSize = 14,
-        TextColor = Token("SpText2", "#A6ADC8"),
+        TextColor = Token("SpText2", "#A0A7BD"),
         LineBreakMode = LineBreakMode.WordWrap
     };
 
@@ -217,7 +217,7 @@ internal sealed class ToastCardView : DialogView<bool?>
         grid.Add(new Label
         {
             Text = message,
-            FontFamily = "OpenSansRegular",
+            FontFamily = "SpaceGroteskRegular",
             FontSize = 14,
             TextColor = text,
             VerticalOptions = LayoutOptions.Center,
@@ -228,9 +228,9 @@ internal sealed class ToastCardView : DialogView<bool?>
             var button = new Label
             {
                 Text = actionText,
-                FontFamily = "OpenSansSemibold",
+                FontFamily = "SpaceGroteskMedium",
                 FontSize = 14,
-                TextColor = AppDialogs.Token("SpSteel2", "#B4BEFE"),
+                TextColor = AppDialogs.Token("SpSteel2", "#B3B7EC"),
                 VerticalOptions = LayoutOptions.Center
             };
             var tap = new TapGestureRecognizer();
@@ -265,7 +265,7 @@ internal sealed class ActionSheetView : DialogView<string?>
         stack.Add(new BoxView
         {
             HeightRequest = 4, WidthRequest = 40, CornerRadius = 2,
-            Color = AppDialogs.Token("SpText4", "#45475A"),
+            Color = AppDialogs.Token("SpText4", "#4A5064"),
             HorizontalOptions = LayoutOptions.Center,
             Margin = new Thickness(0, 0, 0, 14)
         });
@@ -286,7 +286,7 @@ internal sealed class ActionSheetView : DialogView<string?>
 
         Content = new Border
         {
-            BackgroundColor = AppDialogs.Token("SpSheet", "#232334"),
+            BackgroundColor = AppDialogs.Token("SpSheet", "#1E212C"),
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(24, 24, 0, 0) },
             Padding = new Thickness(20, 12, 20, 28),
@@ -300,9 +300,9 @@ internal sealed class ActionSheetView : DialogView<string?>
         var label = new Label
         {
             Text = text,
-            FontFamily = "OpenSansSemibold",
+            FontFamily = "SpaceGroteskMedium",
             FontSize = 16,
-            TextColor = danger ? AppDialogs.Token("SpDanger", "#F38BA8") : AppDialogs.Token("SpText", "#CDD6F4"),
+            TextColor = danger ? AppDialogs.Token("SpDanger", "#EF8A8A") : AppDialogs.Token("SpText", "#E8EAF2"),
             VerticalOptions = LayoutOptions.Center
         };
         var row = new Border
@@ -317,7 +317,7 @@ internal sealed class ActionSheetView : DialogView<string?>
         var tap = new TapGestureRecognizer();
         tap.Tapped += async (_, _) =>
         {
-            row.BackgroundColor = AppDialogs.Token("SpCardHi", "#2C2D42");
+            row.BackgroundColor = AppDialogs.Token("SpCardHi", "#262A37");
             await Task.Delay(70);
             Finish(text);
         };
@@ -357,8 +357,8 @@ internal sealed class ConfirmView : DialogView<bool?>
 
     internal static Border Card(View content) => new()
     {
-        BackgroundColor = AppDialogs.Token("SpSheet", "#232334"),
-        Stroke = new SolidColorBrush(AppDialogs.Token("SpLine", "#34354A")),
+        BackgroundColor = AppDialogs.Token("SpSheet", "#1E212C"),
+        Stroke = new SolidColorBrush(AppDialogs.Token("SpLine", "#2A2E3C")),
         StrokeThickness = 1,
         StrokeShape = new RoundRectangle { CornerRadius = 22 },
         Padding = new Thickness(20),
@@ -389,14 +389,14 @@ internal sealed class PromptView : DialogView<string?>
             Keyboard = keyboard,
             MaxLength = maxLength,
             FontSize = 16,
-            TextColor = AppDialogs.Token("SpText", "#CDD6F4"),
-            PlaceholderColor = AppDialogs.Token("SpText4", "#45475A"),
+            TextColor = AppDialogs.Token("SpText", "#E8EAF2"),
+            PlaceholderColor = AppDialogs.Token("SpText4", "#4A5064"),
             BackgroundColor = Colors.Transparent,
             ReturnType = ReturnType.Done
         };
         stack.Add(new Border
         {
-            BackgroundColor = AppDialogs.Token("SpBg", "#1E1E2E"),
+            BackgroundColor = AppDialogs.Token("SpBg", "#14161E"),
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Padding = new Thickness(12, 2),
@@ -406,9 +406,9 @@ internal sealed class PromptView : DialogView<string?>
 
         var error = new Label
         {
-            FontFamily = "OpenSansRegular",
+            FontFamily = "SpaceGroteskRegular",
             FontSize = 13,
-            TextColor = AppDialogs.Token("SpDanger", "#F38BA8"),
+            TextColor = AppDialogs.Token("SpDanger", "#EF8A8A"),
             IsVisible = false
         };
         stack.Add(error);

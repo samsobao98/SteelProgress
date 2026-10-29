@@ -53,7 +53,7 @@ public partial class App : Application
         if (!hasOrphanRoutines && !hasOrphanSessions && !hasOrphanExercises) return;
 
         // Crea el perfil predeterminado y migra los datos existentes
-        var defaultProfile = new UserProfile { Name = "Mi perfil", AvatarColor = "#89B4FA" };
+        var defaultProfile = new UserProfile { Name = "Mi perfil", AvatarColor = "#9DB4E6" };
         db.UserProfiles.Add(defaultProfile);
         await db.SaveChangesAsync();
 

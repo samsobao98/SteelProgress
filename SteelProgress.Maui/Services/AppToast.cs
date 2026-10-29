@@ -30,19 +30,19 @@ public static class AppToast
             var (background, text) = kind switch
             {
                 ToastKind.Success => ("#1F3327", "#A6E3A1"),
-                ToastKind.Error => ("#3A2030", "#F38BA8"),
-                ToastKind.Record => ("#3A3322", "#F9E2AF"),
-                _ => ("#2C2D42", "#CDD6F4")
+                ToastKind.Error => ("#3A2030", "#EF8A8A"),
+                ToastKind.Record => ("#3A3322", "#F0C46A"),
+                _ => ("#262A37", "#E8EAF2")
             };
 
             var options = new SnackbarOptions
             {
                 BackgroundColor = Color.FromArgb(background),
                 TextColor = Color.FromArgb(text),
-                ActionButtonTextColor = Color.FromArgb("#B4BEFE"),
+                ActionButtonTextColor = Color.FromArgb("#B3B7EC"),
                 CornerRadius = new CornerRadius(14),
-                Font = Microsoft.Maui.Font.OfSize("OpenSansRegular", 14),
-                ActionButtonFont = Microsoft.Maui.Font.OfSize("OpenSansSemibold", 14)
+                Font = Microsoft.Maui.Font.OfSize("SpaceGroteskRegular", 14),
+                ActionButtonFont = Microsoft.Maui.Font.OfSize("SpaceGroteskMedium", 14)
             };
 
             // Los errores se leen con más calma; con acción («Deshacer») también hace falta tiempo

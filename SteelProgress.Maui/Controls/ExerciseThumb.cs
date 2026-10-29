@@ -31,10 +31,10 @@ public class ExerciseThumb : ContentView
     {
         _image = new Image { Aspect = Aspect.AspectFill, IsAnimationPlaying = false };
         _play = new Label { Text = "▶", FontSize = 18, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
-        _badgeText = new Label { FontSize = 9, FontFamily = "OpenSansSemibold" };
+        _badgeText = new Label { FontSize = 9, FontFamily = "SpaceGroteskMedium" };
         _badge = new Border
         {
-            BackgroundColor = Color.FromArgb("#B3161622"),
+            BackgroundColor = Color.FromArgb("#B30F1117"),
             Padding = new Thickness(5, 1),
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = 5 },

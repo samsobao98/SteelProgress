@@ -16,14 +16,14 @@
     <ContentPage.Resources>
         <converters:InvertedBoolConverter x:Key="Not" />
         <Style x:Key="RoundButton" TargetType="Border">
-            <Setter Property="BackgroundColor" Value="#99161622" />
+            <Setter Property="BackgroundColor" Value="#990F1117" />
             <Setter Property="HeightRequest" Value="40" />
             <Setter Property="WidthRequest" Value="40" />
             <Setter Property="StrokeShape" Value="RoundRectangle 20" />
             <Setter Property="StrokeThickness" Value="0" />
         </Style>
         <Style x:Key="MediaChip" TargetType="Border">
-            <Setter Property="BackgroundColor" Value="#99161622" />
+            <Setter Property="BackgroundColor" Value="#990F1117" />
             <Setter Property="Padding" Value="10,4" />
             <Setter Property="StrokeShape" Value="RoundRectangle 10" />
             <Setter Property="StrokeThickness" Value="0" />
@@ -61,7 +61,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding NextMediaCommand}" />
                             </Border.GestureRecognizers>
-                            <Label Text="{Binding IndexText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                            <Label Text="{Binding IndexText}" FontSize="12" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                         </Border>
                         <!-- Empieza sin sonido (en el gimnasio); se puede activar -->
                         <Border Style="{StaticResource MediaChip}" IsVisible="{Binding IsVideo}">
@@ -74,7 +74,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding ToggleSlowMotionCommand}" />
                             </Border.GestureRecognizers>
-                            <Label Text="{Binding SpeedText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                            <Label Text="{Binding SpeedText}" FontSize="12" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                         </Border>
                     </HorizontalStackLayout>
                 </Grid>
@@ -88,7 +88,7 @@
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
                                     <Border Style="{StaticResource SpChipStyle}" Margin="0,0,6,6">
-                                        <Label Text="{Binding .}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText2}" />
+                                        <Label Text="{Binding .}" FontSize="12" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText2}" />
                                     </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>

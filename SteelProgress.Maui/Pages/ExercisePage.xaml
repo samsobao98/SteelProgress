@@ -6,7 +6,7 @@
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
     xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
-    BackgroundColor="#1E1E2E"
+    BackgroundColor="#14161E"
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
@@ -25,7 +25,7 @@
             <Ellipse
                 AbsoluteLayout.LayoutBounds="1, 0, 260, 260"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
-                Fill="#89B4FA"
+                Fill="#9DB4E6"
                 Opacity="0.05" />
         </AbsoluteLayout>
 
@@ -154,7 +154,7 @@
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
+            Shadow="{Shadow Brush='#B3B7EC', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />
             </Border.GestureRecognizers>
@@ -181,7 +181,7 @@
         <!-- ── Bottom sheet formulario ── -->
         <Border
             x:Name="BottomSheet"
-            BackgroundColor="#1E1E2E"
+            BackgroundColor="#14161E"
             StrokeShape="RoundRectangle 24,24,0,0"
             StrokeThickness="0"
             VerticalOptions="End"
@@ -195,7 +195,7 @@
                 <BoxView
                     HeightRequest="4"
                     WidthRequest="40"
-                    BackgroundColor="#45475A"
+                    BackgroundColor="#4A5064"
                     CornerRadius="2"
                     HorizontalOptions="Center" />
 
@@ -205,11 +205,11 @@
                         FontAttributes="Bold"
                         FontSize="20"
                         Text="{Binding OverlayTitle}"
-                        TextColor="#CDD6F4"
+                        TextColor="#E8EAF2"
                         VerticalOptions="Center" />
                     <Border
                         Grid.Column="1"
-                        BackgroundColor="#313244"
+                        BackgroundColor="#2A2E3C"
                         HeightRequest="36"
                         WidthRequest="36"
                         StrokeShape="RoundRectangle 18"
@@ -219,7 +219,7 @@
                         </Border.GestureRecognizers>
                         <mi:MauiIcon
                             Icon="{mi:Material Close}"
-                            IconColor="#6C7086"
+                            IconColor="#8A91A8"
                             IconSize="18"
                             HorizontalOptions="Center"
                             VerticalOptions="Center" />
@@ -232,7 +232,7 @@
                     Padding="16,12"
                     IsVisible="{Binding MediaEnabled}">
                     <VerticalStackLayout Spacing="10">
-                        <Label FontSize="11" Text="VÍDEOS E IMÁGENES" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Label FontSize="11" Text="VÍDEOS E IMÁGENES" TextColor="#8A91A8" CharacterSpacing="1" />
                         <CollectionView ItemsSource="{Binding Media}" HeightRequest="84" SelectionMode="None">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
@@ -259,7 +259,7 @@
                                             </Grid>
                                         </Border>
                                         <!-- Quitar -->
-                                        <Border WidthRequest="24" HeightRequest="24" BackgroundColor="#CC161622"
+                                        <Border WidthRequest="24" HeightRequest="24" BackgroundColor="#CC0F1117"
                                                 StrokeShape="RoundRectangle 12" StrokeThickness="0"
                                                 HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,4,0">
                                             <Border.GestureRecognizers>
@@ -283,16 +283,16 @@
 
                 <!-- Campo: Nombre -->
                 <Border
-                    BackgroundColor="#252536"
+                    BackgroundColor="#1B1E28"
                     Padding="16,12"
                     StrokeShape="RoundRectangle 14"
                     StrokeThickness="0">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOMBRE" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Label FontSize="11" Text="NOMBRE" TextColor="#8A91A8" CharacterSpacing="1" />
                         <Entry
                             Text="{Binding Name}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
+                            TextColor="#E8EAF2"
+                            PlaceholderColor="#4A5064"
                             Placeholder="ej. Press banca"
                             BackgroundColor="Transparent"
                             FontSize="15" />
@@ -317,17 +317,17 @@
                     </Label>
                     <Grid x:Name="EquipmentChips" ColumnDefinitions="*,*" ColumnSpacing="8" RowSpacing="8" />
                     <Border
-                        BackgroundColor="#252536"
+                        BackgroundColor="#1B1E28"
                         Padding="16,12"
                         StrokeShape="RoundRectangle 14"
                         StrokeThickness="0"
                         IsVisible="{Binding IsOtherEquipment}">
                         <VerticalStackLayout Spacing="4">
-                            <Label FontSize="11" Text="¿CUÁL? (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                            <Label FontSize="11" Text="¿CUÁL? (OPCIONAL)" TextColor="#8A91A8" CharacterSpacing="1" />
                             <Entry
                                 Text="{Binding Equipment}"
-                                TextColor="#CDD6F4"
-                                PlaceholderColor="#45475A"
+                                TextColor="#E8EAF2"
+                                PlaceholderColor="#4A5064"
                                 Placeholder="ej. Gomas, TRX, balón medicinal"
                                 BackgroundColor="Transparent"
                                 FontSize="15" />
@@ -337,16 +337,16 @@
 
                 <!-- Campo: Notas -->
                 <Border
-                    BackgroundColor="#252536"
+                    BackgroundColor="#1B1E28"
                     Padding="16,12"
                     StrokeShape="RoundRectangle 14"
                     StrokeThickness="0">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="NOTAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Label FontSize="11" Text="NOTAS (OPCIONAL)" TextColor="#8A91A8" CharacterSpacing="1" />
                         <Entry
                             Text="{Binding Notes}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
+                            TextColor="#E8EAF2"
+                            PlaceholderColor="#4A5064"
                             Placeholder="Descripción, variantes..."
                             BackgroundColor="Transparent"
                             FontSize="15" />
@@ -355,17 +355,17 @@
 
                 <!-- Instrucciones y etiquetas: vista entrenador -->
                 <Border
-                    BackgroundColor="#252536"
+                    BackgroundColor="#1B1E28"
                     Padding="16,12"
                     StrokeShape="RoundRectangle 14"
                     StrokeThickness="0"
                     IsVisible="{Binding ShowDetailFields}">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="INSTRUCCIONES (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Label FontSize="11" Text="INSTRUCCIONES (OPCIONAL)" TextColor="#8A91A8" CharacterSpacing="1" />
                         <Editor
                             Text="{Binding Instructions}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
+                            TextColor="#E8EAF2"
+                            PlaceholderColor="#4A5064"
                             Placeholder="Cómo se ejecuta, puntos técnicos…"
                             BackgroundColor="Transparent"
                             AutoSize="TextChanges"
@@ -374,17 +374,17 @@
                     </VerticalStackLayout>
                 </Border>
                 <Border
-                    BackgroundColor="#252536"
+                    BackgroundColor="#1B1E28"
                     Padding="16,12"
                     StrokeShape="RoundRectangle 14"
                     StrokeThickness="0"
                     IsVisible="{Binding ShowDetailFields}">
                     <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="ETIQUETAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Label FontSize="11" Text="ETIQUETAS (OPCIONAL)" TextColor="#8A91A8" CharacterSpacing="1" />
                         <Entry
                             Text="{Binding Tags}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
+                            TextColor="#E8EAF2"
+                            PlaceholderColor="#4A5064"
                             Placeholder="Separadas por comas: unilateral, casa"
                             BackgroundColor="Transparent"
                             FontSize="15" />
@@ -404,7 +404,7 @@
                         Text="{Binding SaveButtonText}"
                         FontAttributes="Bold"
                         FontSize="16"
-                        TextColor="#1E1E2E"
+                        TextColor="#14161E"
                         HorizontalOptions="Center" />
                 </Border>
 
@@ -414,7 +414,7 @@
                     Padding="0,12"
                     StrokeShape="RoundRectangle 14"
                     StrokeThickness="1"
-                    Stroke="#F38BA8"
+                    Stroke="#EF8A8A"
                     IsVisible="{Binding IsEditMode}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnDeleteTapped" />
@@ -423,7 +423,7 @@
                         Text="Eliminar ejercicio"
                         FontAttributes="Bold"
                         FontSize="15"
-                        TextColor="#F38BA8"
+                        TextColor="#EF8A8A"
                         HorizontalOptions="Center" />
                 </Border>
 

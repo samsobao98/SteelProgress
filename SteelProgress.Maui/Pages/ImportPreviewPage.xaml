@@ -47,8 +47,8 @@
                     <Label Text="{Binding Title}" Style="{StaticResource SpTitle}" HorizontalTextAlignment="Center" Margin="0,10,0,0" />
 
                     <Border Style="{StaticResource SpChipStyle}" HorizontalOptions="Center" Margin="0,8,0,0"
-                            BackgroundColor="#26B4BEFE" IsVisible="{Binding IsUpdate}">
-                        <Label Text="{Binding VersionBadge}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpSteel2}" />
+                            BackgroundColor="#26B3B7EC" IsVisible="{Binding IsUpdate}">
+                        <Label Text="{Binding VersionBadge}" FontSize="12" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpSteel2}" />
                     </Border>
 
                     <!-- Resumen -->
@@ -56,33 +56,33 @@
                         <VerticalStackLayout>
                             <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding HasDays}">
                                 <Label Text="Días" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
-                                <Label Grid.Column="1" Text="{Binding DaysText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                                <Label Grid.Column="1" Text="{Binding DaysText}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                             </Grid>
                             <BoxView HeightRequest="1" Color="{StaticResource SpLine}" IsVisible="{Binding HasDays}" />
                             <Grid ColumnDefinitions="*,Auto" Padding="0,11">
                                 <Label Text="Ejercicios nuevos" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
-                                <Label Grid.Column="1" Text="{Binding NewExercisesText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                                <Label Grid.Column="1" Text="{Binding NewExercisesText}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                             </Grid>
                             <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
                             <Grid ColumnDefinitions="*,Auto" Padding="0,11">
                                 <Label Text="Vídeos" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
-                                <Label Grid.Column="1" Text="{Binding MediaText}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                                <Label Grid.Column="1" Text="{Binding MediaText}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                             </Grid>
                             <BoxView HeightRequest="1" Color="{StaticResource SpLine}" IsVisible="{Binding IsUpdate}" />
                             <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding IsUpdate}">
                                 <Label Text="Tu historial" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText2}" />
-                                <Label Grid.Column="1" Text="Se conserva" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpOk}" />
+                                <Label Grid.Column="1" Text="Se conserva" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpOk}" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
 
                     <!-- Mensaje del autor -->
-                    <Border BackgroundColor="#14F9E2AF" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="14,10" Margin="0,12,0,0"
+                    <Border BackgroundColor="#14F0C46A" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="14,10" Margin="0,12,0,0"
                             IsVisible="{Binding HasMessage}">
                         <Label FontSize="13" TextColor="{StaticResource SpText2}">
                             <Label.FormattedText>
                                 <FormattedString>
-                                    <Span Text="{Binding AuthorName, StringFormat='{0}: '}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpRecord}" />
+                                    <Span Text="{Binding AuthorName, StringFormat='{0}: '}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpRecord}" />
                                     <Span Text="{Binding Message, StringFormat='«{0}»'}" />
                                 </FormattedString>
                             </Label.FormattedText>

@@ -127,9 +127,9 @@ public partial class ProgressPage : ContentPage
     private static Label LegendText(string text) => new()
     {
         Text = text,
-        FontFamily = "OpenSansRegular",
+        FontFamily = "SpaceGroteskRegular",
         FontSize = 10,
-        TextColor = Color.FromArgb("#6C7086"),
+        TextColor = Color.FromArgb("#8A91A8"),
         VerticalOptions = LayoutOptions.Center,
         Margin = new Thickness(3, 0)
     };

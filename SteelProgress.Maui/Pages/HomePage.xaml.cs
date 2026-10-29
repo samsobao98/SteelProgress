@@ -77,16 +77,16 @@ public partial class HomePage : ContentPage
                 WidthRequest = 34,
                 HorizontalOptions = LayoutOptions.Center,
                 StrokeShape = new RoundRectangle { CornerRadius = 17 },
-                BackgroundColor = day.Done ? Color.FromArgb("#2E3050") : Color.FromArgb("#252536"),
-                Stroke = day.IsToday ? Color.FromArgb("#B4BEFE") : Colors.Transparent,
+                BackgroundColor = day.Done ? Color.FromArgb("#262B40") : Color.FromArgb("#1B1E28"),
+                Stroke = day.IsToday ? Color.FromArgb("#B3B7EC") : Colors.Transparent,
                 StrokeThickness = day.IsToday ? 2 : 0,
                 Opacity = day.IsFuture ? 0.55 : 1,
                 Content = new Label
                 {
                     Text = day.Done ? "✓" : "",
-                    FontFamily = "OpenSansSemibold",
+                    FontFamily = "SpaceGroteskMedium",
                     FontSize = 14,
-                    TextColor = Color.FromArgb("#B4BEFE"),
+                    TextColor = Color.FromArgb("#B3B7EC"),
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center
                 }
@@ -99,9 +99,9 @@ public partial class HomePage : ContentPage
                     new Label
                     {
                         Text = day.Letter,
-                        FontFamily = "OpenSansSemibold",
+                        FontFamily = "SpaceGroteskMedium",
                         FontSize = 11,
-                        TextColor = day.IsToday ? Color.FromArgb("#CDD6F4") : Color.FromArgb("#6C7086"),
+                        TextColor = day.IsToday ? Color.FromArgb("#E8EAF2") : Color.FromArgb("#8A91A8"),
                         HorizontalOptions = LayoutOptions.Center
                     },
                     circle
@@ -116,14 +116,14 @@ public partial class HomePage : ContentPage
     {
         TodayChips.Children.Clear();
         foreach (var name in _vm.TodayExercises)
-            TodayChips.Children.Add(Chip(name, "#A6ADC8", "OpenSansRegular"));
+            TodayChips.Children.Add(Chip(name, "#A0A7BD", "SpaceGroteskRegular"));
         if (_vm.HasTodayMore)
-            TodayChips.Children.Add(Chip(_vm.TodayMoreText, "#6C7086", "OpenSansSemibold"));
+            TodayChips.Children.Add(Chip(_vm.TodayMoreText, "#8A91A8", "SpaceGroteskMedium"));
     }
 
     private static Border Chip(string text, string color, string font) => new()
     {
-        BackgroundColor = Color.FromArgb("#252536"),
+        BackgroundColor = Color.FromArgb("#1B1E28"),
         StrokeThickness = 0,
         StrokeShape = new RoundRectangle { CornerRadius = 12 },
         Padding = new Thickness(10, 5),

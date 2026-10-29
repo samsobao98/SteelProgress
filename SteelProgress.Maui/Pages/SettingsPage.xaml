@@ -51,13 +51,13 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding SetSimpleCommand}" Tapped="OnOptionTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Simple" HorizontalOptions="Center" FontFamily="OpenSansSemibold" FontSize="14" />
+                                <Label Text="Simple" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
                             </Border>
                             <Border x:Name="TrainerOption" Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding SetTrainerCommand}" Tapped="OnOptionTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Entrenador" HorizontalOptions="Center" FontFamily="OpenSansSemibold" FontSize="14" />
+                                <Label Text="Entrenador" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
                             </Border>
                         </Grid>
                         </Border>

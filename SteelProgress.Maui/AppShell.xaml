@@ -3,10 +3,10 @@
     x:Class="SteelProgress.Maui.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Shell.TabBarBackgroundColor="#1E1E2E"
-    Shell.TabBarForegroundColor="#CDD6F4"
-    Shell.TabBarTitleColor="#CDD6F4"
-    Shell.TabBarUnselectedColor="#585B70">
+    Shell.TabBarBackgroundColor="#14161E"
+    Shell.TabBarForegroundColor="#E8EAF2"
+    Shell.TabBarTitleColor="#E8EAF2"
+    Shell.TabBarUnselectedColor="#6A7088">
 
     <TabBar>
         <Tab Title="Inicio">

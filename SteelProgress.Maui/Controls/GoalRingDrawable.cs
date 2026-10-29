@@ -4,13 +4,13 @@ namespace SteelProgress.Maui.Controls;
 // (SpSteel1 → SpSteel3) que se llena desde arriba en sentido horario
 public class GoalRingDrawable : IDrawable
 {
-    private static readonly Color Start = Color.FromArgb("#89B4FA");
-    private static readonly Color End = Color.FromArgb("#CBA6F7");
+    private static readonly Color Start = Color.FromArgb("#9DB4E6");
+    private static readonly Color End = Color.FromArgb("#C9B9F2");
 
     /// <summary>Fracción cumplida (0 a 1).</summary>
     public double Progress { get; set; }
 
-    public Color TrackColor { get; set; } = Color.FromArgb("#2C2D42");
+    public Color TrackColor { get; set; } = Color.FromArgb("#262A37");
     public float Thickness { get; set; } = 12;
 
     public void Draw(ICanvas canvas, RectF dirtyRect)

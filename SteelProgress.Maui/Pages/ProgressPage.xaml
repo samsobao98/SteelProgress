@@ -12,7 +12,7 @@
     <ContentPage.Resources>
         <!-- Pestañas internas: Resumen · Ejercicios · Historial -->
         <Style x:Key="SegmentLabel" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontFamily" Value="SpaceGroteskMedium" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="TextColor" Value="{StaticResource SpText3}" />
             <Setter Property="HorizontalOptions" Value="Center" />
@@ -25,7 +25,7 @@
             <Setter Property="Padding" Value="0,9" />
         </Style>
         <Style x:Key="StatCaption" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansRegular" />
+            <Setter Property="FontFamily" Value="SpaceGroteskRegular" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="TextColor" Value="{StaticResource SpText3}" />
         </Style>
@@ -208,7 +208,7 @@
                                             <Label Text="★" FontSize="15" TextColor="{StaticResource SpRecord}" HorizontalOptions="Center" VerticalOptions="Center" />
                                         </Border>
                                         <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                            <Label Text="{Binding ExerciseName}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                            <Label Text="{Binding ExerciseName}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                             <Label Text="{Binding Kind}" Style="{StaticResource StatCaption}" />
                                         </VerticalStackLayout>
                                         <VerticalStackLayout Grid.Column="2" Spacing="1" VerticalOptions="Center">
@@ -270,8 +270,8 @@
                                 <Border BackgroundColor="{StaticResource SpCard}" StrokeShape="RoundRectangle 14" StrokeThickness="0" Padding="14,12">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="#2E3050" />
-                                            <Setter Property="Stroke" Value="#B4BEFE" />
+                                            <Setter Property="BackgroundColor" Value="#262B40" />
+                                            <Setter Property="Stroke" Value="#B3B7EC" />
                                             <Setter Property="StrokeThickness" Value="1.5" />
                                         </DataTrigger>
                                     </Border.Triggers>
@@ -280,7 +280,7 @@
                                     </Border.GestureRecognizers>
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                         <VerticalStackLayout Spacing="1">
-                                            <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                            <Label Text="{Binding Name}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                             <Label Text="{Binding DetailText}" Style="{StaticResource StatCaption}" />
                                         </VerticalStackLayout>
                                         <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
@@ -314,14 +314,14 @@
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <VerticalStackLayout Spacing="1">
                                         <HorizontalStackLayout Spacing="8">
-                                            <Label Text="{Binding Title}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" />
+                                            <Label Text="{Binding Title}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" />
                                             <Border Style="{StaticResource SpChipStyle}" BackgroundColor="#3A3322" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasStatus}">
                                                 <Border.Triggers>
                                                     <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
-                                                        <Setter Property="BackgroundColor" Value="#2E3050" />
+                                                        <Setter Property="BackgroundColor" Value="#262B40" />
                                                     </DataTrigger>
                                                 </Border.Triggers>
-                                                <Label Text="{Binding StatusText}" FontFamily="OpenSansSemibold" FontSize="10" TextColor="{StaticResource SpIntensity}">
+                                                <Label Text="{Binding StatusText}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpIntensity}">
                                                     <Label.Triggers>
                                                         <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
                                                             <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
@@ -373,7 +373,7 @@
                             </Border>
                         </Grid>
                         <Label Text="{Binding Subtitle}" Style="{StaticResource SpSecondary}" Margin="0,2,0,0" />
-                        <Label Text="{Binding StatusText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpIntensity}"
+                        <Label Text="{Binding StatusText}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpIntensity}"
                                Margin="0,6,0,0" IsVisible="{Binding HasStatus}" />
                         <Border BackgroundColor="{StaticResource SpCard}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,10" Margin="0,10,0,0"
                                 IsVisible="{Binding HasNotes}">
@@ -387,16 +387,16 @@
                                 <DataTemplate>
                                     <VerticalStackLayout Spacing="2" Padding="0,10">
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                            <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
-                                            <Label Grid.Column="1" Text="{Binding RecordText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpRecord}"
+                                            <Label Text="{Binding Name}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                            <Label Grid.Column="1" Text="{Binding RecordText}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpRecord}"
                                                    VerticalOptions="Center" IsVisible="{Binding HasRecord}" />
                                         </Grid>
                                         <Label Text="{Binding SetsText}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpText2}" />
-                                        <Label Text="{Binding SetNotes}" FontFamily="OpenSansRegular" FontSize="13" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
+                                        <Label Text="{Binding SetNotes}" FontFamily="SpaceGroteskRegular" FontSize="13" FontAttributes="Italic" TextColor="{StaticResource SpText2}"
                                                Margin="0,2,0,0" IsVisible="{Binding HasSetNotes}" />
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                             <Label Text="{Binding ComparisonText}" Style="{StaticResource StatCaption}" IsVisible="{Binding HasComparison}" />
-                                            <Label Grid.Column="1" Text="Evolución ›" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel1}">
+                                            <Label Grid.Column="1" Text="Evolución ›" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpSteel1}">
                                                 <Label.GestureRecognizers>
                                                     <TapGestureRecognizer Tapped="OnDetailExerciseTapped" />
                                                 </Label.GestureRecognizers>

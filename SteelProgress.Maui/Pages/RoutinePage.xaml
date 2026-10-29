@@ -20,7 +20,7 @@
                 <SwipeView IsEnabled="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" BackgroundColor="Transparent">
                     <SwipeView.RightItems>
                         <SwipeItems Mode="Execute">
-                            <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
+                            <SwipeItem Text="Eliminar" BackgroundColor="#2EEF8A8A" Invoked="OnSwipeDeleteInvoked" />
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Grid>
@@ -28,14 +28,14 @@
                     <Border Padding="18" StrokeThickness="0" StrokeShape="RoundRectangle 20" Loaded="OnCardLoaded">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
-                                <GradientStop Color="#2C2D45" Offset="0" />
-                                <GradientStop Color="#252536" Offset="1" />
+                                <GradientStop Color="#262A37" Offset="0" />
+                                <GradientStop Color="#1B1E28" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                         <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="Auto,*">
-                                <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4">
-                                    <Label Text="{Binding ActiveLabel}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
+                                <Border BackgroundColor="#29B3B7EC" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4">
+                                    <Label Text="{Binding ActiveLabel}" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="{StaticResource SpSteel2}" />
                                 </Border>
                                 <mi:MauiIcon Grid.Column="1" Icon="{mi:Material DragHandle}" IconColor="{StaticResource SpText4}" IconSize="22"
                                              HorizontalOptions="End" IsVisible="{Binding IsReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" />
@@ -66,7 +66,7 @@
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="Toca: " TextColor="{StaticResource SpText3}" />
-                                            <Span Text="{Binding NextDayName}" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                                            <Span Text="{Binding NextDayName}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
                                             <Span Text=" ›" TextColor="{StaticResource SpText3}" />
                                         </FormattedString>
                                     </Label.FormattedText>
@@ -93,7 +93,7 @@
                 <SwipeView IsEnabled="{Binding IsNotReordering, Source={RelativeSource AncestorType={x:Type vm:RoutineViewModel}}}" BackgroundColor="Transparent">
                     <SwipeView.RightItems>
                         <SwipeItems Mode="Execute">
-                            <SwipeItem Text="Eliminar" BackgroundColor="#2EF38BA8" Invoked="OnSwipeDeleteInvoked" />
+                            <SwipeItem Text="Eliminar" BackgroundColor="#2EEF8A8A" Invoked="OnSwipeDeleteInvoked" />
                         </SwipeItems>
                     </SwipeView.RightItems>
                     <Grid>
@@ -106,7 +106,7 @@
                                        TextColor="{Binding AccentIndex, Converter={StaticResource Accent}}" />
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding Name}" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                 <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
                             </VerticalStackLayout>
                         </Grid>
@@ -141,7 +141,7 @@
                 AbsoluteLayout.LayoutFlags="PositionProportional"
                 TranslationX="110"
                 TranslationY="-90"
-                Fill="#89B4FA"
+                Fill="#9DB4E6"
                 Opacity="0.06" />
         </AbsoluteLayout>
 
@@ -169,7 +169,7 @@
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnOrderTapped" />
                     </Border.GestureRecognizers>
-                    <Label x:Name="OrderButtonLabel" Text="Ordenar" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpText2}" />
+                    <Label x:Name="OrderButtonLabel" Text="Ordenar" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText2}" />
                 </Border>
             </Grid>
 
@@ -223,7 +223,7 @@
             VerticalOptions="End"
             Margin="0,0,20,24"
             IsVisible="{Binding IsNotReordering}"
-            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
+            Shadow="{Shadow Brush='#B3B7EC', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />
             </Border.GestureRecognizers>
@@ -237,14 +237,14 @@
                     <TapGestureRecognizer Tapped="OnPreviewBackdropTapped" />
                 </BoxView.GestureRecognizers>
             </BoxView>
-            <Border x:Name="PreviewCard" BackgroundColor="{StaticResource SpSheet}" StrokeThickness="1" Stroke="#34354A" StrokeShape="RoundRectangle 22"
+            <Border x:Name="PreviewCard" BackgroundColor="{StaticResource SpSheet}" StrokeThickness="1" Stroke="#2A2E3C" StrokeShape="RoundRectangle 22"
                     Padding="20" Margin="20,0" VerticalOptions="Center" MaximumHeightRequest="620"
                     Shadow="{Shadow Brush='#000000', Offset='0,12', Radius=30, Opacity=0.5}">
                 <ScrollView>
                     <VerticalStackLayout Spacing="0" BindingContext="{Binding Preview}">
-                        <Border BackgroundColor="#29B4BEFE" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4" HorizontalOptions="Start"
+                        <Border BackgroundColor="#29B3B7EC" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="9,4" HorizontalOptions="Start"
                                 Margin="0,0,0,8" IsVisible="{Binding IsActive}">
-                            <Label Text="{Binding ActiveLabel}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource SpSteel2}" />
+                            <Label Text="{Binding ActiveLabel}" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="{StaticResource SpSteel2}" />
                         </Border>
                         <Label Text="{Binding Name}" FontFamily="SpaceGroteskBold" FontSize="24" TextColor="{StaticResource SpText}" />
                         <Label Text="{Binding Notes}" Style="{StaticResource SpSecondary}" Margin="0,2,0,0" IsVisible="{Binding HasNotes}" />
@@ -299,13 +299,13 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnPreviewStartTapped" />
                             </Border.GestureRecognizers>
-                            <Label Text="{Binding StartText}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                            <Label Text="{Binding StartText}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                         </Border>
                         <Border BackgroundColor="{StaticResource SpCardHi}" Padding="0,15" StrokeShape="RoundRectangle 14" StrokeThickness="0" Margin="0,10,0,0">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnPreviewEnterTapped" />
                             </Border.GestureRecognizers>
-                            <Label Text="Entrar en la rutina" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
+                            <Label Text="Entrar en la rutina" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
                         </Border>
                     </VerticalStackLayout>
                 </ScrollView>
@@ -364,7 +364,7 @@
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCreateTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Crear rutina" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                    <Label Text="Crear rutina" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                 </Border>
             </VerticalStackLayout>
         </Border>

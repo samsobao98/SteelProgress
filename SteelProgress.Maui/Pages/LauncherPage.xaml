@@ -5,7 +5,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:conv="clr-namespace:SteelProgress.Maui.Converters"
-    BackgroundColor="#1E1E2E"
+    BackgroundColor="#14161E"
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
 
@@ -30,7 +30,7 @@
         <Ellipse
             x:Name="Orb2"
             Grid.RowSpan="3"
-            Fill="#89B4FA"
+            Fill="#9DB4E6"
             HeightRequest="220"
             WidthRequest="220"
             HorizontalOptions="Start"
@@ -40,7 +40,7 @@
         <Ellipse
             x:Name="Orb3"
             Grid.RowSpan="3"
-            Fill="#CBA6F7"
+            Fill="#C9B9F2"
             HeightRequest="180"
             WidthRequest="180"
             HorizontalOptions="End"
@@ -85,7 +85,7 @@
             Text="{Binding SubtitleText}"
             FontSize="15"
             FontAttributes="Bold"
-            TextColor="#BAC2DE"
+            TextColor="#C6CBDA"
             HorizontalTextAlignment="Center"
             Margin="0,14,0,0" />
 
@@ -112,12 +112,12 @@
                     Text="No se pudo iniciar"
                     FontSize="17"
                     FontAttributes="Bold"
-                    TextColor="#F38BA8"
+                    TextColor="#EF8A8A"
                     HorizontalTextAlignment="Center" />
                 <Label
                     Text="{Binding ErrorMessage}"
                     FontSize="13"
-                    TextColor="#BAC2DE"
+                    TextColor="#C6CBDA"
                     HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
@@ -140,7 +140,7 @@
                 <Label
                     IsVisible="{Binding CanAddProfile}"
                     Text="＋ Añadir perfil"
-                    TextColor="#6C7086"
+                    TextColor="#8A91A8"
                     FontSize="14"
                     FontAttributes="Bold"
                     HorizontalOptions="Center">
@@ -188,7 +188,7 @@
                             <Label
                                 x:Name="AvatarInitialLabel"
                                 Text="{Binding NewProfileName, Converter={StaticResource InitialConverter}}"
-                                TextColor="#1E1E2E"
+                                TextColor="#14161E"
                                 FontSize="36"
                                 FontAttributes="Bold"
                                 HorizontalOptions="Center"
@@ -202,7 +202,7 @@
                         Text="{Binding DescriptionPreviewText}"
                         FontSize="14"
                         FontAttributes="Italic"
-                        TextColor="#45475A"
+                        TextColor="#4A5064"
                         HorizontalOptions="Center"
                         HorizontalTextAlignment="Center"
                         MaxLines="3"
@@ -211,7 +211,7 @@
                         Margin="24,0">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding HasDescription}" Value="True">
-                                <Setter Property="TextColor" Value="#BAC2DE" />
+                                <Setter Property="TextColor" Value="#C6CBDA" />
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
@@ -227,7 +227,7 @@
                     <Entry
                         x:Name="NameEntry"
                         Text="{Binding NewProfileName}"
-                        TextColor="#CDD6F4"
+                        TextColor="#E8EAF2"
                         BackgroundColor="Transparent"
                         FontSize="18"
                         ReturnType="Next"
@@ -236,7 +236,7 @@
                     <Label
                         x:Name="FloatingLabel"
                         Text="Nombre"
-                        TextColor="#6C7086"
+                        TextColor="#8A91A8"
                         FontSize="18"
                         AnchorX="0"
                         AnchorY="0.5"
@@ -244,7 +244,7 @@
                         HorizontalOptions="Start"
                         TranslationY="22" />
                     <BoxView
-                        BackgroundColor="#45475A"
+                        BackgroundColor="#4A5064"
                         HeightRequest="1"
                         VerticalOptions="End"
                         HorizontalOptions="Fill" />
@@ -267,7 +267,7 @@
                     <Entry
                         x:Name="FraseEntry"
                         Text="{Binding NewProfileDescription}"
-                        TextColor="#CDD6F4"
+                        TextColor="#E8EAF2"
                         BackgroundColor="Transparent"
                         FontSize="16"
                         MaxLength="55"
@@ -278,7 +278,7 @@
                     <Label
                         x:Name="FraseLabel"
                         Text="Frase (opcional)"
-                        TextColor="#6C7086"
+                        TextColor="#8A91A8"
                         FontSize="16"
                         AnchorX="0"
                         AnchorY="0.5"
@@ -286,7 +286,7 @@
                         HorizontalOptions="Start"
                         TranslationY="22" />
                     <BoxView
-                        BackgroundColor="#45475A"
+                        BackgroundColor="#4A5064"
                         HeightRequest="1"
                         VerticalOptions="End"
                         HorizontalOptions="Fill" />
@@ -307,7 +307,7 @@
                     Margin="0,20,0,0">
                     <Label
                         Text="COLOR"
-                        TextColor="#6C7086"
+                        TextColor="#8A91A8"
                         FontSize="11"
                         FontAttributes="Bold"
                         CharacterSpacing="2"
@@ -332,7 +332,7 @@
                         IsVisible="{Binding IsFirstTimeSetup}"
                         Text="Empezar"
                         BackgroundColor="#A6E3A1"
-                        TextColor="#1E1E2E"
+                        TextColor="#14161E"
                         FontAttributes="Bold"
                         FontSize="16"
                         HeightRequest="52"
@@ -345,19 +345,19 @@
                         <Button
                             Grid.Column="0"
                             Text="Cancelar"
-                            BackgroundColor="#252536"
-                            TextColor="#CDD6F4"
+                            BackgroundColor="#1B1E28"
+                            TextColor="#E8EAF2"
                             FontSize="15"
                             HeightRequest="50"
                             CornerRadius="10"
-                            BorderColor="#45475A"
+                            BorderColor="#4A5064"
                             BorderWidth="1"
                             Command="{Binding CancelCreatingCommand}" />
                         <Button
                             Grid.Column="1"
                             Text="Crear"
                             BackgroundColor="#A6E3A1"
-                            TextColor="#1E1E2E"
+                            TextColor="#14161E"
                             FontAttributes="Bold"
                             FontSize="15"
                             HeightRequest="50"
@@ -379,7 +379,7 @@
             <!-- Backdrop: tap to dismiss -->
             <BoxView
                 x:Name="OverlayBackdrop"
-                BackgroundColor="#1E1E2E"
+                BackgroundColor="#14161E"
                 Opacity="0">
                 <BoxView.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnOverlayBackdropTapped" />
@@ -389,10 +389,10 @@
             <!-- Card panel: blocks backdrop tap from leaking through -->
             <Border
                 x:Name="OverlayPanel"
-                BackgroundColor="#252536"
+                BackgroundColor="#1B1E28"
                 StrokeShape="RoundRectangle 24"
                 StrokeThickness="1"
-                Stroke="#45475A"
+                Stroke="#4A5064"
                 HorizontalOptions="Fill"
                 VerticalOptions="Center"
                 Margin="20,0"
@@ -418,7 +418,7 @@
                             HorizontalOptions="Center">
                             <Label
                                 x:Name="OverlayInitial"
-                                TextColor="#1E1E2E"
+                                TextColor="#14161E"
                                 FontSize="44"
                                 FontAttributes="Bold"
                                 HorizontalOptions="Center"
@@ -427,14 +427,14 @@
 
                         <Label
                             x:Name="OverlayName"
-                            TextColor="#CDD6F4"
+                            TextColor="#E8EAF2"
                             FontSize="20"
                             FontAttributes="Bold"
                             HorizontalTextAlignment="Center" />
 
                         <Label
                             x:Name="OverlayDescription"
-                            TextColor="#BAC2DE"
+                            TextColor="#C6CBDA"
                             FontSize="13"
                             FontAttributes="Italic"
                             HorizontalTextAlignment="Center"
@@ -453,29 +453,29 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnOverlayEntrarTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Entrar" TextColor="#1E1E2E" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="Entrar" TextColor="#14161E" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
                             </Border>
                             <Border
-                                BackgroundColor="#313244"
+                                BackgroundColor="#2A2E3C"
                                 StrokeShape="RoundRectangle 12"
                                 StrokeThickness="1"
-                                Stroke="#89B4FA"
+                                Stroke="#9DB4E6"
                                 Padding="0,13">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnOverlayEditarTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Editar" TextColor="#89B4FA" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="Editar" TextColor="#9DB4E6" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
                             </Border>
                             <Border
-                                BackgroundColor="#313244"
+                                BackgroundColor="#2A2E3C"
                                 StrokeShape="RoundRectangle 12"
                                 StrokeThickness="1"
-                                Stroke="#F38BA8"
+                                Stroke="#EF8A8A"
                                 Padding="0,13">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnOverlayEliminarTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Eliminar" TextColor="#F38BA8" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="Eliminar" TextColor="#EF8A8A" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
                             </Border>
                         </VerticalStackLayout>
 
@@ -494,7 +494,7 @@
                             HorizontalOptions="Center">
                             <Label
                                 x:Name="OverlayEditInitial"
-                                TextColor="#1E1E2E"
+                                TextColor="#14161E"
                                 FontSize="34"
                                 FontAttributes="Bold"
                                 HorizontalOptions="Center"
@@ -507,8 +507,8 @@
                                 x:Name="OverlayEditNameEntry"
                                 Text="{Binding EditingName, Mode=TwoWay}"
                                 Placeholder="Nombre"
-                                PlaceholderColor="#6C7086"
-                                TextColor="#CDD6F4"
+                                PlaceholderColor="#8A91A8"
+                                TextColor="#E8EAF2"
                                 BackgroundColor="Transparent"
                                 FontSize="16"
                                 MaxLength="30"
@@ -516,7 +516,7 @@
                                 VerticalOptions="End"
                                 Margin="0,0,0,8" />
                             <BoxView
-                                BackgroundColor="#45475A"
+                                BackgroundColor="#4A5064"
                                 HeightRequest="1"
                                 VerticalOptions="End"
                                 HorizontalOptions="Fill" />
@@ -536,8 +536,8 @@
                                 x:Name="OverlayEditDescEntry"
                                 Text="{Binding EditingDescription, Mode=TwoWay}"
                                 Placeholder="Frase corta (opcional)"
-                                PlaceholderColor="#6C7086"
-                                TextColor="#CDD6F4"
+                                PlaceholderColor="#8A91A8"
+                                TextColor="#E8EAF2"
                                 BackgroundColor="Transparent"
                                 FontSize="15"
                                 MaxLength="55"
@@ -545,7 +545,7 @@
                                 VerticalOptions="End"
                                 Margin="0,0,0,8" />
                             <BoxView
-                                BackgroundColor="#45475A"
+                                BackgroundColor="#4A5064"
                                 HeightRequest="1"
                                 VerticalOptions="End"
                                 HorizontalOptions="Fill" />
@@ -574,15 +574,15 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,4,0,0">
                             <Border
                                 Grid.Column="0"
-                                BackgroundColor="#313244"
+                                BackgroundColor="#2A2E3C"
                                 StrokeShape="RoundRectangle 12"
                                 StrokeThickness="1"
-                                Stroke="#45475A"
+                                Stroke="#4A5064"
                                 Padding="0,13">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnOverlayCancelarTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Cancelar" TextColor="#BAC2DE" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="Cancelar" TextColor="#C6CBDA" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
                             </Border>
                             <Border
                                 Grid.Column="1"
@@ -593,7 +593,7 @@
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnOverlayGuardarTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Guardar" TextColor="#1E1E2E" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
+                                <Label Text="Guardar" TextColor="#14161E" FontSize="15" FontAttributes="Bold" HorizontalOptions="Center" />
                             </Border>
                         </Grid>
 

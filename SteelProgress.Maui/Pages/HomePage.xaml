@@ -15,7 +15,7 @@
             <Setter Property="TextColor" Value="{StaticResource SpText}" />
         </Style>
         <Style x:Key="StatCaption" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansRegular" />
+            <Setter Property="FontFamily" Value="SpaceGroteskRegular" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="TextColor" Value="{StaticResource SpText3}" />
         </Style>
@@ -55,9 +55,9 @@
 
             <!-- ── Hoy toca ── -->
             <Border x:Name="TodayCard" BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 20"
-                    Stroke="#3D4066" StrokeThickness="1" Padding="18,16,18,18" IsVisible="{Binding ShowToday}">
+                    Stroke="#343A55" StrokeThickness="1" Padding="18,16,18,18" IsVisible="{Binding ShowToday}">
                 <VerticalStackLayout Spacing="0">
-                    <Label Text="{Binding TodayDoneText}" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpOk}"
+                    <Label Text="{Binding TodayDoneText}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpOk}"
                            Margin="0,0,0,10" IsVisible="{Binding HasTodayDone}" />
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Label Text="{Binding TodayLabel}" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpSteel2}" VerticalOptions="Center" />
@@ -76,10 +76,10 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnStartTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="{Binding StartTodayText}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpOnAccent}"
+                        <Label Text="{Binding StartTodayText}" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpOnAccent}"
                                HorizontalOptions="Center" />
                     </Border>
-                    <Label Text="Elegir otro entreno ›" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpSteel1}"
+                    <Label Text="Elegir otro entreno ›" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpSteel1}"
                            HorizontalOptions="Center" Padding="12,12,12,0">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnOtherWorkoutTapped" />
@@ -89,7 +89,7 @@
             </Border>
 
             <!-- Entreno en curso -->
-            <Border BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 20" Stroke="#3D4066" StrokeThickness="1"
+            <Border BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 20" Stroke="#343A55" StrokeThickness="1"
                     Padding="18,16,18,18" IsVisible="{Binding ShowActiveWorkout}">
                 <VerticalStackLayout Spacing="0">
                     <Label Text="● Entreno en curso" Style="{StaticResource SpOverline}" TextColor="{StaticResource SpOk}" />
@@ -98,7 +98,7 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnOtherWorkoutTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="▶ Continuar entreno" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                        <Label Text="▶ Continuar entreno" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                     </Border>
                 </VerticalStackLayout>
             </Border>
@@ -113,7 +113,7 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnRoutinesTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="Ir a Rutinas" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                        <Label Text="Ir a Rutinas" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                     </Border>
                 </VerticalStackLayout>
             </Border>
@@ -157,7 +157,7 @@
             <!-- ── Últimas sesiones ── -->
             <Grid ColumnDefinitions="*,Auto" Margin="0,24,0,8">
                 <Label Text="Últimas sesiones" Style="{StaticResource SpOverline}" VerticalOptions="Center" />
-                <Label Grid.Column="1" Text="Ver historial ›" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpSteel1}"
+                <Label Grid.Column="1" Text="Ver historial ›" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel1}"
                        IsVisible="{Binding HasSessions}" VerticalOptions="Center">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnHistoryTapped" />
@@ -187,10 +187,10 @@
                                             <Setter Property="BackgroundColor" Value="#3A3322" />
                                         </DataTrigger>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="#2E3050" />
+                                            <Setter Property="BackgroundColor" Value="#262B40" />
                                         </DataTrigger>
                                     </Border.Triggers>
-                                    <Label Text="✓" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource SpOk}"
+                                    <Label Text="✓" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpOk}"
                                            HorizontalOptions="Center" VerticalOptions="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsIncomplete}" Value="True">
@@ -206,7 +206,7 @@
                                     </Label>
                                 </Border>
                                 <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                    <Label Text="{Binding Title}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Title}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                     <Label Text="{Binding Detail}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText3}" />
                                 </VerticalStackLayout>
                                 <Label Grid.Column="2" Text="›" FontSize="22" TextColor="{StaticResource SpText3}" VerticalOptions="Center" />

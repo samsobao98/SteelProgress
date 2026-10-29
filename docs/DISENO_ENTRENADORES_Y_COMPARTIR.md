@@ -334,7 +334,7 @@ Maquetas aprobadas por Samuel el 2026-10-27 en `docs/maquetas/` (no son la app r
 * **Tokens únicos** (colores, espaciado 4/8/12/16/24/32, radios 8/14/20, tipografía) definidos una vez en `Resources/Styles` y usados en todas las pantallas. Hoy los colores están escritos a mano en cada página y no coinciden (`#252536` en Inicio, `#313244` en Rutinas).
 * **Color de marca: degradado acero** `#89B4FA → #B4BEFE → #CBA6F7`, solo para el botón principal, anillos de progreso y momentos importantes.
 * **Colores con significado fijo:** hecho `#A6E3A1`, intensidad `#FAB387`, descanso `#94E2D5`, récord `#F9E2AF`, peligro `#F38BA8`.
-* **Tipografía:** Space Grotesk (cifras de ancho fijo) para números y títulos; Open Sans para el texto.
+* **Tipografía:** Space Grotesk (cifras de ancho fijo) para números y títulos; Open Sans para el texto. **Revisado (2026-10-29, estilo «Acero + Discos»):** Space Grotesk en todo, también el texto, y la paleta pasa a la de las maquetas nuevas (ver `IMPLEMENTACION.md`, Rediseño 5).
 * **Placa biselada** para tarjetas protagonistas (rutina activa, «Hoy toca», serie actual).
 * **Respuesta al tocar:** escala 0,96 con rebote (150 ms) en todo lo pulsable y vibración suave en acciones importantes. Animaciones de 150–300 ms que nunca frenan.
 

@@ -372,7 +372,7 @@ public partial class LauncherPage : ContentPage
     {
         _ = label.TranslateToAsync(0, 22, 180, Easing.CubicOut);
         _ = label.ScaleToAsync(1.0, 180, Easing.CubicOut);
-        label.TextColor = Color.FromArgb("#6C7086");
+        label.TextColor = Color.FromArgb("#8A91A8");
     }
 
     private static void AnimateUnderlineIn(BoxView line)
@@ -426,11 +426,11 @@ public partial class LauncherPage : ContentPage
     {
         FloatingLabel.TranslationY = 22;
         FloatingLabel.Scale = 1.0;
-        FloatingLabel.TextColor = Color.FromArgb("#6C7086");
+        FloatingLabel.TextColor = Color.FromArgb("#8A91A8");
         BottomLineActive.ScaleX = 0;
         FraseLabel.TranslationY = 22;
         FraseLabel.Scale = 1.0;
-        FraseLabel.TextColor = Color.FromArgb("#6C7086");
+        FraseLabel.TextColor = Color.FromArgb("#8A91A8");
         FraseLineActive.ScaleX = 0;
         AvatarBorder.Scale = 1.0;
         AvatarHalo.Scale = 1.0;
@@ -468,7 +468,7 @@ public partial class LauncherPage : ContentPage
             Text = profile.Name.Length > 0
                 ? profile.Name.TrimStart()[0].ToString().ToUpperInvariant()
                 : "?",
-            TextColor = Color.FromArgb("#1E1E2E"),
+            TextColor = Color.FromArgb("#14161E"),
             FontSize = 40,
             FontAttributes = FontAttributes.Bold,
             HorizontalOptions = LayoutOptions.Center,
@@ -497,7 +497,7 @@ public partial class LauncherPage : ContentPage
         var name = new Label
         {
             Text = profile.Name,
-            TextColor = Color.FromArgb("#CDD6F4"),
+            TextColor = Color.FromArgb("#E8EAF2"),
             FontSize = 15,
             FontAttributes = FontAttributes.Bold,
             HorizontalTextAlignment = TextAlignment.Center,

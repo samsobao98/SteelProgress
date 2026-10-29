@@ -6,7 +6,7 @@ public class RestRingDrawable : IDrawable
     /// <summary>Fracción que queda (1 = lleno, 0 = vacío).</summary>
     public double Progress { get; set; } = 1;
 
-    public Color TrackColor { get; set; } = Color.FromArgb("#2C2D42");
+    public Color TrackColor { get; set; } = Color.FromArgb("#262A37");
     public Color ArcColor { get; set; } = Color.FromArgb("#94E2D5");
     public float Thickness { get; set; } = 16;
 

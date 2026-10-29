@@ -9,11 +9,11 @@ public class ConsistencyDrawable : IDrawable
     // Nivel 0 = sin entreno (SpCardHi); 1–4 = del acero apagado al SpSteel2
     public static readonly Color[] Levels =
     [
-        Color.FromArgb("#2C2D42"),
+        Color.FromArgb("#262A37"),
         Color.FromArgb("#3A4670"),
         Color.FromArgb("#4F67A8"),
         Color.FromArgb("#6E8FDB"),
-        Color.FromArgb("#B4BEFE")
+        Color.FromArgb("#B3B7EC")
     ];
 
     public IReadOnlyList<CalendarDay> Days { get; set; } = Array.Empty<CalendarDay>();
@@ -36,7 +36,7 @@ public class ConsistencyDrawable : IDrawable
             canvas.FillRoundedRectangle(x, y, cell, cell, 3);
             if (day.IsToday)
             {
-                canvas.StrokeColor = Color.FromArgb("#CDD6F4");
+                canvas.StrokeColor = Color.FromArgb("#E8EAF2");
                 canvas.StrokeSize = 1.5f;
                 canvas.DrawRoundedRectangle(x + 0.75f, y + 0.75f, cell - 1.5f, cell - 1.5f, 3);
             }

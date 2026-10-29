@@ -34,7 +34,7 @@
             <Setter Property="StrokeThickness" Value="0" />
         </Style>
         <Style x:Key="SheetPrimaryLabel" TargetType="Label">
-            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="FontFamily" Value="SpaceGroteskMedium" />
             <Setter Property="FontSize" Value="16" />
             <Setter Property="TextColor" Value="{StaticResource SpOnAccent}" />
             <Setter Property="HorizontalOptions" Value="Center" />
@@ -48,7 +48,7 @@
             <Ellipse
                 AbsoluteLayout.LayoutBounds="0, 0, 240, 240"
                 AbsoluteLayout.LayoutFlags="PositionProportional"
-                Fill="#CBA6F7"
+                Fill="#C9B9F2"
                 Opacity="0.05" />
         </AbsoluteLayout>
 
@@ -84,17 +84,17 @@
                 <Label Text="{Binding SubtitleText}" Style="{StaticResource SpSecondary}" />
                 <!-- Elegir esta como rutina activa (o quitar la marca) -->
                 <Border x:Name="MarkActiveButton" HorizontalOptions="Start" Margin="0,10,0,0" Padding="12,6" StrokeShape="RoundRectangle 10"
-                        BackgroundColor="{StaticResource SpCard}" StrokeThickness="1" Stroke="#34354A">
+                        BackgroundColor="{StaticResource SpCard}" StrokeThickness="1" Stroke="#2A2E3C">
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding IsMarkedActive}" Value="True">
-                            <Setter Property="BackgroundColor" Value="#29B4BEFE" />
+                            <Setter Property="BackgroundColor" Value="#29B3B7EC" />
                             <Setter Property="StrokeThickness" Value="0" />
                         </DataTrigger>
                     </Border.Triggers>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnMarkActiveTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="{Binding MarkActiveText}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource SpSteel2}" />
+                    <Label Text="{Binding MarkActiveText}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpSteel2}" />
                 </Border>
             </VerticalStackLayout>
 
@@ -130,12 +130,12 @@
                                     <Label Grid.Column="0" Text="{Binding ., Converter={StaticResource RowLabel}}" FontFamily="SpaceGroteskBold" FontSize="15"
                                            TextColor="{StaticResource SpSteel2}" WidthRequest="26" VerticalOptions="Center" />
                                     <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                        <Label Text="{Binding Exercise.Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Exercise.Name}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                         <!-- Lo prescrito: "4 × 6–8 · RPE 8 · 1:30" -->
                                         <Label Text="{Binding ., Converter={StaticResource PrescriptionText}}" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpText3}"
                                                IsVisible="{Binding ., Converter={StaticResource PrescriptionText}, ConverterParameter=visible}" />
                                         <!-- Sin objetivo: en Entreno no sabría cuándo está hecho -->
-                                        <Label Text="+ Añadir series y reps" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource SpSteel2}"
+                                        <Label Text="+ Añadir series y reps" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel2}"
                                                IsVisible="{Binding TargetSets, Converter={StaticResource IsNull}}">
                                             <Label.GestureRecognizers>
                                                 <TapGestureRecognizer Tapped="OnAddTargetsTapped" />
@@ -172,7 +172,7 @@
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
+            Shadow="{Shadow Brush='#B3B7EC', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnAddExerciseTapped" />
             </Border.GestureRecognizers>
@@ -238,7 +238,7 @@
                                     </Grid>
                                 </Border>
                                 <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                    <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Name}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" LineBreakMode="TailTruncation" />
                                     <Label Text="{Binding Detail}" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
                                 <!-- + sin elegir, ✓ elegido -->
@@ -354,11 +354,11 @@
                     <Label Text="Guardar" Style="{StaticResource SheetPrimaryLabel}" />
                 </Border>
 
-                <Border BackgroundColor="Transparent" Padding="0,12" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#F38BA8">
+                <Border BackgroundColor="Transparent" Padding="0,12" StrokeShape="RoundRectangle 14" StrokeThickness="1" Stroke="#EF8A8A">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnDeleteRoutineTapped" />
                     </Border.GestureRecognizers>
-                    <Label Text="Eliminar rutina" FontFamily="OpenSansSemibold" FontSize="15" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
+                    <Label Text="Eliminar rutina" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpDanger}" HorizontalOptions="Center" />
                 </Border>
             </VerticalStackLayout>
         </Border>

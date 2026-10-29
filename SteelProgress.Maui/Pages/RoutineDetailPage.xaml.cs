@@ -60,7 +60,7 @@ public partial class RoutineDetailPage : ContentPage
     // ── Chips de días ──────────────────────────────────────────────────────
 
     private static Brush SteelBrush =>
-        Application.Current?.Resources.TryGetValue("SpSteelBrush", out var b) == true ? (Brush)b : new SolidColorBrush(Color.FromArgb("#B4BEFE"));
+        Application.Current?.Resources.TryGetValue("SpSteelBrush", out var b) == true ? (Brush)b : new SolidColorBrush(Color.FromArgb("#B3B7EC"));
 
     private void BuildDayChips()
     {
@@ -74,7 +74,7 @@ public partial class RoutineDetailPage : ContentPage
             {
                 Text = day.Name,
                 FontSize = 14,
-                FontFamily = "OpenSansSemibold",
+                FontFamily = "SpaceGroteskMedium",
                 VerticalOptions = LayoutOptions.Center
             };
             var chip = new Border
@@ -95,17 +95,17 @@ public partial class RoutineDetailPage : ContentPage
         // Chip "+" para añadir un día
         var addChip = new Border
         {
-            BackgroundColor = Color.FromArgb("#252536"),
+            BackgroundColor = Color.FromArgb("#1B1E28"),
             Padding = new Thickness(16, 9),
             StrokeThickness = 1,
-            Stroke = new SolidColorBrush(Color.FromArgb("#34354A")),
+            Stroke = new SolidColorBrush(Color.FromArgb("#2A2E3C")),
             StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Content = new Label
             {
                 Text = _vm.Days.Count == 0 ? "+ Añadir día" : "+",
                 FontSize = _vm.Days.Count == 0 ? 14 : 18,
-                FontFamily = "OpenSansSemibold",
-                TextColor = Color.FromArgb("#B4BEFE"),
+                FontFamily = "SpaceGroteskMedium",
+                TextColor = Color.FromArgb("#B3B7EC"),
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center
             }
@@ -123,8 +123,8 @@ public partial class RoutineDetailPage : ContentPage
         foreach (var (day, chip, label) in _dayChips)
         {
             var selected = _vm.SelectedDay is not null && day.Id == _vm.SelectedDay.Id;
-            chip.Background = selected ? SteelBrush : new SolidColorBrush(Color.FromArgb("#252536"));
-            label.TextColor = Color.FromArgb(selected ? "#1B1B2B" : "#CDD6F4");
+            chip.Background = selected ? SteelBrush : new SolidColorBrush(Color.FromArgb("#1B1E28"));
+            label.TextColor = Color.FromArgb(selected ? "#14161E" : "#E8EAF2");
         }
     }
 
@@ -221,7 +221,7 @@ public partial class RoutineDetailPage : ContentPage
 
     private void AddGroupChip(string? group, string text)
     {
-        var label = new Label { Text = text, FontSize = 12, FontFamily = "OpenSansSemibold", VerticalOptions = LayoutOptions.Center };
+        var label = new Label { Text = text, FontSize = 12, FontFamily = "SpaceGroteskMedium", VerticalOptions = LayoutOptions.Center };
         var chip = new Border
         {
             Padding = new Thickness(11, 5),
@@ -242,8 +242,8 @@ public partial class RoutineDetailPage : ContentPage
         foreach (var (group, chip, label) in _groupChips)
         {
             var selected = group == _vm.Picker.GroupFilter;
-            chip.BackgroundColor = Color.FromArgb(selected ? "#2689B4FA" : "#2C2D42");
-            label.TextColor = Color.FromArgb(selected ? "#89B4FA" : "#A6ADC8");
+            chip.BackgroundColor = Color.FromArgb(selected ? "#269DB4E6" : "#262A37");
+            label.TextColor = Color.FromArgb(selected ? "#9DB4E6" : "#A0A7BD");
         }
     }
 

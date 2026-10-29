@@ -290,7 +290,7 @@ Decisiones (2026-10-29): **D1 → reproductor dentro de la app** (`CommunityTool
 Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 pantallas: Entreno con barra cargada, mancuernas, polea y máquina de discos; Inicio; tipos de material; Entreno, Rutinas, Ejercicios, Progreso, Clientes, Ajustes y Perfiles). Se aplica por partes, primero lo que se puede comprobar con pruebas:
 
 1. **Tipo de material obligatorio** — hecho, pendiente de probar en el móvil.
-2. Colores y tipografía del estilo nuevo en los tokens.
+2. **Colores y tipografía del estilo nuevo** — hecho, pendiente de ver en el móvil.
 3. **«Tu gimnasio» y la barra cargada en Entreno** — hecho, pendiente de probar en el móvil.
 4. Pantallas una a una.
 
@@ -310,6 +310,19 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 2. «+»: sin elegir «Con qué se hace», «Añadir» avisa y no guarda. Elegir «Otro» → sale «¿Cuál?»; guardar con «Gomas»: la fila dice «Gomas».
 3. Editar un ejercicio propio antiguo: viene con el tipo deducido marcado.
 4. Revisar que las máquinas de la biblioteca (prensa, curl femoral…) tienen el tipo que corresponde a tu gimnasio.
+
+#### 2. Colores y tipografía
+
+**Qué cambia**
+* La paleta pasa a la de las maquetas en **toda la app**, no solo en los tokens: también los colores que las pantallas antiguas tenían escritos a mano, para que no queden dos fondos distintos. Fondo `#14161E`, tarjeta `#1B1E28`, tarjeta alta `#262A37`, texto `#E8EAF2` / `#A0A7BD` / `#8A91A8`, acero `#9DB4E6` → lila `#C9B9F2`, **récords en dorado** `#F0C46A` y peligro `#EF8A8A`. Las gráficas de Progreso y de la ficha, igual.
+* **Space Grotesk en todo** (antes Open Sans en el texto). Se añade `SpaceGrotesk-Regular.ttf` (misma licencia OFL, en `docs/licencias`); el proyecto no publica SemiBold estático, así que lo que iba en semibold usa Medium. Open Sans se quita.
+* Pantalla de arranque y barra de Android con el fondo nuevo.
+* **No cambian** los colores de avatar de perfiles y clientes: están guardados con cada perfil.
+* Es un cambio de colores, no de distribución: las pantallas siguen con su disposición actual hasta rediseñarlas una a una.
+
+**Probar**
+1. Recorrer todas las pestañas, ventanas y avisos: nada debe quedar con el fondo morado o azulado anterior, ni texto ilegible.
+2. Textos largos (instrucciones, notas): Space Grotesk ocupa algo más que Open Sans; mirar que nada se corte.
 
 #### 3. «Tu gimnasio» y la barra cargada
 

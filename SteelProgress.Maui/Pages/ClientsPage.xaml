@@ -41,21 +41,21 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 22"
                                             BackgroundColor="{Binding Client.AvatarColor}" VerticalOptions="Center">
-                                        <Label Text="{Binding Initial}" FontFamily="OpenSansSemibold" FontSize="18"
+                                        <Label Text="{Binding Initial}" FontFamily="SpaceGroteskMedium" FontSize="18"
                                                TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                        <Label Text="{Binding Client.Name}" Style="{StaticResource SpBody}" FontFamily="OpenSansSemibold" />
+                                        <Label Text="{Binding Client.Name}" Style="{StaticResource SpBody}" FontFamily="SpaceGroteskMedium" />
                                         <Label Text="{Binding Subtitle}" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
                                     <Border Grid.Column="2" Style="{StaticResource SpChipStyle}" BackgroundColor="#26A6E3A1"
                                             VerticalOptions="Center" IsVisible="{Binding HasBadge}">
                                         <Border.Triggers>
                                             <DataTrigger TargetType="Border" Binding="{Binding BadgeIsWarning}" Value="True">
-                                                <Setter Property="BackgroundColor" Value="#26F38BA8" />
+                                                <Setter Property="BackgroundColor" Value="#26EF8A8A" />
                                             </DataTrigger>
                                         </Border.Triggers>
-                                        <Label Text="{Binding Badge}" FontSize="11" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpOk}">
+                                        <Label Text="{Binding Badge}" FontSize="11" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpOk}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding BadgeIsWarning}" Value="True">
                                                     <Setter Property="TextColor" Value="{StaticResource SpDanger}" />

@@ -33,9 +33,9 @@ public static class MauiProgram
             .UseMaterialMauiIcons()
             .ConfigureFonts(fonts =>
             {
-                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                // Números y títulos del sistema de diseño (Resources/Styles/Tokens.xaml)
+                // Estilo «Acero + Discos»: Space Grotesk en toda la app (Resources/Styles/Tokens.xaml).
+                // No hay SemiBold estático: lo que iba en semibold usa Medium.
+                fonts.AddFont("SpaceGrotesk-Regular.ttf", "SpaceGroteskRegular");
                 fonts.AddFont("SpaceGrotesk-Medium.ttf", "SpaceGroteskMedium");
                 fonts.AddFont("SpaceGrotesk-Bold.ttf", "SpaceGroteskBold");
             });
