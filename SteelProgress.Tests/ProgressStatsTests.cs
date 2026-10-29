@@ -478,18 +478,45 @@ public class ProgressStatsTests : IDisposable
         Assert.True(trainer.ShowDetailFields);
         trainer.Name = "Remo en polea";
         trainer.MuscleGroup = "Espalda";
-        trainer.Equipment = " Polea ";
+        trainer.SelectedEquipment = EquipmentType.Cable;
         trainer.Instructions = "Espalda recta";
         await trainer.AddExerciseCommand.ExecuteAsync(null);
 
         Exercise saved;
         using (var db = Db())
             saved = db.Exercises.Single(e => e.Name == "Remo en polea");
-        Assert.Equal(("Polea", "Espalda recta"), (saved.Equipment, saved.Instructions));
+        Assert.Equal(("Polea", EquipmentType.Cable, "Espalda recta"), (saved.Equipment, saved.EquipmentType, saved.Instructions));
 
         // En vista simple no se ofrecen, pero si el ejercicio ya los tiene se ven
         simple.SelectedExercise = saved;
         Assert.True(simple.ShowDetailFields);
-        Assert.Equal("Polea", simple.Equipment);
+        Assert.Equal((EquipmentType.Cable, ""), (simple.SelectedEquipment, simple.Equipment));
+    }
+
+    [Fact]
+    public async Task EquipmentTypeIsRequiredAndOtherKeepsWhatWasWritten()
+    {
+        var vm = new ExerciseViewModel(new ExerciseRepository(Db()));
+        vm.ClearForm();
+        vm.Name = "Face pull";
+        vm.MuscleGroup = "Hombros";
+        await vm.AddExerciseCommand.ExecuteAsync(null);
+        using (var db = Db())
+            Assert.False(db.Exercises.Any(e => e.Name == "Face pull"));
+
+        vm.SelectedEquipment = EquipmentType.Other;
+        Assert.True(vm.IsOtherEquipment);
+        vm.Equipment = " Gomas ";
+        await vm.AddExerciseCommand.ExecuteAsync(null);
+        Exercise saved;
+        using (var db = Db())
+            saved = db.Exercises.Single(e => e.Name == "Face pull");
+        Assert.Equal((EquipmentType.Other, "Gomas"), (saved.EquipmentType, saved.Equipment));
+
+        vm.SelectedExercise = saved;
+        Assert.Equal((EquipmentType.Other, "Gomas"), (vm.SelectedEquipment, vm.Equipment));
+        // Un ejercicio antiguo sin tipo propone el deducido
+        vm.SelectedExercise = new Exercise { Name = "Prensa de piernas", Equipment = "Máquina" };
+        Assert.Equal(EquipmentType.PlateMachine, vm.SelectedEquipment);
     }
 }

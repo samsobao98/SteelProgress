@@ -305,6 +305,36 @@
                     <FlexLayout x:Name="FormGroupChips" Wrap="Wrap" AlignItems="Start" />
                 </VerticalStackLayout>
 
+                <!-- Con qué se hace: obligatorio, tarjetas con icono (construidas en code-behind) -->
+                <VerticalStackLayout Spacing="8">
+                    <Label FontSize="11" TextColor="{StaticResource SpText3}" CharacterSpacing="1">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="CON QUÉ SE HACE " />
+                                <Span Text="(OBLIGATORIO)" TextColor="{StaticResource SpRecord}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Grid x:Name="EquipmentChips" ColumnDefinitions="*,*" ColumnSpacing="8" RowSpacing="8" />
+                    <Border
+                        BackgroundColor="#252536"
+                        Padding="16,12"
+                        StrokeShape="RoundRectangle 14"
+                        StrokeThickness="0"
+                        IsVisible="{Binding IsOtherEquipment}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label FontSize="11" Text="¿CUÁL? (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                            <Entry
+                                Text="{Binding Equipment}"
+                                TextColor="#CDD6F4"
+                                PlaceholderColor="#45475A"
+                                Placeholder="ej. Gomas, TRX, balón medicinal"
+                                BackgroundColor="Transparent"
+                                FontSize="15" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
                 <!-- Campo: Notas -->
                 <Border
                     BackgroundColor="#252536"
@@ -323,24 +353,7 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Material e instrucciones: vista entrenador -->
-                <Border
-                    BackgroundColor="#252536"
-                    Padding="16,12"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0"
-                    IsVisible="{Binding ShowDetailFields}">
-                    <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="MATERIAL (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Entry
-                            Text="{Binding Equipment}"
-                            TextColor="#CDD6F4"
-                            PlaceholderColor="#45475A"
-                            Placeholder="ej. Barra, mancuernas, polea"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
-                    </VerticalStackLayout>
-                </Border>
+                <!-- Instrucciones y etiquetas: vista entrenador -->
                 <Border
                     BackgroundColor="#252536"
                     Padding="16,12"

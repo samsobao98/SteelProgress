@@ -309,6 +309,25 @@ public class SharingTests : IDisposable
     }
 
     [Fact]
+    public async Task EquipmentTypeTravelsAndOldPackagesGetOneDeduced()
+    {
+        var routineId = await CreateCoachRoutineAsync(withVideo: false);
+        using (var db = _coach.Db())
+        {
+            // Elegido a mano (aunque el texto diga otra cosa); el remo se queda sin tipo, como en un paquete antiguo
+            db.Exercises.Single(e => e.Name == "Press banca").EquipmentType = EquipmentType.PlateMachine;
+            await db.SaveChangesAsync();
+        }
+
+        await ImportAsync(await ExportAsync(routineId, includeMedia: false));
+
+        using var check = _client.Db();
+        var imported = check.Exercises.Where(e => !e.IsSystem).ToDictionary(e => e.Name, e => e.EquipmentType);
+        Assert.Equal(EquipmentType.PlateMachine, imported["Press banca"]);
+        Assert.Equal(EquipmentType.Barbell, imported["Remo con barra"]);
+    }
+
+    [Fact]
     public async Task OwnExercisesHaveNoAuthor()
     {
         await CreateCoachRoutineAsync(withVideo: false);

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SteelProgress.Data.Context;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Data.Repositories;
 
@@ -24,6 +25,21 @@ public class ExerciseRepository //Se encarga de trabajar con la tabla Exercise
             .Include(e => e.Media.OrderBy(m => m.Order))
             .OrderBy(e => e.Name)
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Pone el tipo de material a los ejercicios que no lo tienen (los anteriores a que fuera obligatorio),
+    /// deducido de su material o de su nombre. De todos los perfiles y de la biblioteca. Devuelve cuántos.
+    /// </summary>
+    public async Task<int> FillMissingEquipmentTypesAsync()
+    {
+        var missing = await _context.Exercises.IgnoreQueryFilters()
+            .Where(e => e.EquipmentType == null)
+            .ToListAsync();
+        foreach (var e in missing)
+            e.EquipmentType = EquipmentCatalog.Classify(e.Equipment, e.Name);
+        if (missing.Count > 0) await _context.SaveChangesAsync();
+        return missing.Count;
     }
 
     // ── Vídeos e imágenes ─────────────────────────────────────────────────

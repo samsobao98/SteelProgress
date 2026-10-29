@@ -7,7 +7,8 @@ namespace SteelProgress.Maui.Controls;
 
 /// <summary>
 /// Miniatura de un ejercicio en la biblioteca (Rediseño 4): el fotograma de su primer vídeo con
-/// la duración («0:24»), su GIF («GIF») o su foto; sin nada, un hueco punteado con «+».
+/// la duración («0:24»), su GIF («GIF») o su foto; sin nada, un hueco punteado con el icono de su material
+/// (o «+» si aún no tiene tipo).
 /// El fotograma se calcula aparte (<see cref="VideoThumbnails"/>) y aparece al estar listo.
 /// </summary>
 public class ExerciseThumb : ContentView
@@ -23,7 +24,8 @@ public class ExerciseThumb : ContentView
 
     private readonly Border _card, _empty, _badge;
     private readonly Image _image;
-    private readonly Label _play, _badgeText;
+    private readonly Label _play, _badgeText, _plus;
+    private readonly EquipmentIcon _equipment;
 
     public ExerciseThumb()
     {
@@ -53,13 +55,16 @@ public class ExerciseThumb : ContentView
             StrokeThickness = 1,
             StrokeDashArray = new DoubleCollection { 3, 3 },
             StrokeShape = new RoundRectangle { CornerRadius = 12 },
-            Content = new Label { Text = "+", FontSize = 18, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center }
+            Content = new Grid { Children = {
+                (_plus = new Label { Text = "+", FontSize = 18, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center }),
+                (_equipment = new EquipmentIcon { HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center })
+            } }
         };
         _card.SetDynamicResource(BackgroundColorProperty, "SpCardHi");
         _play.SetDynamicResource(Label.TextColorProperty, "SpText");
         _badgeText.SetDynamicResource(Label.TextColorProperty, "SpText");
         _empty.SetDynamicResource(Border.StrokeProperty, "SpText4");
-        ((Label)_empty.Content).SetDynamicResource(Label.TextColorProperty, "SpText4");
+        _plus.SetDynamicResource(Label.TextColorProperty, "SpText4");
         Content = new Grid { Children = { _card, _empty } };
         Refresh();
     }
@@ -70,6 +75,8 @@ public class ExerciseThumb : ContentView
         var first = exercise?.Media.OrderBy(m => m.Order).FirstOrDefault();
         _card.IsVisible = first is not null;
         _empty.IsVisible = first is null;
+        _equipment.Type = exercise?.EquipmentType;
+        _plus.IsVisible = exercise?.EquipmentType is null;
         _image.Source = null;
         _play.IsVisible = first?.Kind == MediaKind.Video;
         _badge.IsVisible = first?.Kind == MediaKind.Gif;

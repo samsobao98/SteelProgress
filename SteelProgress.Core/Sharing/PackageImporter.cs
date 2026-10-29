@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SteelProgress.Core.Services;
 using SteelProgress.Data.Context;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.Sharing;
 
@@ -132,6 +133,7 @@ public class PackageImporter
                     MuscleGroup = pkg.MuscleGroup,
                     Notes = pkg.Notes,
                     Equipment = pkg.Equipment,
+                    EquipmentType = pkg.EquipmentType ?? EquipmentCatalog.Classify(pkg.Equipment, pkg.Name),
                     Instructions = pkg.Instructions,
                     Tags = pkg.Tags,
                     // Su autor original si lo trae (reenviado); si no, quien envía el paquete

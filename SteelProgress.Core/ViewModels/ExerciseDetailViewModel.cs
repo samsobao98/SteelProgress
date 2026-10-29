@@ -8,6 +8,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using SteelProgress.Core.Services;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.ViewModels;
 
@@ -84,7 +85,7 @@ public partial class ExerciseDetailViewModel : ObservableObject
 
         var chips = new List<string> { exercise.MuscleGroup };
         chips.AddRange(ExerciseCatalog.TagsOf(exercise.SecondaryMuscles));
-        if (!string.IsNullOrWhiteSpace(exercise.Equipment)) chips.Add(exercise.Equipment.Trim());
+        if (EquipmentCatalog.DisplayText(exercise) is { Length: > 0 } equipment) chips.Add(equipment);
         chips.AddRange(ExerciseCatalog.TagsOf(exercise.Tags));
         Chips = chips.Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 

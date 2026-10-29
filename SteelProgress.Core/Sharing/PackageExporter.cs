@@ -132,6 +132,7 @@ public class PackageExporter
         MuscleGroup = e.MuscleGroup,
         Notes = e.Notes,
         Equipment = e.Equipment,
+        EquipmentType = e.EquipmentType,
         Instructions = e.Instructions,
         Tags = e.Tags,
         AuthorName = e.AuthorName,

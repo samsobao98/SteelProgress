@@ -22,6 +22,9 @@ namespace SteelProgress.Domain.Entities
         public string? SecondaryMuscles { get; set; }
         // Material (barra, mancuernas, polea...) e instrucciones de ejecución
         public string? Equipment { get; set; }
+        // Tipo de material (obligatorio en el formulario). Null solo en datos anteriores, hasta que el arranque
+        // lo deduce de Equipment (EquipmentCatalog.Classify). En «Otro», Equipment guarda lo que se escribió.
+        public EquipmentType? EquipmentType { get; set; }
         public string? Instructions { get; set; }
 
         // Persistido (no computado): distingue la biblioteca precargada de datos

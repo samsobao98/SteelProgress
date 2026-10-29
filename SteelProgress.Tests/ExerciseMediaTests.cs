@@ -92,6 +92,7 @@ public class ExerciseMediaTests : IDisposable
         var vm = ViewModel();
         vm.Name = "Aperturas en polea";
         vm.MuscleGroup = "Pecho";
+        vm.SelectedEquipment = EquipmentType.Barbell;
         await vm.AddMediaAsync(Bytes(100), "clip.mp4");
         await vm.AddMediaAsync(Bytes(50), "foto.png");
 
@@ -173,6 +174,7 @@ public class ExerciseMediaTests : IDisposable
         var vm = ViewModel();
         vm.Name = "Press banca";
         vm.MuscleGroup = "Pecho";
+        vm.SelectedEquipment = EquipmentType.Barbell;
         await vm.AddMediaAsync(Bytes(100), "clip.mp4");
         await vm.AddExerciseCommand.ExecuteAsync(null);
         Assert.Equal(1, FilesOnDisk());
@@ -201,6 +203,7 @@ public class ExerciseMediaTests : IDisposable
         var vm = ViewModel();
         vm.Name = "Press banca";
         vm.MuscleGroup = "Pecho";
+        vm.SelectedEquipment = EquipmentType.Barbell;
         await vm.AddMediaAsync(Bytes(100), "clip.mp4");
         await vm.AddExerciseCommand.ExecuteAsync(null);
 
@@ -230,6 +233,7 @@ public class ExerciseMediaTests : IDisposable
         var vm = ViewModel();
         vm.Name = "Press banca";
         vm.MuscleGroup = "Pecho";
+        vm.SelectedEquipment = EquipmentType.Barbell;
         await vm.AddMediaAsync(Bytes(100), "clip.mp4");
         await vm.AddExerciseCommand.ExecuteAsync(null);
 

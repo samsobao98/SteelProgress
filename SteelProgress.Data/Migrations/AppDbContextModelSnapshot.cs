@@ -68,6 +68,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("Equipment")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("EquipmentType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Instructions")
                         .HasColumnType("TEXT");
 

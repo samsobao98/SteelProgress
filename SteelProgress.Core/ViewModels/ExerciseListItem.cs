@@ -1,5 +1,6 @@
 using SteelProgress.Core.Services;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.ViewModels;
 
@@ -30,7 +31,7 @@ public sealed class ExerciseListItem
         Progress = progress;
 
         var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(exercise.Equipment)) parts.Add(exercise.Equipment.Trim());
+        if (EquipmentCatalog.DisplayText(exercise) is { Length: > 0 } equipment) parts.Add(equipment);
         if (progress is not null) parts.Add($"mejor: {WorkoutExerciseState.FormatKg(progress.BestWeight)} × {progress.BestReps}");
         else if (IsOwn && exercise.Media.Count == 0) parts.Add("sin vídeo");
         DetailText = string.Join(" · ", parts);

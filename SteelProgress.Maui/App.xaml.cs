@@ -36,6 +36,8 @@ public partial class App : Application
         await SeedDefaultProfileIfNeededAsync(db);
         await SeedExerciseLibraryIfNeededAsync(db);
         await NormalizeLibraryUidsAsync(db);
+        // Tipo de material obligatorio (2026-10-29): se deduce para lo que ya había
+        await new SteelProgress.Data.Repositories.ExerciseRepository(db).FillMissingEquipmentTypesAsync();
     }
 
     private static async Task SeedDefaultProfileIfNeededAsync(AppDbContext db)
@@ -93,6 +95,7 @@ public partial class App : Application
             MuscleGroup = i.MuscleGroup,
             SecondaryMuscles = i.SecondaryMuscles,
             Equipment = i.Equipment,
+            EquipmentType = SteelProgress.Domain.Services.EquipmentCatalog.Classify(i.Equipment, i.Name),
             Instructions = i.Instructions,
             UserId = null,
             IsSystem = true,

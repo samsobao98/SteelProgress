@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SteelProgress.Core.Services;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.ViewModels;
 
@@ -105,7 +106,7 @@ public partial class ExercisePickerItem : ObservableObject
         get
         {
             if (Exercise.Media.Any(m => m.Kind == MediaKind.Video)) return $"{Exercise.MuscleGroup} · con vídeo";
-            if (!string.IsNullOrWhiteSpace(Exercise.Equipment)) return $"{Exercise.MuscleGroup} · {Exercise.Equipment}";
+            if (EquipmentCatalog.DisplayText(Exercise) is { Length: > 0 } equipment) return $"{Exercise.MuscleGroup} · {equipment}";
             return Exercise.MuscleGroup;
         }
     }

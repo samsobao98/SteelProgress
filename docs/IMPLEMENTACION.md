@@ -145,6 +145,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 3. Progreso (absorbe Historial) e Inicio — **hecho, pendiente de probar en el móvil** (ver abajo).
 4. Ejercicios — **hecho, pendiente de probar en el móvil** (ver abajo).
 5. Respuesta táctil y animaciones en toda la app.
+6. **Estilo «Acero + Discos»** (maquetas del canvas de diseño, 2026-10-29) — en curso (ver abajo).
 
 ### Rediseño 1 — Entreno
 
@@ -283,6 +284,32 @@ Decisiones (2026-10-29): **D1 → reproductor dentro de la app** (`CommunityTool
 * Miniaturas de vídeo en Windows.
 * Recortar el vídeo y el ★ de la maqueta en la fila (no quedó claro qué marcaba).
 * «Ver cómo se hace» en Entreno sigue abriendo el reproductor del móvil; se puede pasar a la ficha más adelante.
+
+### Rediseño 5 — Estilo «Acero + Discos»
+
+Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 pantallas: Entreno con barra cargada, mancuernas, polea y máquina de discos; Inicio; tipos de material; Entreno, Rutinas, Ejercicios, Progreso, Clientes, Ajustes y Perfiles). Se aplica por partes, primero lo que se puede comprobar con pruebas:
+
+1. **Tipo de material obligatorio** — hecho, pendiente de probar en el móvil.
+2. Colores y tipografía del estilo nuevo en los tokens.
+3. «Tu gimnasio» (discos y peso de la barra) y cálculo de cómo cargar la barra.
+4. Pantallas una a una.
+
+#### 1. Tipo de material
+
+**Qué hace**
+* Cada ejercicio tiene un **tipo de material** (`Exercise.EquipmentType`): barra, mancuernas, **máquina de placas** (la de pila con pasador), **máquina de discos** (se carga con discos), polea, peso corporal, kettlebell u otro. Migración `AddExerciseEquipmentType`.
+* **Formulario**: «Con qué se hace (obligatorio)», ocho tarjetas con su icono; sin elegir no se guarda. Con «Otro» aparece «¿Cuál?» (gomas, TRX…). Sustituye al antiguo campo de texto «Material», que solo salía en vista entrenador.
+* **Lo que ya había**: al arrancar, cada ejercicio sin tipo (de la biblioteca y de todos los perfiles) recibe uno deducido de su material o, si no tiene, de su nombre (`EquipmentCatalog.Classify`). Lo elegido a mano no se toca.
+* **Biblioteca**: de las 21 «Máquina», son de discos la prensa, la sentadilla hack y las elevaciones de talones en prensa y sentado; las 6 de cardio (cinta, bicicleta, elíptica, remo, escaladora, assault bike) quedan en «Otro», y los 2 «Banco» (fondos entre bancos, step-up) en peso corporal. **A revisar por Samuel**: depende de las máquinas de cada gimnasio, y se puede cambiar por ejercicio.
+* **Iconos** (`Controls/EquipmentIcon`), dibujados como en las maquetas. De momento salen en el formulario y en el hueco de la miniatura de los ejercicios sin vídeo; el resto de pantallas los usarán al rediseñarse.
+* El material que se enseña sale del tipo («Máquina de discos»); en «Otro», lo escrito.
+* **Compartir**: el tipo viaja en los `.steel`; en paquetes antiguos se deduce al importar.
+
+**Probar**
+1. Abrir la app (migra y rellena los tipos). Ejercicios: un ejercicio sin vídeo muestra el icono de su material en el hueco.
+2. «+»: sin elegir «Con qué se hace», «Añadir» avisa y no guarda. Elegir «Otro» → sale «¿Cuál?»; guardar con «Gomas»: la fila dice «Gomas».
+3. Editar un ejercicio propio antiguo: viene con el tipo deducido marcado.
+4. Revisar que las máquinas de la biblioteca (prensa, curl femoral…) tienen el tipo que corresponde a tu gimnasio.
 
 ---
 

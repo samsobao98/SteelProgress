@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using SteelProgress.Core.Services;
 using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.ViewModels;
 
@@ -46,14 +47,24 @@ public partial class ExerciseViewModel : ObservableObject
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string? _muscleGroup;
     [ObservableProperty] private string _notes = string.Empty;
+    /// <summary>Con qué se hace (obligatorio): los chips con icono del formulario.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOtherEquipment))]
+    private EquipmentType? _selectedEquipment;
+    public bool IsOtherEquipment => SelectedEquipment == EquipmentType.Other;
+    public IReadOnlyList<EquipmentType> EquipmentTypes => EquipmentCatalog.All;
+    /// <summary>Solo con «Otro»: cuál (gomas, TRX…).</summary>
     [ObservableProperty] private string _equipment = string.Empty;
     [ObservableProperty] private string _instructions = string.Empty;
     /// <summary>Etiquetas separadas por comas.</summary>
     [ObservableProperty] private string _tags = string.Empty;
 
-    /// <summary>Material, instrucciones y etiquetas: solo vista entrenador (si el ejercicio ya los tiene, se ven siempre).</summary>
+    /// <summary>Instrucciones y etiquetas: solo vista entrenador (si el ejercicio ya las tiene, se ven siempre).</summary>
     public bool ShowDetailFields => (_viewOptions?.Current.EditExerciseDetails ?? false)
-        || Equipment.Length > 0 || Instructions.Length > 0 || Tags.Length > 0;
+        || Instructions.Length > 0 || Tags.Length > 0;
+
+    [RelayCommand]
+    private void SelectEquipment(EquipmentType type) => SelectedEquipment = type;
 
     /// <summary>Grupo muscular elegido con los chips del formulario.</summary>
     [RelayCommand]
@@ -128,6 +139,7 @@ public partial class ExerciseViewModel : ObservableObject
         Name = string.Empty;
         Notes = string.Empty;
         Equipment = string.Empty;
+        SelectedEquipment = null;
         Instructions = string.Empty;
         Tags = string.Empty;
         MuscleGroup = null;
@@ -145,6 +157,7 @@ public partial class ExerciseViewModel : ObservableObject
             MuscleGroup = null;
             Notes = string.Empty;
             Equipment = string.Empty;
+            SelectedEquipment = null;
             Instructions = string.Empty;
             Tags = string.Empty;
             OnPropertyChanged(nameof(ShowDetailFields));
@@ -157,7 +170,9 @@ public partial class ExerciseViewModel : ObservableObject
         Name = SelectedExercise.Name;
         MuscleGroup = SelectedExercise.MuscleGroup;
         Notes = SelectedExercise.Notes ?? string.Empty;
-        Equipment = SelectedExercise.Equipment ?? string.Empty;
+        SelectedEquipment = SelectedExercise.EquipmentType
+            ?? EquipmentCatalog.Classify(SelectedExercise.Equipment, SelectedExercise.Name);
+        Equipment = SelectedEquipment == EquipmentType.Other ? SelectedExercise.Equipment?.Trim() ?? string.Empty : string.Empty;
         Instructions = SelectedExercise.Instructions ?? string.Empty;
         Tags = SelectedExercise.Tags ?? string.Empty;
         OnPropertyChanged(nameof(ShowDetailFields));
@@ -182,6 +197,12 @@ public partial class ExerciseViewModel : ObservableObject
             return;
         }
 
+        if (SelectedEquipment is not { } equipment)
+        {
+            NotificationService.Error("Elige con qué se hace el ejercicio.");
+            return;
+        }
+
         if (await _repository.ExistsByNameAsync(name))
         {
             NotificationService.Error("Ya existe un ejercicio con ese nombre.");
@@ -193,7 +214,8 @@ public partial class ExerciseViewModel : ObservableObject
             Name = name,
             MuscleGroup = muscleGroup,
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes,
-            Equipment = Clean(Equipment),
+            Equipment = EquipmentCatalog.StoredText(equipment, Equipment),
+            EquipmentType = equipment,
             Instructions = Clean(Instructions),
             Tags = ExerciseCatalog.JoinTags([Tags])
         };
@@ -241,6 +263,12 @@ public partial class ExerciseViewModel : ObservableObject
             return;
         }
 
+        if (SelectedEquipment is not { } equipment)
+        {
+            NotificationService.Error("Elige con qué se hace el ejercicio.");
+            return;
+        }
+
         if (await _repository.ExistsByNameExceptIdAsync(name, SelectedExercise.Id))
         {
             NotificationService.Error("Ya existe otro ejercicio con ese nombre.");
@@ -250,7 +278,8 @@ public partial class ExerciseViewModel : ObservableObject
         SelectedExercise.Name = name;
         SelectedExercise.MuscleGroup = muscleGroup;
         SelectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
-        SelectedExercise.Equipment = Clean(Equipment);
+        SelectedExercise.Equipment = EquipmentCatalog.StoredText(equipment, Equipment);
+        SelectedExercise.EquipmentType = equipment;
         SelectedExercise.Instructions = Clean(Instructions);
         SelectedExercise.Tags = ExerciseCatalog.JoinTags([Tags]);
 

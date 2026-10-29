@@ -4,6 +4,8 @@ using Microsoft.Maui.Controls.Shapes;
 using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
+using SteelProgress.Domain.Services;
+using SteelProgress.Maui.Controls;
 using SteelProgress.Maui.Converters;
 
 namespace SteelProgress.Maui.Pages;
@@ -16,6 +18,7 @@ public partial class ExercisePage : ContentPage
     private readonly ExerciseViewModel _vm;
     private readonly List<(string? value, Border chip, Label label)> _groupChips = new();
     private readonly List<(string value, Border chip, Label label)> _formChips = new();
+    private readonly List<(EquipmentType value, Border chip, Label label)> _equipmentChips = new();
     private bool _chipsBuilt;
 
     public ExercisePage(ExerciseViewModel vm)
@@ -23,7 +26,11 @@ public partial class ExercisePage : ContentPage
         InitializeComponent();
         _ = new MauiIcon();
         BindingContext = _vm = vm;
-        _vm.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ExerciseViewModel.MuscleGroup)) StyleFormChips(); };
+        _vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ExerciseViewModel.MuscleGroup)) StyleFormChips();
+            else if (e.PropertyName == nameof(ExerciseViewModel.SelectedEquipment)) StyleEquipmentChips();
+        };
         SizeChanged += (_, _) => { if (Height > 0) SheetScroll.MaximumHeightRequest = Height * 0.92; };
     }
 
@@ -36,6 +43,7 @@ public partial class ExercisePage : ContentPage
             _chipsBuilt = true;
             BuildGroupChips();
             BuildFormChips();
+            BuildEquipmentChips();
         }
         await _vm.RefreshAsync();
         await RunEntryAnimationsAsync();
@@ -136,6 +144,56 @@ public partial class ExercisePage : ContentPage
             var selected = value == _vm.MuscleGroup;
             chip.BackgroundColor = selected ? Color.FromArgb("#CBA6F7") : Color.FromArgb("#252536");
             label.TextColor = selected ? Color.FromArgb("#1E1E2E") : Color.FromArgb("#BAC2DE");
+        }
+    }
+
+    // Con qué se hace: dos columnas de tarjetas con su icono (maqueta «Con qué se hace»)
+    private void BuildEquipmentChips()
+    {
+        EquipmentChips.Children.Clear();
+        EquipmentChips.RowDefinitions.Clear();
+        _equipmentChips.Clear();
+        var types = _vm.EquipmentTypes;
+        for (var i = 0; i < types.Count; i++)
+        {
+            var type = types[i];
+            if (i % 2 == 0) EquipmentChips.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            var label = new Label
+            {
+                Text = type == EquipmentType.Other ? "Otro: gomas, TRX…" : EquipmentCatalog.Label(type),
+                FontSize = 13,
+                VerticalOptions = LayoutOptions.Center,
+                LineBreakMode = LineBreakMode.WordWrap
+            };
+            var content = new Grid { ColumnDefinitions = { new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Star) }, ColumnSpacing = 10 };
+            content.Add(new EquipmentIcon { Type = type, VerticalOptions = LayoutOptions.Center }, 0);
+            content.Add(label, 1);
+            var chip = new Border
+            {
+                Padding = new Thickness(12, 0),
+                HeightRequest = 56,
+                StrokeShape = new RoundRectangle { CornerRadius = 16 },
+                Content = content
+            };
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += (_, _) => _vm.SelectEquipmentCommand.Execute(type);
+            chip.GestureRecognizers.Add(tap);
+            _equipmentChips.Add((type, chip, label));
+            EquipmentChips.Add(chip, i % 2, i / 2);
+        }
+        StyleEquipmentChips();
+    }
+
+    private void StyleEquipmentChips()
+    {
+        foreach (var (value, chip, label) in _equipmentChips)
+        {
+            var selected = value == _vm.SelectedEquipment;
+            chip.BackgroundColor = selected ? Color.FromArgb("#2C2D42") : Color.FromArgb("#252536");
+            chip.Stroke = selected ? Color.FromArgb("#CBA6F7") : Colors.Transparent;
+            chip.StrokeThickness = selected ? 2 : 0;
+            label.TextColor = selected ? Color.FromArgb("#CDD6F4") : Color.FromArgb("#BAC2DE");
+            label.FontAttributes = selected ? FontAttributes.Bold : FontAttributes.None;
         }
     }
 
