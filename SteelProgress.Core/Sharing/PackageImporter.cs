@@ -132,7 +132,10 @@ public class PackageImporter
                     MuscleGroup = pkg.MuscleGroup,
                     Notes = pkg.Notes,
                     Equipment = pkg.Equipment,
-                    Instructions = pkg.Instructions
+                    Instructions = pkg.Instructions,
+                    Tags = pkg.Tags,
+                    // Su autor original si lo trae (reenviado); si no, quien envía el paquete
+                    AuthorName = pkg.AuthorName ?? package.Manifest.AuthorName
                 };
                 _db.Exercises.Add(exercise);
                 byUid[pkg.Uid] = exercise;

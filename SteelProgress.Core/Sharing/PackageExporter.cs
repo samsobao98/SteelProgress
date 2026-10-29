@@ -133,6 +133,8 @@ public class PackageExporter
         Notes = e.Notes,
         Equipment = e.Equipment,
         Instructions = e.Instructions,
+        Tags = e.Tags,
+        AuthorName = e.AuthorName,
         Media = includeMedia
             ? e.Media.OrderBy(m => m.Order)
                 .Where(m => File.Exists(_storage.GetFullPath(m.FileName)))

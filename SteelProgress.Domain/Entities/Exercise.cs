@@ -28,6 +28,11 @@ namespace SteelProgress.Domain.Entities
         // legacy con UserId null, que el seed de perfiles migra a un perfil.
         public bool IsSystem { get; set; }
 
+        // Quién lo envió, si llegó en un paquete .steel (null: propio o de la biblioteca)
+        public string? AuthorName { get; set; }
+        // Etiquetas libres separadas por comas (vista entrenador), p. ej. «unilateral, casa»
+        public string? Tags { get; set; }
+
         public ICollection<ExerciseMedia> Media { get; set; } = new List<ExerciseMedia>();
     }
 }

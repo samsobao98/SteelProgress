@@ -288,6 +288,35 @@ public class SharingTests : IDisposable
     }
 
     [Fact]
+    public async Task ImportedExercisesRememberWhoSentThemAndKeepTheirTags()
+    {
+        var routineId = await CreateCoachRoutineAsync(withVideo: false);
+        using (var db = _coach.Db())
+        {
+            var bench = db.Exercises.Single(e => e.Name == "Press banca");
+            bench.Tags = "básico, barra";
+            // Uno que a Laura le llegó de otro: al reenviarlo conserva su autor original
+            db.Exercises.Single(e => e.Name == "Remo con barra").AuthorName = "Iván";
+            await db.SaveChangesAsync();
+        }
+
+        await ImportAsync(await ExportAsync(routineId, includeMedia: false));
+
+        using var check = _client.Db();
+        var imported = check.Exercises.Where(e => !e.IsSystem).ToDictionary(e => e.Name);
+        Assert.Equal(("Laura", "básico, barra"), (imported["Press banca"].AuthorName, imported["Press banca"].Tags));
+        Assert.Equal("Iván", imported["Remo con barra"].AuthorName);
+    }
+
+    [Fact]
+    public async Task OwnExercisesHaveNoAuthor()
+    {
+        await CreateCoachRoutineAsync(withVideo: false);
+        using var db = _coach.Db();
+        Assert.All(db.Exercises.Where(e => !e.IsSystem), e => Assert.Null(e.AuthorName));
+    }
+
+    [Fact]
     public void RejectsFilesThatAreNotPackages()
     {
         var ex = Assert.Throws<SteelPackageException>(() => SteelPackage.Open(new MemoryStream(new byte[] { 1, 2, 3, 4 })));

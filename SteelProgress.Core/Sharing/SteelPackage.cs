@@ -54,6 +54,9 @@ public sealed class PackageExercise
     public string? Notes { get; set; }
     public string? Equipment { get; set; }
     public string? Instructions { get; set; }
+    // Etiquetas y autor original (si se reenvía un ejercicio que llegó de otro); null en paquetes antiguos
+    public string? Tags { get; set; }
+    public string? AuthorName { get; set; }
     public List<PackageMedia> Media { get; set; } = new();
 }
 

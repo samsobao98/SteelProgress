@@ -62,6 +62,9 @@ namespace SteelProgress.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AuthorName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Equipment")
                         .HasColumnType("TEXT");
 
@@ -83,6 +86,9 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SecondaryMuscles")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tags")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("Uid")
