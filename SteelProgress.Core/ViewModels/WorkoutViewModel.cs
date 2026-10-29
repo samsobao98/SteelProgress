@@ -406,12 +406,12 @@ public partial class WorkoutViewModel : ObservableObject
     public bool IsPlateMachine => CurrentEquipment == EquipmentType.PlateMachine;
 
     /// <summary>
-    /// Discos por lado para el peso actual; null si el ejercicio no se carga con discos.
+    /// Discos por lado para el peso actual; null si el ejercicio no se carga con discos o aún no hay peso.
     /// En la máquina de discos se cuentan solo los discos (aún no se guarda lo que pesa el carro).
     /// </summary>
     public PlateLoad? Load => CurrentEquipment switch
     {
-        EquipmentType.Barbell => PlateLoading.For(Weight, Gym.BarWeight, Gym.Plates),
+        EquipmentType.Barbell when Weight > 0 => PlateLoading.For(Weight, Gym.BarWeight, Gym.Plates),
         EquipmentType.PlateMachine when Weight > 0 => PlateLoading.For(Weight, 0, Gym.Plates),
         _ => null
     };

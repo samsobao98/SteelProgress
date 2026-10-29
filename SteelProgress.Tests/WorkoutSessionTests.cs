@@ -125,6 +125,8 @@ public class WorkoutSessionTests : IDisposable
         Assert.Equal(new[] { 25.0, 15 }, vm.Load!.PerSide);
         vm.Weight = 20;
         Assert.Equal("Solo la barra", vm.LoadText);
+        vm.Weight = 0;
+        Assert.False(vm.ShowsPlates);   // sin historial ni prescripción: aún no hay barra que enseñar
         vm.Weight = 10;
         Assert.Equal("Menos que la barra sola (20 kg)", vm.LoadText);
 
