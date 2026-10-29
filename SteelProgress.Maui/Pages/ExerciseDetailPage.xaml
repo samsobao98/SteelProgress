@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Ficha de un ejercicio (Rediseño 4): el vídeo a sangre arriba, sus datos y tu progreso en él -->
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.ExerciseDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
+    x:DataType="vm:ExerciseDetailViewModel"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="Not" />
+        <Style x:Key="RoundButton" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="#99161622" />
+            <Setter Property="HeightRequest" Value="40" />
+            <Setter Property="WidthRequest" Value="40" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+            <Setter Property="StrokeThickness" Value="0" />
+        </Style>
+        <Style x:Key="MediaChip" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="#99161622" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+            <Setter Property="StrokeThickness" Value="0" />
+        </Style>
+        <Style x:Key="StatCard" TargetType="Border" BasedOn="{StaticResource SpCardStyle}">
+            <Setter Property="Padding" Value="8,12" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- ── Vídeo, GIF o foto, a sangre ── -->
+                <Grid x:Name="MediaArea" HeightRequest="300">
+                    <!-- Sin nada: el degradado acero con un aviso -->
+                    <Border Background="{StaticResource SpSteelBrush}" Opacity="0.25" StrokeThickness="0" IsVisible="{Binding HasMedia, Converter={StaticResource Not}}" />
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6"
+                                         IsVisible="{Binding HasMedia, Converter={StaticResource Not}}">
+                        <mi:MauiIcon Icon="{mi:Material VideocamOff}" IconColor="{StaticResource SpText3}" IconSize="36" HorizontalOptions="Center" />
+                        <Label Text="Sin vídeo" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <Image x:Name="MediaImage" Aspect="AspectFit" IsAnimationPlaying="True" />
+                    <toolkit:MediaElement x:Name="Player"
+                                          ShouldAutoPlay="True"
+                                          ShouldLoopPlayback="True"
+                                          ShouldMute="True"
+                                          ShouldShowPlaybackControls="True"
+                                          Speed="{Binding Speed}"
+                                          Aspect="AspectFit"
+                                          IsVisible="{Binding IsVideo}" />
+                    <!-- Varios vídeos: 1 / 2 (toca para el siguiente) y la velocidad -->
+                    <HorizontalStackLayout HorizontalOptions="End" VerticalOptions="End" Spacing="8" Margin="0,0,14,14">
+                        <Border Style="{StaticResource MediaChip}" IsVisible="{Binding HasManyMedia}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NextMediaCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding IndexText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                        </Border>
+                        <!-- Empieza sin sonido (en el gimnasio); se puede activar -->
+                        <Border Style="{StaticResource MediaChip}" IsVisible="{Binding IsVideo}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSoundTapped" />
+                            </Border.GestureRecognizers>
+                            <mi:MauiIcon x:Name="SoundIcon" Icon="{mi:Material VolumeOff}" IconColor="{StaticResource SpText}" IconSize="16" />
+                        </Border>
+                        <Border Style="{StaticResource MediaChip}" IsVisible="{Binding IsVideo}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleSlowMotionCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding SpeedText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText}" />
+                        </Border>
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Padding="20,18,20,40" Spacing="16">
+                    <!-- Nombre, procedencia y chips -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding Name}" Style="{StaticResource SpTitle}" FontSize="26" LineBreakMode="WordWrap" />
+                        <Label Text="{Binding OriginText}" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpSteel3}" IsVisible="{Binding HasOrigin}" />
+                        <FlexLayout BindableLayout.ItemsSource="{Binding Chips}" Wrap="Wrap" AlignItems="Start">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Border Style="{StaticResource SpChipStyle}" Margin="0,0,6,6">
+                                        <Label Text="{Binding .}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource SpText2}" />
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Tu mejor serie, 1RM estimado y sesiones -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding HasProgress}">
+                        <Border Style="{StaticResource StatCard}">
+                            <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
+                                <Label Text="{Binding BestSetText}" Style="{StaticResource SpNumber}" TextColor="{StaticResource SpRecord}" HorizontalOptions="Center" />
+                                <Label Text="Mejor serie" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource StatCard}">
+                            <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
+                                <Label Text="{Binding E1rmText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                <Label Text="1RM estimado" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                            <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
+                                <Label Text="{Binding SessionsText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
+                                <Label Text="{Binding SessionsCaption}" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                    <Label Text="Aún no lo has entrenado: tu mejor serie y tu evolución aparecerán aquí."
+                           Style="{StaticResource SpSecondary}" IsVisible="{Binding HasProgress, Converter={StaticResource Not}}" />
+
+                    <!-- Evolución del 1RM estimado -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16,14" IsVisible="{Binding HasChart}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Evolución" Style="{StaticResource SpHeading}" FontSize="15" />
+                                <Label Grid.Column="1" Text="{Binding ChartCaption}" Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                            </Grid>
+                            <lvc:CartesianChart HeightRequest="150" BackgroundColor="Transparent" Series="{Binding Series}" XAxes="{Binding XAxes}"
+                                                YAxes="{Binding YAxes}" TooltipPosition="Hidden" LegendPosition="Hidden" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Cómo hacerlo (solo si hay texto) -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16,14" IsVisible="{Binding HasSteps}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Cómo hacerlo" Style="{StaticResource SpHeading}" FontSize="15" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Steps}" Spacing="4">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Label Text="{Binding .}" Style="{StaticResource SpBody}" FontSize="14" TextColor="{StaticResource SpText2}" LineBreakMode="WordWrap" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Notas -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16,14" IsVisible="{Binding HasNotes}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Notas" Style="{StaticResource SpHeading}" FontSize="15" />
+                            <Label Text="{Binding Notes}" Style="{StaticResource SpBody}" FontSize="14" TextColor="{StaticResource SpText2}" LineBreakMode="WordWrap" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Atrás y editar, flotando sobre el vídeo -->
+        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16,16,0" VerticalOptions="Start">
+            <Border Style="{StaticResource RoundButton}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackTapped" />
+                </Border.GestureRecognizers>
+                <mi:MauiIcon Icon="{mi:Material ChevronLeft}" IconColor="{StaticResource SpText}" IconSize="24" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource RoundButton}" IsVisible="{Binding CanEdit}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnEditTapped" />
+                </Border.GestureRecognizers>
+                <mi:MauiIcon Icon="{mi:Material Edit}" IconColor="{StaticResource SpText}" IconSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

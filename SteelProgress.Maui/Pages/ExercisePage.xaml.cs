@@ -1,6 +1,7 @@
 using SteelProgress.Maui.Services;
 using MauiIcons.Core;
 using Microsoft.Maui.Controls.Shapes;
+using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Domain.Entities;
 using SteelProgress.Maui.Converters;
@@ -14,6 +15,7 @@ public partial class ExercisePage : ContentPage
 
     private readonly ExerciseViewModel _vm;
     private readonly List<(string? value, Border chip, Label label)> _groupChips = new();
+    private readonly List<(string value, Border chip, Label label)> _formChips = new();
     private bool _chipsBuilt;
 
     public ExercisePage(ExerciseViewModel vm)
@@ -21,6 +23,7 @@ public partial class ExercisePage : ContentPage
         InitializeComponent();
         _ = new MauiIcon();
         BindingContext = _vm = vm;
+        _vm.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ExerciseViewModel.MuscleGroup)) StyleFormChips(); };
         SizeChanged += (_, _) => { if (Height > 0) SheetScroll.MaximumHeightRequest = Height * 0.92; };
     }
 
@@ -32,6 +35,7 @@ public partial class ExercisePage : ContentPage
         {
             _chipsBuilt = true;
             BuildGroupChips();
+            BuildFormChips();
         }
         await _vm.RefreshAsync();
         await RunEntryAnimationsAsync();
@@ -52,6 +56,7 @@ public partial class ExercisePage : ContentPage
         _groupChips.Clear();
 
         AddGroupChip(null, "Todos");
+        AddGroupChip(ExerciseCatalog.OwnFilter, ExerciseCatalog.OwnFilter);
         foreach (var group in _vm.MuscleGroups)
             AddGroupChip(group, group);
 
@@ -99,6 +104,41 @@ public partial class ExercisePage : ContentPage
         }
     }
 
+    // Grupo muscular del formulario: chips en vez de desplegable (maqueta de crear ejercicio)
+    private void BuildFormChips()
+    {
+        FormGroupChips.Children.Clear();
+        _formChips.Clear();
+        foreach (var group in _vm.MuscleGroups)
+        {
+            var label = new Label { Text = group, FontSize = 13, FontAttributes = FontAttributes.Bold, VerticalOptions = LayoutOptions.Center };
+            var chip = new Border
+            {
+                Padding = new Thickness(12, 7),
+                Margin = new Thickness(0, 0, 6, 6),
+                StrokeThickness = 0,
+                StrokeShape = new RoundRectangle { CornerRadius = 12 },
+                Content = label
+            };
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += (_, _) => _vm.SelectMuscleGroupCommand.Execute(group);
+            chip.GestureRecognizers.Add(tap);
+            _formChips.Add((group, chip, label));
+            FormGroupChips.Children.Add(chip);
+        }
+        StyleFormChips();
+    }
+
+    private void StyleFormChips()
+    {
+        foreach (var (value, chip, label) in _formChips)
+        {
+            var selected = value == _vm.MuscleGroup;
+            chip.BackgroundColor = selected ? Color.FromArgb("#CBA6F7") : Color.FromArgb("#252536");
+            label.TextColor = selected ? Color.FromArgb("#1E1E2E") : Color.FromArgb("#BAC2DE");
+        }
+    }
+
     private async Task RunEntryAnimationsAsync()
     {
         if (IsReduceMotionEnabled())
@@ -121,91 +161,29 @@ public partial class ExercisePage : ContentPage
         _ = ShowOverlayAsync();
     }
 
-    // ── Item de la lista: abre la ficha de detalle ────────────────────────
+    // ── Item de la lista: abre la ficha (página propia, con el vídeo) ──────
 
-    private Exercise? _detailExercise;
+    private bool _opening;
 
-    private void OnExerciseTapped(object? sender, TappedEventArgs e)
+    private async void OnExerciseTapped(object? sender, TappedEventArgs e)
     {
-        if ((sender as BindableObject)?.BindingContext is Exercise exercise)
-            _ = ShowDetailAsync(exercise);
-    }
-
-    private async Task ShowDetailAsync(Exercise exercise)
-    {
-        _detailExercise = exercise;
-
-        DetailName.Text = exercise.Name;
-        DetailGroupLabel.Text = exercise.MuscleGroup;
-        DetailGroupChip.BackgroundColor =
-            (Color)new MuscleGroupColorConverter().Convert(exercise.MuscleGroup, typeof(Color), null, null!)!;
-
-        DetailEquipmentChip.IsVisible = !string.IsNullOrWhiteSpace(exercise.Equipment);
-        DetailEquipmentLabel.Text = exercise.Equipment ?? string.Empty;
-
-        DetailSecondarySection.IsVisible = !string.IsNullOrWhiteSpace(exercise.SecondaryMuscles);
-        DetailSecondaryLabel.Text = exercise.SecondaryMuscles ?? string.Empty;
-
-        DetailInstructionsSection.IsVisible = !string.IsNullOrWhiteSpace(exercise.Instructions);
-        DetailInstructionsLabel.Text = exercise.Instructions ?? string.Empty;
-
-        DetailNotesSection.IsVisible = !string.IsNullOrWhiteSpace(exercise.Notes);
-        DetailNotesLabel.Text = exercise.Notes ?? string.Empty;
-
-        DetailEditButton.IsVisible = !exercise.IsSystem;
-
-        DetailSheet.TranslationY = 800;
-        DetailSheet.IsVisible = true;
-        OverlayBackdrop.Opacity = 0;
-        OverlayBackdrop.IsVisible = true;
-
-        if (IsReduceMotionEnabled())
+        if (_opening || (sender as BindableObject)?.BindingContext is not ExerciseListItem item) return;
+        _opening = true;
+        try
         {
-            DetailSheet.TranslationY = 0;
-            OverlayBackdrop.Opacity = 0.6;
-            return;
+            await ExerciseDetailPage.Show(Navigation, new ExerciseDetailViewModel(item.Exercise, item.Progress), async exercise =>
+            {
+                _vm.SelectedExercise = exercise;
+                await ShowOverlayAsync();
+            });
         }
-
-        await Task.WhenAll(
-            DetailSheet.TranslateToAsync(0, 0, 320, Easing.CubicOut),
-            OverlayBackdrop.FadeToAsync(0.6, 280, Easing.CubicOut));
-    }
-
-    private async Task HideDetailAsync()
-    {
-        if (!IsReduceMotionEnabled())
-        {
-            await Task.WhenAll(
-                DetailSheet.TranslateToAsync(0, 800, 260, Easing.CubicIn),
-                OverlayBackdrop.FadeToAsync(0, 220, Easing.CubicIn));
-        }
-
-        DetailSheet.IsVisible = false;
-        OverlayBackdrop.IsVisible = false;
-    }
-
-    private void OnCloseDetailTapped(object? sender, TappedEventArgs e)
-        => _ = HideDetailAsync();
-
-    private async void OnDetailEditTapped(object? sender, TappedEventArgs e)
-    {
-        if (_detailExercise is null || _detailExercise.IsSystem) return;
-
-        DetailSheet.IsVisible = false;
-        _vm.SelectedExercise = _detailExercise;
-        await ShowOverlayAsync();
+        finally { _opening = false; }
     }
 
     // ── Cierre del overlay ────────────────────────────────────────────────
 
     // Cerrar sin guardar: ClearForm borra los vídeos elegidos para un ejercicio nuevo que no se guardó
-    private void OnBackdropTapped(object? sender, TappedEventArgs e)
-    {
-        if (DetailSheet.IsVisible)
-            _ = HideDetailAsync();
-        else
-            _ = CancelOverlayAsync();
-    }
+    private void OnBackdropTapped(object? sender, TappedEventArgs e) => _ = CancelOverlayAsync();
 
     private void OnCloseSheetTapped(object? sender, TappedEventArgs e)
         => _ = CancelOverlayAsync();
@@ -257,7 +235,7 @@ public partial class ExercisePage : ContentPage
             await _vm.RemoveMediaCommand.ExecuteAsync(media);
     }
 
-    // Por ahora el vídeo se abre con el reproductor del móvil (reproductor propio: decisión D1 pendiente)
+    // En el formulario, tocar un vídeo lo abre con el reproductor del móvil (en la ficha se ve dentro de la app)
     private async void OnMediaTapped(object? sender, TappedEventArgs e)
     {
         if ((sender as BindableObject)?.BindingContext is not ExerciseMedia media) return;

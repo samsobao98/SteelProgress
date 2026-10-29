@@ -13,6 +13,9 @@ public partial class ExerciseViewModel : ObservableObject
     private List<Exercise> _allExercises = new();
     private readonly ExerciseMediaService? _media;
     private readonly ViewOptionsService? _viewOptions;
+    private readonly WorkoutRepository? _workouts;
+    // Progreso de cada ejercicio en el historial del perfil (o cliente) activo, por Id
+    private Dictionary<int, ExerciseProgress> _progress = new();
 
     // Vídeos e imágenes del ejercicio que se está creando o editando.
     // Al crear, se copian a la app al elegirlos y se asocian al guardar; si se cancela, se borran.
@@ -23,6 +26,12 @@ public partial class ExerciseViewModel : ObservableObject
     [ObservableProperty] private bool _isImportingMedia;
 
     public ObservableCollection<Exercise> Exercises { get; } = new();
+
+    /// <summary>Lo filtrado, agrupado por grupo muscular (la lista de la pantalla).</summary>
+    public ObservableCollection<ExerciseGroup> Groups { get; } = new();
+
+    /// <summary>«111 ejercicios · 3 propios» (todos, sin filtrar).</summary>
+    [ObservableProperty] private string _countText = string.Empty;
 
     [ObservableProperty] private string _searchText = string.Empty;
 
@@ -39,10 +48,16 @@ public partial class ExerciseViewModel : ObservableObject
     [ObservableProperty] private string _notes = string.Empty;
     [ObservableProperty] private string _equipment = string.Empty;
     [ObservableProperty] private string _instructions = string.Empty;
+    /// <summary>Etiquetas separadas por comas.</summary>
+    [ObservableProperty] private string _tags = string.Empty;
 
-    /// <summary>Material e instrucciones: solo vista entrenador (si el ejercicio ya los tiene, se ven siempre).</summary>
+    /// <summary>Material, instrucciones y etiquetas: solo vista entrenador (si el ejercicio ya los tiene, se ven siempre).</summary>
     public bool ShowDetailFields => (_viewOptions?.Current.EditExerciseDetails ?? false)
-        || Equipment.Length > 0 || Instructions.Length > 0;
+        || Equipment.Length > 0 || Instructions.Length > 0 || Tags.Length > 0;
+
+    /// <summary>Grupo muscular elegido con los chips del formulario.</summary>
+    [RelayCommand]
+    private void SelectMuscleGroup(string? group) => MuscleGroup = group;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAddMode), nameof(OverlayTitle), nameof(SaveButtonText))]
@@ -66,11 +81,13 @@ public partial class ExerciseViewModel : ObservableObject
     }
 
     // media es opcional para que la app de escritorio, que crea el ViewModel a mano, siga compilando
-    public ExerciseViewModel(ExerciseRepository repository, ExerciseMediaService? media = null, ViewOptionsService? viewOptions = null)
+    public ExerciseViewModel(ExerciseRepository repository, ExerciseMediaService? media = null, ViewOptionsService? viewOptions = null,
+        WorkoutRepository? workouts = null)
     {
         _repository = repository;
         _media = media;
         _viewOptions = viewOptions;
+        _workouts = workouts;
         _ = LoadExercisesAsync();
     }
 
@@ -79,8 +96,18 @@ public partial class ExerciseViewModel : ObservableObject
     private async Task LoadExercisesAsync()
     {
         _allExercises = await _repository.GetAllAsync();
+        if (_workouts is not null)
+            _progress = TrainingStats.Exercises((await _workouts.GetTrainingLogAsync()).Sets).ToDictionary(p => p.ExerciseId);
+        int own = _allExercises.Count(e => !e.IsSystem);
+        CountText = $"{Plural(_allExercises.Count, "ejercicio", "ejercicios")} · {Plural(own, "propio", "propios")}";
         ApplyFilter();
     }
+
+    private static string Plural(int n, string one, string many) => $"{n} {(n == 1 ? one : many)}";
+
+    /// <summary>La fila de un ejercicio (con su mejor marca y procedencia), para la ficha.</summary>
+    public ExerciseListItem ItemOf(Exercise exercise) =>
+        new(exercise, _progress.GetValueOrDefault(exercise.Id));
 
     private void ApplyFilter()
     {
@@ -89,6 +116,10 @@ public partial class ExerciseViewModel : ObservableObject
         Exercises.Clear();
         foreach (var exercise in result)
             Exercises.Add(exercise);
+
+        Groups.Clear();
+        foreach (var group in ExerciseGroup.Build(Exercises.Select(ItemOf)))
+            Groups.Add(group);
     }
 
     public void ClearForm()
@@ -98,6 +129,7 @@ public partial class ExerciseViewModel : ObservableObject
         Notes = string.Empty;
         Equipment = string.Empty;
         Instructions = string.Empty;
+        Tags = string.Empty;
         MuscleGroup = null;
         SelectedExercise = null;
         OnPropertyChanged(nameof(ShowDetailFields));
@@ -114,6 +146,7 @@ public partial class ExerciseViewModel : ObservableObject
             Notes = string.Empty;
             Equipment = string.Empty;
             Instructions = string.Empty;
+            Tags = string.Empty;
             OnPropertyChanged(nameof(ShowDetailFields));
             return;
         }
@@ -126,6 +159,7 @@ public partial class ExerciseViewModel : ObservableObject
         Notes = SelectedExercise.Notes ?? string.Empty;
         Equipment = SelectedExercise.Equipment ?? string.Empty;
         Instructions = SelectedExercise.Instructions ?? string.Empty;
+        Tags = SelectedExercise.Tags ?? string.Empty;
         OnPropertyChanged(nameof(ShowDetailFields));
     }
 
@@ -160,7 +194,8 @@ public partial class ExerciseViewModel : ObservableObject
             MuscleGroup = muscleGroup,
             Notes = string.IsNullOrWhiteSpace(notes) ? null : notes,
             Equipment = Clean(Equipment),
-            Instructions = Clean(Instructions)
+            Instructions = Clean(Instructions),
+            Tags = ExerciseCatalog.JoinTags([Tags])
         };
         for (var i = 0; i < Media.Count; i++)
         {
@@ -217,6 +252,7 @@ public partial class ExerciseViewModel : ObservableObject
         SelectedExercise.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes;
         SelectedExercise.Equipment = Clean(Equipment);
         SelectedExercise.Instructions = Clean(Instructions);
+        SelectedExercise.Tags = ExerciseCatalog.JoinTags([Tags]);
 
         await _repository.UpdateAsync(SelectedExercise);
         await LoadExercisesAsync();

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters;assembly=SteelProgress.Maui"
+    xmlns:controls="clr-namespace:SteelProgress.Maui.Controls"
     BackgroundColor="#1E1E2E"
     Shell.NavBarIsVisible="False">
 
@@ -31,36 +32,16 @@
         <!-- ── Contenido principal ── -->
         <Grid RowDefinitions="Auto,Auto,Auto,*">
 
-            <!-- Mini-header sin card — solo título + contador -->
-            <Grid
-                Grid.Row="0"
-                ColumnDefinitions="*,Auto"
-                Padding="20,20,20,12">
-                <Label
-                    FontAttributes="Bold"
-                    FontSize="26"
-                    Text="Ejercicios"
-                    TextColor="#CDD6F4"
-                    VerticalOptions="Center" />
-                <Border
-                    Grid.Column="1"
-                    BackgroundColor="#252536"
-                    Padding="12,6"
-                    StrokeShape="RoundRectangle 10"
-                    StrokeThickness="0"
-                    VerticalOptions="Center">
-                    <Label
-                        FontSize="13"
-                        FontAttributes="Bold"
-                        Text="{Binding Exercises.Count}"
-                        TextColor="#6C7086" />
-                </Border>
-            </Grid>
+            <!-- Cabecera: título y cuántos hay (todos y propios) -->
+            <VerticalStackLayout Grid.Row="0" Padding="20,20,20,12">
+                <Label Text="Ejercicios" Style="{StaticResource SpTitle}" />
+                <Label Text="{Binding CountText}" Style="{StaticResource SpSecondary}" />
+            </VerticalStackLayout>
 
-            <!-- Búsqueda -->
+            <!-- Búsqueda (nombre, grupo o etiqueta) -->
             <Border
                 Grid.Row="1"
-                BackgroundColor="#252536"
+                BackgroundColor="{StaticResource SpCard}"
                 Padding="14,2"
                 Margin="20,0,20,10"
                 StrokeShape="RoundRectangle 14"
@@ -68,136 +49,88 @@
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <mi:MauiIcon
                         Icon="{mi:Material Search}"
-                        IconColor="#6C7086"
+                        IconColor="{StaticResource SpText3}"
                         IconSize="20"
                         VerticalOptions="Center" />
                     <Entry
                         Grid.Column="1"
                         Text="{Binding SearchText, Mode=TwoWay}"
                         Placeholder="Buscar ejercicio..."
-                        PlaceholderColor="#45475A"
-                        TextColor="#CDD6F4"
+                        PlaceholderColor="{StaticResource SpText4}"
+                        TextColor="{StaticResource SpText}"
                         BackgroundColor="Transparent"
                         FontSize="14"
                         ReturnType="Search" />
                 </Grid>
             </Border>
 
-            <!-- Chips de filtro por grupo muscular (construidos en code-behind) -->
+            <!-- Chips: Todos, ★ Propios y los grupos musculares (construidos en code-behind) -->
             <ScrollView
                 Grid.Row="2"
                 Orientation="Horizontal"
                 HorizontalScrollBarVisibility="Never"
-                Margin="0,0,0,10">
+                Margin="0,0,0,6">
                 <HorizontalStackLayout
                     x:Name="GroupChipsContainer"
                     Spacing="8"
                     Padding="20,0" />
             </ScrollView>
 
-            <!-- Lista de ejercicios -->
+            <!-- Lista por grupo muscular -->
             <CollectionView
                 x:Name="ExerciseList"
                 Grid.Row="3"
-                ItemsSource="{Binding Exercises}"
+                ItemsSource="{Binding Groups}"
+                IsGrouped="True"
                 Opacity="0"
                 Margin="20,0,20,0">
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="96" Color="Transparent" />
+                </CollectionView.Footer>
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="0,60" Spacing="14" HorizontalOptions="Center">
                         <mi:MauiIcon
                             Icon="{mi:Material FitnessCenter}"
-                            IconColor="#313244"
+                            IconColor="{StaticResource SpCardHi}"
                             IconSize="52"
                             HorizontalOptions="Center" />
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="Sin resultados"
-                            TextColor="#585B70"
-                            FontSize="15" />
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="Prueba otra búsqueda u otro filtro"
-                            TextColor="#45475A"
-                            FontSize="13" />
+                        <Label HorizontalTextAlignment="Center" Text="Sin resultados" Style="{StaticResource SpBody}" TextColor="{StaticResource SpText3}" />
+                        <Label HorizontalTextAlignment="Center" Text="Prueba otra búsqueda u otro filtro" Style="{StaticResource SpSecondary}" TextColor="{StaticResource SpText4}" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding Header}" Style="{StaticResource SpOverline}" Margin="2,12,0,8" />
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="0,0,0,10">
+                        <Grid Padding="0,0,0,8">
                             <Border
-                                BackgroundColor="#252536"
-                                Padding="16,14"
-                                StrokeShape="RoundRectangle 14"
-                                StrokeThickness="0">
+                                Style="{StaticResource SpCardStyle}"
+                                Padding="10">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnExerciseTapped" />
                                 </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                    <!-- Miniatura del primer vídeo o imagen -->
-                                    <Border
-                                        WidthRequest="56"
-                                        HeightRequest="56"
-                                        BackgroundColor="{StaticResource SpCardHi}"
-                                        StrokeShape="RoundRectangle 12"
-                                        StrokeThickness="0"
-                                        VerticalOptions="Center"
-                                        IsVisible="{Binding ., Converter={StaticResource ExerciseThumb}, ConverterParameter=any}">
-                                        <Grid>
-                                            <Image Source="{Binding ., Converter={StaticResource ExerciseThumb}}" Aspect="AspectFill" />
-                                            <Label Text="▶" FontSize="18" TextColor="{StaticResource SpText}" HorizontalOptions="Center" VerticalOptions="Center"
-                                                   IsVisible="{Binding ., Converter={StaticResource ExerciseThumb}, ConverterParameter=video}" />
-                                        </Grid>
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                                        <Label
-                                            FontAttributes="Bold"
-                                            FontSize="15"
-                                            Text="{Binding Name}"
-                                            TextColor="#CDD6F4"
-                                            LineBreakMode="TailTruncation" />
-                                        <!-- Chips: grupo muscular + badge "Propio" en los del usuario -->
-                                        <HorizontalStackLayout Spacing="6">
-                                            <Border
-                                                BackgroundColor="{Binding MuscleGroup, Converter={StaticResource MuscleGroupColor}}"
-                                                Padding="10,4"
-                                                StrokeShape="RoundRectangle 8"
-                                                StrokeThickness="0">
-                                                <Label
-                                                    FontSize="11"
-                                                    FontAttributes="Bold"
-                                                    Text="{Binding MuscleGroup}"
-                                                    TextColor="#1E1E2E" />
-                                            </Border>
-                                            <Border
-                                                BackgroundColor="Transparent"
-                                                Padding="10,4"
-                                                StrokeShape="RoundRectangle 8"
-                                                StrokeThickness="1"
-                                                Stroke="#585B70"
-                                                IsVisible="{Binding IsSystem, Converter={StaticResource InvertedBool}}">
-                                                <Label
-                                                    FontSize="11"
-                                                    FontAttributes="Bold"
-                                                    Text="Propio"
-                                                    TextColor="#9399B2" />
-                                            </Border>
-                                        </HorizontalStackLayout>
-                                        <Label
-                                            FontSize="12"
-                                            Text="{Binding Equipment}"
-                                            TextColor="#6C7086"
-                                            IsVisible="{Binding Equipment, Converter={StaticResource StringNotNullOrEmpty}}" />
-                                        <Label
-                                            FontSize="12"
-                                            Text="{Binding Notes}"
-                                            TextColor="#6C7086"
-                                            LineBreakMode="TailTruncation"
-                                            IsVisible="{Binding Notes, Converter={StaticResource StringNotNullOrEmpty}}" />
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                    <!-- Miniatura: fotograma del vídeo con su duración, GIF o foto; sin nada, hueco punteado -->
+                                    <controls:ExerciseThumb Exercise="{Binding Exercise}" WidthRequest="64" HeightRequest="64" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" Style="{StaticResource SpHeading}" FontSize="15" LineBreakMode="TailTruncation" />
+                                        <Label FontSize="12" LineBreakMode="TailTruncation">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding DetailText}" TextColor="{StaticResource SpText3}" />
+                                                    <Span Text="{Binding OriginSeparator}" TextColor="{StaticResource SpText3}" />
+                                                    <Span Text="{Binding OriginText}" TextColor="{StaticResource SpSteel3}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
                                     </VerticalStackLayout>
                                     <mi:MauiIcon
                                         Grid.Column="2"
                                         Icon="{mi:Material ChevronRight}"
-                                        IconColor="#45475A"
+                                        IconColor="{StaticResource SpText4}"
                                         IconSize="20"
                                         VerticalOptions="Center" />
                                 </Grid>
@@ -210,23 +143,24 @@
         </Grid>
 
         <!-- ── FAB ── -->
+        <!-- Sin animar: Scale/Opacity sobre un elemento con Shadow deja la sombra borrosa en Android -->
         <Border
             x:Name="FabButton"
-            BackgroundColor="#A6E3A1"
-            HeightRequest="56"
-            WidthRequest="56"
-            StrokeShape="RoundRectangle 28"
+            Background="{StaticResource SpSteelBrush}"
+            HeightRequest="58"
+            WidthRequest="58"
+            StrokeShape="RoundRectangle 18"
             StrokeThickness="0"
             HorizontalOptions="End"
             VerticalOptions="End"
             Margin="0,0,20,24"
-            Shadow="{Shadow Brush='#A6E3A1', Offset='0,4', Radius=12, Opacity=0.35}">
+            Shadow="{Shadow Brush='#B4BEFE', Offset='0,6', Radius=14, Opacity=0.35}">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnFabTapped" />
             </Border.GestureRecognizers>
             <mi:MauiIcon
                 Icon="{mi:Material Add}"
-                IconColor="#1E1E2E"
+                IconColor="{StaticResource SpOnAccent}"
                 IconSize="28"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
@@ -292,6 +226,61 @@
                     </Border>
                 </Grid>
 
+                <!-- Lo primero, el vídeo: es lo que hace propio el ejercicio -->
+                <Border
+                    Style="{StaticResource SpCardStyle}"
+                    Padding="16,12"
+                    IsVisible="{Binding MediaEnabled}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label FontSize="11" Text="VÍDEOS E IMÁGENES" TextColor="#6C7086" CharacterSpacing="1" />
+                        <CollectionView ItemsSource="{Binding Media}" HeightRequest="84" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.EmptyView>
+                                <Label Text="Añade un vídeo, GIF o foto de la galería para ver cómo se hace."
+                                       Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid WidthRequest="84" HeightRequest="84">
+                                        <Border BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 12" StrokeThickness="0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnMediaTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Grid>
+                                                <Image Source="{Binding ., Converter={StaticResource MediaImage}}" Aspect="AspectFill"
+                                                       IsAnimationPlaying="{Binding ., Converter={StaticResource MediaIsVideo}, ConverterParameter=gif}" />
+                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2"
+                                                                     IsVisible="{Binding ., Converter={StaticResource MediaIsVideo}}">
+                                                    <Label Text="▶" FontSize="22" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
+                                                    <Label Text="Vídeo" FontSize="10" TextColor="{StaticResource SpText3}" HorizontalOptions="Center" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                        <!-- Quitar -->
+                                        <Border WidthRequest="24" HeightRequest="24" BackgroundColor="#CC161622"
+                                                StrokeShape="RoundRectangle 12" StrokeThickness="0"
+                                                HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,4,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnRemoveMediaTapped" />
+                                            </Border.GestureRecognizers>
+                                            <Label Text="✕" FontSize="11" TextColor="{StaticResource SpText}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Button
+                            x:Name="AddMediaButton"
+                            Style="{StaticResource SpSecondaryButton}"
+                            Padding="12,10"
+                            Text="+ Añadir vídeo o imagen"
+                            Clicked="OnAddMediaClicked" />
+                        <ActivityIndicator IsRunning="{Binding IsImportingMedia}" IsVisible="{Binding IsImportingMedia}" Color="{StaticResource SpSteel2}" HeightRequest="24" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Campo: Nombre -->
                 <Border
                     BackgroundColor="#252536"
@@ -310,24 +299,11 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Campo: Grupo muscular (Picker) -->
-                <Border
-                    BackgroundColor="#252536"
-                    Padding="16,12"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="4">
-                        <Label FontSize="11" Text="GRUPO MUSCULAR" TextColor="#6C7086" CharacterSpacing="1" />
-                        <Picker
-                            ItemsSource="{Binding MuscleGroups}"
-                            SelectedItem="{Binding MuscleGroup, Mode=TwoWay}"
-                            Title="Seleccionar..."
-                            TitleColor="#45475A"
-                            TextColor="#CDD6F4"
-                            BackgroundColor="Transparent"
-                            FontSize="15" />
-                    </VerticalStackLayout>
-                </Border>
+                <!-- Grupo muscular: chips (construidos en code-behind) -->
+                <VerticalStackLayout Spacing="8">
+                    <Label FontSize="11" Text="GRUPO MUSCULAR" TextColor="{StaticResource SpText3}" CharacterSpacing="1" />
+                    <FlexLayout x:Name="FormGroupChips" Wrap="Wrap" AlignItems="Start" />
+                </VerticalStackLayout>
 
                 <!-- Campo: Notas -->
                 <Border
@@ -384,59 +360,21 @@
                             FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
-
-                <!-- Vídeos e imágenes propios -->
                 <Border
-                    Style="{StaticResource SpCardStyle}"
+                    BackgroundColor="#252536"
                     Padding="16,12"
-                    IsVisible="{Binding MediaEnabled}">
-                    <VerticalStackLayout Spacing="10">
-                        <Label FontSize="11" Text="VÍDEOS E IMÁGENES" TextColor="#6C7086" CharacterSpacing="1" />
-                        <CollectionView ItemsSource="{Binding Media}" HeightRequest="84" SelectionMode="None">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.EmptyView>
-                                <Label Text="Añade un vídeo, GIF o foto de la galería para ver cómo se hace."
-                                       Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
-                            </CollectionView.EmptyView>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid WidthRequest="84" HeightRequest="84">
-                                        <Border BackgroundColor="{StaticResource SpCardHi}" StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Tapped="OnMediaTapped" />
-                                            </Border.GestureRecognizers>
-                                            <Grid>
-                                                <Image Source="{Binding ., Converter={StaticResource MediaImage}}" Aspect="AspectFill"
-                                                       IsAnimationPlaying="{Binding ., Converter={StaticResource MediaIsVideo}, ConverterParameter=gif}" />
-                                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2"
-                                                                     IsVisible="{Binding ., Converter={StaticResource MediaIsVideo}}">
-                                                    <Label Text="▶" FontSize="22" TextColor="{StaticResource SpText}" HorizontalOptions="Center" />
-                                                    <Label Text="Vídeo" FontSize="10" TextColor="{StaticResource SpText3}" HorizontalOptions="Center" />
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                        </Border>
-                                        <!-- Quitar -->
-                                        <Border WidthRequest="24" HeightRequest="24" BackgroundColor="#CC161622"
-                                                StrokeShape="RoundRectangle 12" StrokeThickness="0"
-                                                HorizontalOptions="End" VerticalOptions="Start" Margin="0,4,4,0">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Tapped="OnRemoveMediaTapped" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="✕" FontSize="11" TextColor="{StaticResource SpText}" HorizontalOptions="Center" VerticalOptions="Center" />
-                                        </Border>
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                        <Button
-                            x:Name="AddMediaButton"
-                            Style="{StaticResource SpSecondaryButton}"
-                            Padding="12,10"
-                            Text="+ Añadir vídeo o imagen"
-                            Clicked="OnAddMediaClicked" />
-                        <ActivityIndicator IsRunning="{Binding IsImportingMedia}" IsVisible="{Binding IsImportingMedia}" Color="{StaticResource SpSteel2}" HeightRequest="24" />
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="0"
+                    IsVisible="{Binding ShowDetailFields}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="11" Text="ETIQUETAS (OPCIONAL)" TextColor="#6C7086" CharacterSpacing="1" />
+                        <Entry
+                            Text="{Binding Tags}"
+                            TextColor="#CDD6F4"
+                            PlaceholderColor="#45475A"
+                            Placeholder="Separadas por comas: unilateral, casa"
+                            BackgroundColor="Transparent"
+                            FontSize="15" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -478,131 +416,6 @@
 
             </VerticalStackLayout>
             </ScrollView>
-        </Border>
-
-        <!-- ── Ficha de detalle (solo lectura) ── -->
-        <Border
-            x:Name="DetailSheet"
-            BackgroundColor="#1E1E2E"
-            StrokeShape="RoundRectangle 24,24,0,0"
-            StrokeThickness="0"
-            VerticalOptions="End"
-            TranslationY="800"
-            IsVisible="False">
-            <VerticalStackLayout Padding="20,16,20,36" Spacing="14">
-
-                <BoxView
-                    HeightRequest="4"
-                    WidthRequest="40"
-                    BackgroundColor="#45475A"
-                    CornerRadius="2"
-                    HorizontalOptions="Center" />
-
-                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0" ColumnSpacing="12">
-                    <Label
-                        x:Name="DetailName"
-                        FontAttributes="Bold"
-                        FontSize="20"
-                        TextColor="#CDD6F4"
-                        LineBreakMode="WordWrap"
-                        VerticalOptions="Center" />
-                    <Border
-                        Grid.Column="1"
-                        BackgroundColor="#313244"
-                        HeightRequest="36"
-                        WidthRequest="36"
-                        StrokeShape="RoundRectangle 18"
-                        StrokeThickness="0"
-                        VerticalOptions="Start">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnCloseDetailTapped" />
-                        </Border.GestureRecognizers>
-                        <mi:MauiIcon
-                            Icon="{mi:Material Close}"
-                            IconColor="#6C7086"
-                            IconSize="18"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Border>
-                </Grid>
-
-                <!-- Chips: grupo + equipamiento -->
-                <HorizontalStackLayout Spacing="6">
-                    <Border
-                        x:Name="DetailGroupChip"
-                        Padding="10,4"
-                        StrokeShape="RoundRectangle 8"
-                        StrokeThickness="0">
-                        <Label
-                            x:Name="DetailGroupLabel"
-                            FontSize="11"
-                            FontAttributes="Bold"
-                            TextColor="#1E1E2E" />
-                    </Border>
-                    <Border
-                        x:Name="DetailEquipmentChip"
-                        BackgroundColor="#313244"
-                        Padding="10,4"
-                        StrokeShape="RoundRectangle 8"
-                        StrokeThickness="0">
-                        <Label
-                            x:Name="DetailEquipmentLabel"
-                            FontSize="11"
-                            FontAttributes="Bold"
-                            TextColor="#BAC2DE" />
-                    </Border>
-                </HorizontalStackLayout>
-
-                <!-- Músculos secundarios -->
-                <VerticalStackLayout x:Name="DetailSecondarySection" Spacing="4">
-                    <Label FontSize="11" Text="MÚSCULOS SECUNDARIOS" TextColor="#6C7086" CharacterSpacing="1" />
-                    <Label
-                        x:Name="DetailSecondaryLabel"
-                        FontSize="14"
-                        TextColor="#BAC2DE" />
-                </VerticalStackLayout>
-
-                <!-- Instrucciones -->
-                <VerticalStackLayout x:Name="DetailInstructionsSection" Spacing="4">
-                    <Label FontSize="11" Text="CÓMO SE HACE" TextColor="#6C7086" CharacterSpacing="1" />
-                    <Label
-                        x:Name="DetailInstructionsLabel"
-                        FontSize="14"
-                        TextColor="#CDD6F4"
-                        LineHeight="1.3"
-                        LineBreakMode="WordWrap" />
-                </VerticalStackLayout>
-
-                <!-- Notas (solo propios) -->
-                <VerticalStackLayout x:Name="DetailNotesSection" Spacing="4">
-                    <Label FontSize="11" Text="NOTAS" TextColor="#6C7086" CharacterSpacing="1" />
-                    <Label
-                        x:Name="DetailNotesLabel"
-                        FontSize="14"
-                        TextColor="#BAC2DE"
-                        LineBreakMode="WordWrap" />
-                </VerticalStackLayout>
-
-                <!-- Editar — solo ejercicios propios -->
-                <Border
-                    x:Name="DetailEditButton"
-                    BackgroundColor="#89B4FA"
-                    Padding="0,14"
-                    StrokeShape="RoundRectangle 14"
-                    StrokeThickness="0"
-                    Margin="0,6,0,0">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnDetailEditTapped" />
-                    </Border.GestureRecognizers>
-                    <Label
-                        Text="Editar ejercicio"
-                        FontAttributes="Bold"
-                        FontSize="15"
-                        TextColor="#1E1E2E"
-                        HorizontalOptions="Center" />
-                </Border>
-
-            </VerticalStackLayout>
         </Border>
 
     </Grid>

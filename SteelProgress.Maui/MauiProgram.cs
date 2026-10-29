@@ -25,6 +25,8 @@ public static class MauiProgram
             .UseMauiApp<App>()
             // Mantener pulsado (TouchBehavior) en la lista de rutinas
             .UseMauiCommunityToolkit()
+            // Vídeo de los ejercicios dentro de la app (decisión D1)
+            .UseMauiCommunityToolkitMediaElement(static _ => { })
             // LiveCharts dibuja sobre un lienzo de SkiaSharp: sin esto la gráfica de Progreso no tiene handler
             .UseSkiaSharp()
             .UseLiveCharts(charts => charts.AddDarkTheme())

@@ -10,6 +10,11 @@
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<!-- Reproductor de vídeo de los ejercicios (MediaElement 7.0.0): su servicio de reproducción. Sin ellos
+	     Android 14 cierra la app si el reproductor lo arranca (revisar al publicar en Play: tipo mediaPlayback) -->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<queries>
 		<intent>
 			<action android:name="android.media.action.VIDEO_CAPTURE" />

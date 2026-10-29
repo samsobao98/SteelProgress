@@ -311,7 +311,7 @@ Recomendación: **1 → 2 → 3 → 4** primero; con eso la app ya se diferencia
 
 | # | Decisión | Opciones | Recomendación |
 |---|---|---|---|
-| D1 | Reproductor de vídeo | `CommunityToolkit.Maui.MediaElement` · Abrir el vídeo con el reproductor del sistema | `MediaElement`: el vídeo se ve dentro de la ficha y durante el entreno |
+| ~~D1~~ | ~~Reproductor de vídeo~~ | **Decidido (2026-10-29):** `MediaElement` 7.0.0 en la ficha del ejercicio (Rediseño 4), con cámara lenta y sin sonido al empezar. En Entreno, de momento, sigue el del sistema | — |
 | ~~D2~~ | ~~Pestaña Clientes~~ | **Decidido (2026-10-27):** pestaña en vista entrenador, en lugar de Historial; Entreno se mantiene con "¿Quién entrena?" y el ajuste "Yo también entreno" | — |
 | D3 | Prescripción | Por ejercicio · Serie a serie | Por ejercicio en la fase 2; serie a serie más adelante |
 | D4 | Límite de tamaño de vídeo | 25 / 50 / 100 MB | 50 MB y aviso al exportar |

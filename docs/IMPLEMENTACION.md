@@ -57,7 +57,7 @@ Tras la fusión, en el PC: 88 pruebas automáticas en verde, compilación real p
 * Migración `AddExerciseMedia` y almacenamiento en la carpeta privada de la app (`AppDataDirectory/media`), con nombres generados, solo formatos admitidos y máximo de 50 MB.
 * **Ejercicios**: en el formulario, sección «Vídeos e imágenes» para elegir de la galería (varios a la vez), grabar un vídeo si el móvil lo permite y quitar. Miniatura en la lista. Al cancelar un ejercicio nuevo se borran los archivos elegidos; al borrar un ejercicio, también.
 * **Entreno**: botón «▶ Ver cómo se hace» si el ejercicio tiene vídeo o imagen.
-* El vídeo se abre con el reproductor del móvil. El reproductor dentro de la app depende de la decisión **D1** (añadir `CommunityToolkit.Maui.MediaElement`), pendiente de tu aprobación.
+* El vídeo se abre con el reproductor del móvil. *(Desde el Rediseño 4, la ficha del ejercicio lo reproduce dentro de la app: decisión D1.)*
 * Permisos de Android (cámara, micrófono, almacenamiento en Android ≤ 12) y textos de privacidad de iOS.
 
 **Probar**
@@ -143,7 +143,7 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 1. Entreno — **hecho** (ver abajo).
 2. Rutinas — **hecho** (ver abajo).
 3. Progreso (absorbe Historial) e Inicio — **hecho, pendiente de probar en el móvil** (ver abajo).
-4. Ejercicios (filtro «Propios», ficha con vídeo, mejor marca, 1RM estimado).
+4. Ejercicios — **hecho, pendiente de probar en el móvil** (ver abajo).
 5. Respuesta táctil y animaciones en toda la app.
 
 ### Rediseño 1 — Entreno
@@ -257,11 +257,37 @@ El sistema de diseño (`Tokens.xaml`, Space Grotesk) ya existe, pero las pantall
 3. Siguiente entreno de ese día: la nota sale bajo «La última vez».
 4. Vista entrenador → Ejercicios → nuevo ejercicio: campos Material e Instrucciones; guardar y abrir su ficha.
 
+### Rediseño 4 — Ejercicios
+
+Decisiones (2026-10-29): **D1 → reproductor dentro de la app** (`CommunityToolkit.Maui.MediaElement` 7.0.0, la última que admite MAUI 10.0.20), **procedencia con el autor** y **etiquetas**. Recortar el vídeo, no.
+
+**Qué hace**
+* **Lista** (biblioteca): «111 ejercicios · 3 propios», buscador (nombre, grupo o **etiqueta**), chips «Todos», **«★ Propios»** (los tuyos y los importados) y los grupos. Agrupada por grupo muscular con su cabecera. Cada fila: miniatura (fotograma del vídeo con su **duración**, «GIF» o la foto; sin nada, un hueco punteado con +), nombre y una línea con el material, **tu mejor marca** («mejor: 72,5 × 8») y la **procedencia** («propio», «de Laura»).
+* **Ficha** (página propia, se abre al tocar un ejercicio): el vídeo **a sangre arriba**, empieza solo, en bucle y **sin sonido** (🔈 para activarlo), **0,5×** para verlo a cámara lenta y **1 / 2** para pasar al siguiente vídeo o imagen. Debajo: nombre, procedencia, chips (grupo, músculos secundarios, material y etiquetas), **mejor serie, 1RM estimado y sesiones**, **evolución** del 1RM estimado (últimos 3 meses, o las últimas sesiones), **«Cómo hacerlo»** en pasos numerados (solo si hay texto) y notas. ✎ arriba a la derecha abre el formulario (solo ejercicios propios o importados).
+* **Crear / editar**: lo primero, los vídeos e imágenes; el grupo muscular con **chips** en vez de desplegable; en vista entrenador (o si ya tiene), material, instrucciones y **etiquetas** (separadas por comas).
+* **Procedencia**: un ejercicio importado guarda quién lo envió (`Exercise.AuthorName`); si se reenvía, conserva su autor original. Las etiquetas (`Exercise.Tags`) también viajan en los `.steel`. Migración `AddExerciseAuthorAndTags`. Los importados **antes** de este cambio no tienen autor guardado: salen como «propio».
+* **Miniaturas de vídeo**: solo Android. Se calculan la primera vez (`MediaMetadataRetriever`) y se guardan junto al vídeo en `media/thumbs/` (la duración va en el nombre del archivo): sin cambios en la base de datos. En Windows el vídeo se queda con el icono ▶.
+* **Android 8.0 como mínimo** (antes 5.0): lo exige el reproductor. Permisos nuevos del servicio de reproducción (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `POST_NOTIFICATIONS`): la 7.0.0 no permite desactivarlo y en Android 14 sin ellos podría cerrarse al reproducir. Al publicar en Play hay que justificar el tipo `mediaPlayback` (o quitar los permisos si se comprueba que no hacen falta).
+
+**Probar**
+1. Ejercicios: el contador, las cabeceras por grupo y «★ Propios». Buscar una etiqueta.
+2. Un ejercicio que hayas entrenado: «mejor: …» en la fila; en la ficha, las tres cifras y la gráfica. Uno sin entrenar: «Aún no lo has entrenado».
+3. Un ejercicio con vídeo: la miniatura sale con su fotograma y su duración (puede tardar un instante la primera vez). En la ficha: se reproduce solo y sin sonido; 🔈, 0,5× y, si tiene varios, 1 / 2. Atrás: el vídeo se para.
+4. Un GIF y una foto en la ficha. Un ejercicio sin nada: el hueco punteado en la lista y «Sin vídeo» en la ficha.
+5. ✎ en la ficha de uno propio: abre el formulario con sus datos; en uno de la biblioteca no sale.
+6. «+»: los vídeos arriba, el grupo con chips; en vista entrenador, etiquetas. Guardar y ver la fila.
+7. Compartir una rutina con un ejercicio propio a otro perfil: en el otro, la fila dice «de <tu nombre>» y conserva las etiquetas.
+8. Girar el móvil en la ficha con el vídeo en marcha; salir y volver varias veces (no debe quedarse el sonido ni cerrarse).
+
+**Aún no está**
+* Miniaturas de vídeo en Windows.
+* Recortar el vídeo y el ★ de la maqueta en la fila (no quedó claro qué marcaba).
+* «Ver cómo se hace» en Entreno sigue abriendo el reproductor del móvil; se puede pasar a la ficha más adelante.
+
 ---
 
 ## Pendiente de decidir
 
-* **D1** — reproductor de vídeo dentro de la app (`CommunityToolkit.Maui.MediaElement`, paquete aparte del Toolkit que ya usamos) o seguir con el del sistema.
 * Límite de vídeo configurable en Ajustes (hoy fijo en 50 MB).
 
 ## Notas técnicas
