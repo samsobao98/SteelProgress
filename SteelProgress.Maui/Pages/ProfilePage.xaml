@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="SteelProgress.Maui.Pages.SettingsPage"
+    x:Class="SteelProgress.Maui.Pages.ProfilePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
     xmlns:converters="clr-namespace:SteelProgress.Maui.Converters"
-    x:DataType="vm:SettingsViewModel"
+    x:DataType="vm:ProfileViewModel"
     BackgroundColor="{StaticResource SpBg}"
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
         <converters:PlateColorConverter x:Key="PlateColor" />
         <converters:PlateHeightConverter x:Key="PlateHeight" />
+        <converters:InvertedBoolConverter x:Key="Not" />
     </ContentPage.Resources>
 
     <!-- Primera pantalla hecha con el sistema de diseño (Resources/Styles/Tokens.xaml) -->
@@ -38,8 +39,83 @@
                     <Label Text="Inicio" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
-                <Label Text="Ajustes" Style="{StaticResource SpTitle}" Margin="0,8,0,0" />
-                <Label Text="{Binding ProfileName, StringFormat='Perfil: {0}'}" Style="{StaticResource SpSecondary}" />
+                <Label Text="Perfil" Style="{StaticResource SpTitle}" Margin="0,8,0,16" />
+
+                <!-- ── Quién eres: avatar, nombre, tipo y frase ── -->
+                <Border Style="{StaticResource SpCardStyle}" Padding="16" IsVisible="{Binding IsEditing, Converter={StaticResource Not}}">
+                    <Grid ColumnDefinitions="64,*,Auto" ColumnSpacing="14">
+                        <Border BackgroundColor="{Binding ProfileColor}" WidthRequest="64" HeightRequest="64"
+                                StrokeShape="RoundRectangle 32" StrokeThickness="0" VerticalOptions="Center">
+                            <Grid>
+                                <Label Text="{Binding ProfileInitial}" FontFamily="SpaceGroteskBold" FontSize="28" TextColor="{StaticResource SpOnAccent}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Image Source="{Binding ProfilePhoto}" IsVisible="{Binding HasProfilePhoto}" Aspect="AspectFill" />
+                            </Grid>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding ProfileName}" FontFamily="SpaceGroteskBold" FontSize="21" TextColor="{StaticResource SpText}"
+                                   LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding KindLabel}" Style="{StaticResource SpSecondary}" FontSize="13" />
+                            <Label Text="{Binding ProfileDescription, StringFormat='«{0}»'}" IsVisible="{Binding HasProfileDescription}"
+                                   FontFamily="SpaceGroteskMedium" FontAttributes="Italic" FontSize="13" TextColor="{StaticResource SpText2}" Margin="0,4,0,0" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="Editar" Style="{StaticResource SpSecondaryButton}" Padding="14,0" HeightRequest="40" MinimumHeightRequest="40"
+                                VerticalOptions="Start" Command="{Binding StartEditCommand}" />
+                    </Grid>
+                </Border>
+
+                <!-- Editando: en el mismo sitio, sin ventana aparte -->
+                <Border Style="{StaticResource SpCardStyle}" Padding="16" IsVisible="{Binding IsEditing}">
+                    <VerticalStackLayout Spacing="14">
+                        <!-- Tocar el avatar: foto de la galería o de la cámara -->
+                        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Border x:Name="EditAvatar" BackgroundColor="{Binding EditColor}" WidthRequest="88" HeightRequest="88"
+                                    StrokeShape="RoundRectangle 44" StrokeThickness="0" HorizontalOptions="Center"
+                                    SemanticProperties.Description="Cambiar la foto">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEditAvatarTapped" />
+                                </Border.GestureRecognizers>
+                                <Grid>
+                                    <Label Text="{Binding EditInitial}" FontFamily="SpaceGroteskBold" FontSize="36" TextColor="{StaticResource SpOnAccent}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Image Source="{Binding EditPhoto}" IsVisible="{Binding HasEditPhoto}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+                            <Label FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel1}" HorizontalOptions="Center"
+                                   IsVisible="{Binding CanChoosePhoto}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding HasEditPhoto}" Value="True">
+                                        <Setter Property="Text" Value="Cambiar foto" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding HasEditPhoto}" Value="False">
+                                        <Setter Property="Text" Value="Añadir foto" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEditAvatarTapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Nombre" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <Entry Text="{Binding EditName}" Placeholder="Tu nombre" MaxLength="30" BackgroundColor="{StaticResource SpBg}"
+                                   TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Frase (opcional)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <Entry Text="{Binding EditDescription}" Placeholder="Algo que te motive" MaxLength="60" BackgroundColor="{StaticResource SpBg}"
+                                   TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Color (se ve sin foto)" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <FlexLayout x:Name="ColorRow" Wrap="Wrap" JustifyContent="Start" Padding="4,4,0,0" />
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,2*" ColumnSpacing="8">
+                            <Button Text="Cancelar" Style="{StaticResource SpSecondaryButton}" Command="{Binding CancelEditCommand}" />
+                            <Button Grid.Column="1" Text="Guardar" Style="{StaticResource SpPrimaryButton}" Command="{Binding SaveEditCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- ── Tipo de perfil: para tus entrenos o para tus clientes ── -->
                 <Label Text="Tipo de perfil" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
@@ -161,7 +237,7 @@
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=TogglePlateCommand}"
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ProfileViewModel}}, Path=TogglePlateCommand}"
                                                           CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -185,6 +261,12 @@
                                 Command="{Binding ChangeBarWeightCommand}" CommandParameter="+" />
                     </Grid>
                 </Border>
+
+                <!-- ── Cambiar de perfil: de vuelta a «¿Quién entrena hoy?» ── -->
+                <Button Text="Cambiar de perfil" Style="{StaticResource SpSecondaryButton}" Margin="0,32,0,0"
+                        Command="{Binding SwitchProfileCommand}" />
+                <Label Text="Vuelves a la pantalla de perfiles. No se borra nada." Style="{StaticResource SpSecondary}" FontSize="12"
+                       HorizontalTextAlignment="Center" Margin="0,8,0,0" />
 
             </VerticalStackLayout>
         </ScrollView>

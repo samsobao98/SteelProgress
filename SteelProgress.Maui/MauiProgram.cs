@@ -47,6 +47,8 @@ public static class MauiProgram
         // Vídeos e imágenes de los ejercicios, en el almacenamiento privado de la app
         builder.Services.AddSingleton<IMediaStorage>(_ =>
             new FileMediaStorage(Path.Combine(FileSystem.AppDataDirectory, "media")));
+        // Fotos de perfil
+        builder.Services.AddSingleton(_ => new ProfilePhotoStore(Path.Combine(FileSystem.AppDataDirectory, "profiles")));
         builder.Services.AddSingleton<ExerciseMediaService>();
 
         // Compartir rutinas (.steel)
@@ -78,7 +80,7 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineDetailViewModel>();
         builder.Services.AddTransient<WorkoutViewModel>();
         builder.Services.AddTransient<ProgressViewModel>();
-        builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<ProfileViewModel>();
         builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddTransient<ClientsViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
@@ -90,12 +92,12 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineDetailPage>();
         builder.Services.AddTransient<WorkoutPage>();
         builder.Services.AddTransient<ProgressPage>();
-        builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<ProfilePage>();
         builder.Services.AddTransient<ImportPreviewPage>();
         builder.Services.AddTransient<ClientsPage>();
 
-        // Shell and launcher live for the app lifetime
-        builder.Services.AddSingleton<AppShell>();
+        // La pantalla de perfiles vive toda la app; el Shell, uno nuevo por cada entrada en un perfil
+        builder.Services.AddTransient<AppShell>();
         builder.Services.AddSingleton<LauncherPage>();
 
 #if DEBUG

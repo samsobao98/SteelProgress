@@ -137,10 +137,10 @@ public partial class HomePage : ContentPage
         await element.ScaleToAsync(1.0, 120, Easing.SpringOut);
     }
 
-    private async void OnSettingsTapped(object? sender, TappedEventArgs e)
+    private async void OnProfileTapped(object? sender, TappedEventArgs e)
     {
-        await PressAsync(SettingsButton);
-        await Shell.Current.GoToAsync("SettingsPage");
+        await PressAsync(ProfileButton);
+        await Shell.Current.GoToAsync("ProfilePage");
     }
 
     // ▶ Empezar: Entreno crea la sesión al aparecer (WorkoutLaunch)
@@ -161,8 +161,8 @@ public partial class HomePage : ContentPage
     private async void OnRoutinesTapped(object? sender, TappedEventArgs e)
     {
         await PressAsync(sender as VisualElement);
-        // Sin apartado Rutinas (vista simple de entrenador), a Ajustes para cambiar la vista
-        await Shell.Current.GoToAsync(_vm.CanEditRoutines ? "//RoutinePage" : "SettingsPage");
+        // Sin apartado Rutinas (vista simple de entrenador), a Perfil para cambiar la vista
+        await Shell.Current.GoToAsync(_vm.CanEditRoutines ? "//RoutinePage" : "ProfilePage");
     }
 
     // Inicio de entrenador: tocar un cliente lo activa e Inicio pasa a mostrar sus datos (OnClientChanged)

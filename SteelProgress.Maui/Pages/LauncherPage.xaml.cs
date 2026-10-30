@@ -10,6 +10,8 @@ namespace SteelProgress.Maui.Pages;
 public partial class LauncherPage : ContentPage
 {
     private readonly LauncherViewModel _vm;
+    private readonly IServiceProvider _services;
+    private AppShell? _shell; // el de la entrada actual en un perfil
     private bool _hasLoaded;
     private bool _isEntering;
 
@@ -31,12 +33,15 @@ public partial class LauncherPage : ContentPage
 
     public ICommand ConfirmDeleteCommand { get; }
 
-    public LauncherPage(LauncherViewModel vm, AppShell shell)
+    public LauncherPage(LauncherViewModel vm, IServiceProvider services)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
+        _services = services;
         vm.ProfileChosen += () =>
         {
+            _shell?.Detach();
+            var shell = _shell = _services.GetRequiredService<AppShell>();
             shell.Opacity = 0;
             Application.Current!.Windows[0].Page = shell;
             _ = shell.FadeToAsync(1, 420, Easing.CubicOut);
@@ -53,7 +58,13 @@ public partial class LauncherPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_hasLoaded) return;
+        if (_hasLoaded)
+        {
+            // De vuelta desde «Cambiar de perfil»: la lista se recarga (nombres, colores y última línea al día)
+            await _vm.LoadAsync(Task.CompletedTask);
+            if (!_vm.IsCreating && _vm.HasProfiles) BuildProfileList();
+            return;
+        }
         _hasLoaded = true;
 
         var app = (App)Application.Current!;
@@ -86,6 +97,25 @@ public partial class LauncherPage : ContentPage
             ProfilesSection.Opacity = 1;
             ProfilesSection.TranslationY = 0;
         }
+    }
+
+    /// <summary>
+    /// «Cambiar de perfil» (pantalla Perfil): la app se cierra sobre sí misma y vuelve esta pantalla.
+    /// El Shell de este perfil se descarta: el siguiente perfil entra con uno nuevo, desde Inicio.
+    /// </summary>
+    public async Task ReturnToProfilesAsync()
+    {
+        var window = Application.Current!.Windows[0];
+        if (_shell is { } shell)
+        {
+            await shell.FadeToAsync(0, 180, Easing.CubicIn);
+            shell.Detach();
+            _shell = null;
+        }
+
+        Opacity = 0;
+        window.Page = this;
+        await this.FadeToAsync(1, 260, Easing.CubicOut);
     }
 
     // ── Color picker ──────────────────────────────────────────────────────
@@ -403,16 +433,22 @@ public partial class LauncherPage : ContentPage
             StrokeThickness = 0,
             StrokeShape = new RoundRectangle { CornerRadius = 22 },
             VerticalOptions = LayoutOptions.Center,
-            Content = new Label
+            Content = new Grid
             {
-                Text = InitialOf(profile.Name),
-                TextColor = (Color)Resources["SpOnAccent"],
-                FontFamily = "SpaceGroteskBold",
-                FontSize = 18,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center
+                new Label
+                {
+                    Text = InitialOf(profile.Name),
+                    TextColor = (Color)Resources["SpOnAccent"],
+                    FontFamily = "SpaceGroteskBold",
+                    FontSize = 18,
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                }
             }
         };
+        // Con foto, la foto tapa la inicial (el color queda de fondo mientras carga)
+        if (_vm.PhotoPathOf(profile) is string photo && avatar.Content is Grid avatarGrid)
+            avatarGrid.Add(new Image { Source = ImageSource.FromFile(photo), Aspect = Aspect.AspectFill });
 
         var text = new VerticalStackLayout
         {
@@ -495,6 +531,13 @@ public partial class LauncherPage : ContentPage
         return row;
     }
 
+    private void ShowOverlayPhoto(UserProfile profile)
+    {
+        var photo = _vm.PhotoPathOf(profile);
+        OverlayPhoto.Source = photo is null ? null : ImageSource.FromFile(photo);
+        OverlayPhoto.IsVisible = photo is not null;
+    }
+
     private static string InitialOf(string name) =>
         string.IsNullOrWhiteSpace(name) ? "?" : name.TrimStart()[0].ToString().ToUpperInvariant();
 
@@ -530,6 +573,7 @@ public partial class LauncherPage : ContentPage
         _isOverlayEditing = false;
 
         OverlayAvatar.BackgroundColor = Color.FromArgb(profile.AvatarColor);
+        ShowOverlayPhoto(profile);
         OverlayInitial.Text = profile.Name.Length > 0
             ? profile.Name.TrimStart()[0].ToString().ToUpperInvariant()
             : "?";
@@ -729,6 +773,7 @@ public partial class LauncherPage : ContentPage
             if (_overlayProfile is not null)
             {
                 OverlayAvatar.BackgroundColor = Color.FromArgb(_overlayProfile.AvatarColor);
+                ShowOverlayPhoto(_overlayProfile);
                 OverlayInitial.Text = _overlayProfile.Name.Length > 0
                     ? _overlayProfile.Name.TrimStart()[0].ToString().ToUpperInvariant()
                     : "?";

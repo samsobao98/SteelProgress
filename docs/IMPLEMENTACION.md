@@ -366,15 +366,31 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 * Sin cliente activo, Inicio es el de los clientes: «Hoy con tus clientes», con una fila por cliente (qué le toca de su rutina activa, hace cuánto fue su última sesión y una etiqueta: «Toca hoy», «Hecho hoy», «Por empezar», «Sin noticias» a partir de 7 días como en Clientes, o «Crear rutina»); «Pendiente» solo si hay algo; y clientes, sesiones y clientes activos de la semana. Tocar un cliente lo activa.
 * Con un cliente activo, el Inicio de siempre en tercera persona: «A Marta le toca», «▶ Empezar sesión con Marta», «Sus últimas sesiones».
 * La rutina activa de un cliente es la misma en Clientes e Inicio: la marcada; si no, la última entrenada; si no, la primera (`ClientRepository.GetSummariesAsync`, que también calcula su semana de rutina).
-* En la vista simple de entrenador (sin Rutinas), Clientes no ofrece «Rutinas de…» y el botón de «Prepara la rutina» lleva a Ajustes.
+* En la vista simple de entrenador (sin Rutinas), Clientes no ofrece «Rutinas de…» y el botón de «Prepara la rutina» lleva a Perfil.
 
 6. Perfil de entrenador con clientes y sin cliente activo: Inicio enseña solo a los clientes. Tocar uno: Inicio en tercera persona. «Salir»: vuelve la lista.
+
+## Perfil (2026-10-30)
+
+Ajustes pasa a llamarse **Perfil** (`ProfilePage`, `ProfileViewModel`): todo lo que tenía ya era del perfil. Pasos 1 a 3 de 4 hechos (Perfil, acceso por el avatar y foto); falta la investigación de qué datos del perfil y de la ficha de cliente aportan algo fiable.
+
+* Se abre tocando tu avatar en Inicio (el engranaje ya no está).
+* **Foto**: al editar, tocar el avatar → «Elegir de la galería», «Hacer una foto» o «Quitar foto». El selector la da ya girada y reducida a 640 px; se ve recortada en círculo en Inicio, Perfil y la pantalla de perfiles. Solo se queda al guardar (cancelar la descarta). Se guarda en `AppDataDirectory/profiles` (`ProfilePhotoStore`, columna `UserProfile.PhotoFile`, migración `AddProfilePhoto`); cambiarla o quitarla borra la anterior, y borrar el perfil borra su foto. Sin foto, la inicial sobre el color.
+* Cabecera: avatar, nombre, tipo de perfil y frase, con «Editar» en el mismo sitio (nombre, frase y color; mismos colores que al crear el perfil, `ProfileColors`). Debajo, la configuración de siempre.
+* Al final, **«Cambiar de perfil»**: vuelve a «¿Quién entrena hoy?» (la lista se recarga). Cada entrada en un perfil crea un `AppShell` nuevo: en Android, un Shell que se quitó de la ventana falla al navegar después (se cerraba la app al abrir Perfil tras volver a entrar). Con un entreno en marcha no se cambia: avisa y ofrece ir al entreno.
+
+**Probar**
+1. Inicio → tocar el avatar: Perfil. «Editar» → cambiar color → «Cancelar»: no cambia nada. Cambiar nombre → «Guardar»: se ve en Perfil, en Inicio y en la lista de perfiles.
+2. «Cambiar de perfil»: lista de perfiles; entrar de nuevo: Inicio, y el abanico funciona.
+3. Con un entreno empezado → Perfil → «Cambiar de perfil»: aviso «Tienes un entreno en marcha».
+4. Editar → tocar el avatar → galería → elegir una foto → «Guardar»: se ve en Perfil, Inicio y la lista de perfiles. Editar → «Quitar foto» → «Guardar»: vuelve la inicial.
+5. Cambiar de perfil y volver a entrar varias veces seguidas, abriendo Perfil cada vez: no se cierra.
 
 ---
 
 ## Pendiente de decidir
 
-* Límite de vídeo configurable en Ajustes (hoy fijo en 50 MB).
+* Límite de vídeo configurable en Perfil (hoy fijo en 50 MB).
 
 ## Notas técnicas
 

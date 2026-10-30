@@ -24,6 +24,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly ViewOptionsService? _viewOptions;
     private readonly ClientContextService? _clientContext;
     private readonly ClientRepository? _clientRepository;
+    private readonly ProfilePhotoStore? _photos;
 
     // Cada repositorio tiene su DbContext, que no admite dos operaciones a la vez:
     // dos recargas seguidas (aparecer + cambio de cliente) se ponen en cola
@@ -32,6 +33,13 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _profileName = "";
     [ObservableProperty] private string _profileColor = "#89B4FA";
     [ObservableProperty] private string _profileInitial = "?";
+
+    // Foto del avatar (ruta completa) o null: la inicial sobre el color
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasProfilePhoto))]
+    private string? _profilePhoto;
+
+    public bool HasProfilePhoto => ProfilePhoto is not null;
     [ObservableProperty] private string _greeting = "Hola";
 
     [ObservableProperty] private IReadOnlyList<WeekDayCell> _week = Array.Empty<WeekDayCell>();
@@ -97,11 +105,11 @@ public partial class HomeViewModel : ObservableObject
         ? "Crea tu rutina con sus días y ejercicios, o importa la que te pase tu entrenador. Después, aquí verás qué te toca cada día."
         : CanEditRoutines
             ? "Crea su rutina con sus días y ejercicios. Después, aquí verás qué le toca cada día y podrás enviársela."
-            : "Las rutinas se crean en la vista detallada: cámbiala en Ajustes y prepárale una.";
+            : "Las rutinas se crean en la vista detallada: cámbiala en tu Perfil y prepárale una.";
 
-    // En la vista simple de entrenador no hay apartado Rutinas: el botón lleva a Ajustes
+    // En la vista simple de entrenador no hay apartado Rutinas: el botón lleva a Perfil
     public bool CanEditRoutines => _viewOptions?.Current.ShowRoutines ?? true;
-    public string NoRoutinesButtonText => CanEditRoutines ? "Ir a Rutinas" : "Ir a Ajustes";
+    public string NoRoutinesButtonText => CanEditRoutines ? "Ir a Rutinas" : "Ir a Perfil";
 
     public ObservableCollection<CoachClientRow> ClientRows { get; } = new();
     public ObservableCollection<CoachPendingItem> PendingItems { get; } = new();
@@ -116,8 +124,10 @@ public partial class HomeViewModel : ObservableObject
 
     public HomeViewModel(AppDbContext dbContext, ICurrentUserService currentUser,
         WorkoutRepository workoutRepository, RoutineRepository routineRepository, TimeProvider? clock = null,
-        ViewOptionsService? viewOptions = null, ClientContextService? clientContext = null, ClientRepository? clientRepository = null)
+        ViewOptionsService? viewOptions = null, ClientContextService? clientContext = null, ClientRepository? clientRepository = null,
+        ProfilePhotoStore? photos = null)
     {
+        _photos = photos;
         _dbContext = dbContext;
         _currentUser = currentUser;
         _workoutRepository = workoutRepository;
@@ -165,12 +175,13 @@ public partial class HomeViewModel : ObservableObject
             _ => "Buenas noches"
         };
 
-        // Sin seguimiento: un cambio de nombre o color en Ajustes (otro contexto) se ve al volver
+        // Sin seguimiento: un cambio de nombre o color en Perfil (otro contexto) se ve al volver
         if (_currentUser.CurrentUserId is int userId
             && await _dbContext.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.Id == userId) is UserProfile profile)
         {
             ProfileName = profile.Name;
             ProfileColor = profile.AvatarColor;
+            ProfilePhoto = _photos?.PathOf(profile.PhotoFile);
             ProfileInitial = string.IsNullOrEmpty(profile.Name) ? "?" : profile.Name[0].ToString().ToUpper();
         }
 
@@ -178,7 +189,7 @@ public partial class HomeViewModel : ObservableObject
         var client = isCoach ? _clientContext?.ActiveClient : null;
         ClientName = client?.Name;
         OnPropertyChanged(nameof(NoRoutinesText));
-        OnPropertyChanged(nameof(NoRoutinesButtonText));   // la vista pudo cambiar en Ajustes
+        OnPropertyChanged(nameof(NoRoutinesButtonText));   // la vista pudo cambiar en Perfil
         ShowCoachOverview = isCoach && client is null && _clientRepository is not null;
         if (ShowCoachOverview)
         {

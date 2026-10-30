@@ -7,6 +7,10 @@ public class UserProfile
     public string AvatarColor { get; set; } = "#89B4FA";
     public string? Description { get; set; }
 
+    // Foto del avatar: nombre del archivo en la carpeta de fotos de perfil (ProfilePhotoStore).
+    // Null = la inicial sobre el color.
+    public string? PhotoFile { get; set; }
+
     // Personal o de entrenador: se elige al crear el perfil
     public ProfileKind Kind { get; set; } = ProfileKind.Personal;
 

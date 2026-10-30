@@ -289,7 +289,7 @@
                     Grid.Row="3"
                     Spacing="10"
                     Margin="0,20,0,0">
-                    <!-- Para qué es el perfil (se puede cambiar luego en Ajustes) -->
+                    <!-- Para qué es el perfil (se puede cambiar luego en Perfil) -->
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="32,0,32,8">
                         <Border Grid.Column="0" Padding="0,12" StrokeShape="RoundRectangle 12" StrokeThickness="1.5"
                                 BackgroundColor="#262A37" Stroke="#A6E3A1">
@@ -435,13 +435,16 @@
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 60"
                             HorizontalOptions="Center">
-                            <Label
-                                x:Name="OverlayInitial"
-                                TextColor="#14161E"
-                                FontSize="44"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center" />
+                            <Grid>
+                                <Label
+                                    x:Name="OverlayInitial"
+                                    TextColor="#14161E"
+                                    FontSize="44"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                                <Image x:Name="OverlayPhoto" Aspect="AspectFill" IsVisible="False" />
+                            </Grid>
                         </Border>
 
                         <Label

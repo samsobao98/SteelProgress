@@ -284,7 +284,7 @@
                         </Border.Background>
                         <VerticalStackLayout Spacing="0">
                             <Label Text="{Binding CurrentSetLabel}" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
-                            <!-- Barra o máquina de discos: cómo cargarla con los discos de «Tu gimnasio» (Ajustes) -->
+                            <!-- Barra o máquina de discos: cómo cargarla con los discos de «Tu gimnasio» (Perfil) -->
                             <controls:LoadedBarbell Load="{Binding Load}" IsMachine="{Binding IsPlateMachine}" IsVisible="{Binding ShowsPlates}"
                                                     HeightRequest="76" Margin="0,10,0,0" />
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,0">

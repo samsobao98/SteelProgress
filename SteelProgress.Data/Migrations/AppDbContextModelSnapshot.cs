@@ -314,6 +314,9 @@ namespace SteelProgress.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PhotoFile")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("SimpleViewBlocks")
                         .HasColumnType("INTEGER");
 

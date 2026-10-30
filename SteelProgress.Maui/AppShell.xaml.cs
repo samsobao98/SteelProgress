@@ -5,8 +5,15 @@ using SteelProgress.Maui.Controls;
 
 namespace SteelProgress.Maui;
 
+// Se crea uno nuevo cada vez que se entra en un perfil (LauncherPage): un Shell que ya se quitó de la ventana
+// no se puede volver a usar en Android (al navegar, su renderer falla). Al salir del perfil, Detach.
 public partial class AppShell : Shell
 {
+    // Rutas y avisos son globales: se registran con el primer Shell, no con cada uno
+    private static bool _globalsWired;
+
+    private readonly Action _detach;
+
     public AppShell(IServiceProvider services)
     {
         InitializeComponent();
@@ -50,12 +57,20 @@ public partial class AppShell : Shell
         }
         viewOptions.Changed += ApplyTabs;
         clientContext.Changed += ApplyTabs;
+        _detach = () =>
+        {
+            viewOptions.Changed -= ApplyTabs;
+            clientContext.Changed -= ApplyTabs;
+        };
         ApplyTabs();
 
-        Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
+        if (_globalsWired) return;
+        _globalsWired = true;
+
+        Routing.RegisterRoute("ProfilePage", typeof(ProfilePage));
         Routing.RegisterRoute(nameof(ImportPreviewPage), typeof(ImportPreviewPage));
 
-        // Wire static service delegates — AppShell lives for app lifetime, so one subscription is correct
+        // Avisos de los servicios: una sola suscripción para toda la vida de la app
         // Con el diseño de la app (docs/PLAN_VENTANAS.md): confirmación propia y avisos breves que se van solos
         ConfirmDialogService.OnConfirmationRequested += request =>
             AppDialogs.ConfirmAsync(request.Title, request.Message, request.Accept, request.Cancel, request.Destructive);
@@ -68,4 +83,7 @@ public partial class AppShell : Shell
                 _ => ToastKind.Info
             });
     }
+
+    /// <summary>Al salir del perfil: este Shell deja de escuchar cambios de vista y de cliente.</summary>
+    public void Detach() => _detach();
 }

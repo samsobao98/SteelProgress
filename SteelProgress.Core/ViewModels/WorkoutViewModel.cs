@@ -46,7 +46,7 @@ public partial class WorkoutViewModel : ObservableObject
     /// <summary>La página lo llama al aparecer.</summary>
     public async Task RefreshAsync()
     {
-        OnPropertyChanged(nameof(CanNoteSets)); // pudo cambiar en Ajustes
+        OnPropertyChanged(nameof(CanNoteSets)); // pudo cambiar en Perfil
         if (IsSessionActive) return;
         await LoadRoutinesAsync();
         await _dayOptionsLoad;

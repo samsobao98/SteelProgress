@@ -72,11 +72,7 @@ public partial class LauncherViewModel : ObservableObject
         ? "No se pudo cargar"
         : HasProfiles ? "¿Quién entrena hoy?" : "Crea tu primer perfil";
 
-    public IReadOnlyList<string> AvailableColors { get; } = new[]
-    {
-        "#89B4FA", "#A6E3A1", "#F38BA8", "#FAB387", "#F9E2AF",
-        "#CBA6F7", "#94E2D5", "#89DCEB"
-    };
+    public IReadOnlyList<string> AvailableColors => ProfileColors.All;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DescriptionPreviewText))]
@@ -101,6 +97,10 @@ public partial class LauncherViewModel : ObservableObject
             // NBSP final: en Android la cursiva sobresale del ancho medido y el
             // recorte se come el último glifo; así se come el espacio invisible.
             : $"\"{NewProfileDescription.Trim()}\" ";
+
+    /// <summary>Ruta de la foto del perfil, o null (entonces la inicial sobre su color).</summary>
+    public string? PhotoPathOf(UserProfile profile) =>
+        _sp.GetService<ProfilePhotoStore>()?.PathOf(profile.PhotoFile);
 
     public event Action? ProfileChosen;
     public event Action? ProfileUpdated;
@@ -241,6 +241,7 @@ public partial class LauncherViewModel : ObservableObject
         if (entity is null) return;
         db.UserProfiles.Remove(entity);
         await db.SaveChangesAsync();
+        _sp.GetService<ProfilePhotoStore>()?.Delete(entity.PhotoFile);
 
         Profiles.Remove(profile);
         NotifyProfileDerived();

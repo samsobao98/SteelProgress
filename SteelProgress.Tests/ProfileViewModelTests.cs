@@ -7,12 +7,12 @@ using SteelProgress.Domain.Entities;
 
 namespace SteelProgress.Tests;
 
-public class SettingsViewModelTests : IDisposable
+public class ProfileViewModelTests : IDisposable
 {
     private readonly SqliteConnection _connection = new("Data Source=:memory:");
     private readonly CurrentUserService _user = new();
 
-    public SettingsViewModelTests()
+    public ProfileViewModelTests()
     {
         _connection.Open();
         using var db = CreateContext();
@@ -26,13 +26,27 @@ public class SettingsViewModelTests : IDisposable
     private AppDbContext CreateContext() =>
         new(new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options, _user);
 
-    public void Dispose() => _connection.Dispose();
+    private readonly string _photoDir = Path.Combine(Path.GetTempPath(), "sp_photos_" + Guid.NewGuid().ToString("N"));
+
+    public void Dispose()
+    {
+        _connection.Dispose();
+        if (Directory.Exists(_photoDir)) Directory.Delete(_photoDir, true);
+    }
+
+    private ProfileViewModel PhotoViewModel(out ProfilePhotoStore photos)
+    {
+        photos = new ProfilePhotoStore(_photoDir);
+        return new ProfileViewModel(CreateContext(), _user, new ViewOptionsService(), photos: photos);
+    }
+
+    private static MemoryStream FakePhoto(byte value) => new(new byte[] { value, value, value });
 
     [Fact]
     public async Task LoadsCurrentProfileSettings()
     {
         _user.SetCurrentUser(2);
-        var vm = new SettingsViewModel(CreateContext(), _user, new ViewOptionsService());
+        var vm = new ProfileViewModel(CreateContext(), _user, new ViewOptionsService());
         await vm.LoadAsync();
 
         Assert.Equal("Lucía", vm.ProfileName);
@@ -45,7 +59,7 @@ public class SettingsViewModelTests : IDisposable
     public async Task ChangesAreSavedAndSharedImmediately()
     {
         var options = new ViewOptionsService();
-        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        var vm = new ProfileViewModel(CreateContext(), _user, options);
         await vm.LoadAsync();
 
         vm.ShowTempoAndRest = true;
@@ -65,7 +79,7 @@ public class SettingsViewModelTests : IDisposable
     public async Task SwitchingToDetailedKeepsBlocksForWhenSwitchingBack()
     {
         var options = new ViewOptionsService();
-        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        var vm = new ProfileViewModel(CreateContext(), _user, options);
         await vm.LoadAsync();
         vm.ShowIntensity = true;
         await vm.SaveAsync();
@@ -89,7 +103,7 @@ public class SettingsViewModelTests : IDisposable
     public async Task ChangingKindAsksFirst(bool confirms, bool becomesCoach)
     {
         var options = new ViewOptionsService();
-        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        var vm = new ProfileViewModel(CreateContext(), _user, options);
         await vm.LoadAsync();
 
         Func<ConfirmRequest, Task<bool>> answer = _ => Task.FromResult(confirms);
@@ -112,7 +126,7 @@ public class SettingsViewModelTests : IDisposable
     [Fact]
     public async Task LoadingDoesNotWriteAnything()
     {
-        var vm = new SettingsViewModel(CreateContext(), _user, new ViewOptionsService());
+        var vm = new ProfileViewModel(CreateContext(), _user, new ViewOptionsService());
         await vm.LoadAsync();
 
         using var check = CreateContext();
@@ -124,7 +138,7 @@ public class SettingsViewModelTests : IDisposable
     public async Task RapidTogglesDoNotCollide()
     {
         var options = new ViewOptionsService();
-        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        var vm = new ProfileViewModel(CreateContext(), _user, options);
         await vm.LoadAsync();
 
         // Varios interruptores casi a la vez, como al tocarlos seguidos
@@ -143,7 +157,7 @@ public class SettingsViewModelTests : IDisposable
     public async Task GymPlatesAndBarAreSavedPerProfile()
     {
         var options = new ViewOptionsService();
-        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        var vm = new ProfileViewModel(CreateContext(), _user, options);
         await vm.LoadAsync();
 
         // Por defecto: todos menos el de 1,25, y barra de 20
@@ -169,5 +183,106 @@ public class SettingsViewModelTests : IDisposable
         foreach (var plate in vm.Plates.Where(p => p.IsAvailable).ToList())
             vm.TogglePlateCommand.Execute(plate);
         Assert.Single(vm.Plates, p => p.IsAvailable);
+    }
+
+    [Fact]
+    public async Task EditingSavesNameDescriptionAndColor()
+    {
+        var vm = new ProfileViewModel(CreateContext(), _user, new ViewOptionsService());
+        await vm.LoadAsync();
+
+        vm.StartEditCommand.Execute(null);
+        Assert.True(vm.IsEditing);
+        vm.EditName = "  Samu ";
+        vm.EditDescription = "Constancia";
+        vm.EditColor = ProfileColors.All[3];
+        await vm.SaveEditCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsEditing);
+        Assert.Equal(("Samu", "S", "Constancia"), (vm.ProfileName, vm.ProfileInitial, vm.ProfileDescription));
+        using var check = CreateContext();
+        var saved = check.UserProfiles.Single(p => p.Id == 1);
+        Assert.Equal(("Samu", "Constancia", ProfileColors.All[3]), (saved.Name, saved.Description, saved.AvatarColor));
+    }
+
+    [Fact]
+    public async Task CancellingOrEmptyNameDoesNotSave()
+    {
+        var vm = new ProfileViewModel(CreateContext(), _user, new ViewOptionsService());
+        await vm.LoadAsync();
+
+        vm.StartEditCommand.Execute(null);
+        vm.EditName = "   ";
+        Assert.False(vm.SaveEditCommand.CanExecute(null));
+
+        vm.EditName = "Otro";
+        vm.CancelEditCommand.Execute(null);
+        Assert.False(vm.IsEditing);
+        Assert.Equal("Samuel", vm.ProfileName);
+        using var check = CreateContext();
+        Assert.Equal("Samuel", check.UserProfiles.Single(p => p.Id == 1).Name);
+    }
+
+    [Fact]
+    public async Task PhotoIsKeptOnlyWhenSaving()
+    {
+        var vm = PhotoViewModel(out var photos);
+        await vm.LoadAsync();
+        Assert.False(vm.HasProfilePhoto);
+
+        // Elegida y cancelada: ni foto ni archivo suelto
+        vm.StartEditCommand.Execute(null);
+        await vm.SetEditPhotoAsync(FakePhoto(1));
+        Assert.True(vm.HasEditPhoto);
+        vm.CancelEditCommand.Execute(null);
+        Assert.False(vm.HasProfilePhoto);
+        Assert.Empty(Directory.GetFiles(_photoDir));
+
+        // Elegida dos veces y guardada: solo queda la última, ya del perfil
+        vm.StartEditCommand.Execute(null);
+        await vm.SetEditPhotoAsync(FakePhoto(2));
+        await vm.SetEditPhotoAsync(FakePhoto(3));
+        await vm.SaveEditCommand.ExecuteAsync(null);
+
+        var file = Assert.Single(Directory.GetFiles(_photoDir));
+        Assert.Equal(file, vm.ProfilePhoto);
+        Assert.Equal(new byte[] { 3, 3, 3 }, File.ReadAllBytes(file));
+        using var check = CreateContext();
+        Assert.Equal(Path.GetFileName(file), check.UserProfiles.Single(p => p.Id == 1).PhotoFile);
+    }
+
+    [Fact]
+    public async Task ReplacingOrRemovingThePhotoDeletesTheOldFile()
+    {
+        var vm = PhotoViewModel(out _);
+        await vm.LoadAsync();
+        vm.StartEditCommand.Execute(null);
+        await vm.SetEditPhotoAsync(FakePhoto(1));
+        await vm.SaveEditCommand.ExecuteAsync(null);
+        var first = vm.ProfilePhoto;
+
+        vm.StartEditCommand.Execute(null);
+        await vm.SetEditPhotoAsync(FakePhoto(2));
+        await vm.SaveEditCommand.ExecuteAsync(null);
+        Assert.NotEqual(first, vm.ProfilePhoto);
+        Assert.False(File.Exists(first));
+
+        vm.StartEditCommand.Execute(null);
+        vm.RemoveEditPhotoCommand.Execute(null);
+        Assert.True(vm.HasProfilePhoto); // hasta guardar sigue la que había
+        await vm.SaveEditCommand.ExecuteAsync(null);
+        Assert.False(vm.HasProfilePhoto);
+        Assert.Empty(Directory.GetFiles(_photoDir));
+        using var check = CreateContext();
+        Assert.Null(check.UserProfiles.Single(p => p.Id == 1).PhotoFile);
+    }
+
+    [Fact]
+    public void PhotoStoreNeverLeavesItsFolder()
+    {
+        var photos = new ProfilePhotoStore(_photoDir);
+        File.WriteAllText(Path.Combine(Path.GetTempPath(), "sp_outside.jpg"), "x");
+        Assert.Null(photos.PathOf("../sp_outside.jpg"));
+        Assert.Null(photos.PathOf(null));
     }
 }

@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SteelProgress.Core.ViewModels;
 
-/// <summary>Un disco en «Tu gimnasio» (Ajustes): su peso y si lo hay.</summary>
+/// <summary>Un disco en «Tu gimnasio» (Perfil): su peso y si lo hay.</summary>
 public partial class PlateOption : ObservableObject
 {
     public double Weight { get; }
