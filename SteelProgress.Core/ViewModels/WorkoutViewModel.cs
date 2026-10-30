@@ -349,6 +349,7 @@ public partial class WorkoutViewModel : ObservableObject
         IsFinishing = false;
         WorkoutStateService.IsWorkoutActive = true;
         WorkoutStateService.ActiveSessionId = session.Id;
+        WorkoutStateService.ActiveSessionStart = session.Date;
 
         SelectExercise(ExerciseStates.FirstOrDefault(e => !e.IsDone) ?? ExerciseStates.FirstOrDefault());
         Tick();
@@ -838,10 +839,11 @@ public partial class WorkoutViewModel : ObservableObject
         _previousVolume = null;
         WorkoutStateService.IsWorkoutActive = false;
         WorkoutStateService.ActiveSessionId = null;
+        WorkoutStateService.ActiveSessionStart = null;
         _dayOptionsLoad = LoadRoutinesAsync(); // cambian la activa, «Toca» y «Hace N días»
     }
 
-    internal static string FormatDuration(TimeSpan t)
+    public static string FormatDuration(TimeSpan t)
     {
         if (t < TimeSpan.Zero) t = TimeSpan.Zero;
         return t.TotalHours >= 1 ? $"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}" : $"{t.Minutes}:{t.Seconds:00}";

@@ -1,6 +1,7 @@
 using SteelProgress.Maui.Services;
 using SteelProgress.Core.Services;
 using SteelProgress.Maui.Pages;
+using SteelProgress.Maui.Controls;
 
 namespace SteelProgress.Maui;
 
@@ -10,13 +11,14 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        // Wire pages via DI so constructor injection works
-        HomeContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<HomePage>());
-        ExerciseContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ExercisePage>());
-        RoutineContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<RoutinePage>());
-        WorkoutContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<WorkoutPage>());
-        ProgressContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ProgressPage>());
-        ClientsContent.ContentTemplate = new DataTemplate(() => services.GetRequiredService<ClientsPage>());
+        // Wire pages via DI so constructor injection works. La barra de pestañas está oculta
+        // (Shell.TabBarIsVisible): cada página principal lleva el abanico del logo (Controls/FanMenu.cs).
+        HomeContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<HomePage>(), "HomePage"));
+        ExerciseContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<ExercisePage>(), "ExercisePage"));
+        RoutineContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<RoutinePage>(), "RoutinePage"));
+        WorkoutContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<WorkoutPage>(), "WorkoutPage"));
+        ProgressContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<ProgressPage>(), "ProgressPage"));
+        ClientsContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<ClientsPage>(), "ClientsPage"));
 
         // Barra según la vista: en vista entrenador aparece Clientes y, si el perfil no entrena, Progreso
         // solo se ve mientras se trabaja con un cliente (es su progreso e historial)

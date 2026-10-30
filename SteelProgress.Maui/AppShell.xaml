@@ -6,7 +6,8 @@
     Shell.TabBarBackgroundColor="#14161E"
     Shell.TabBarForegroundColor="#E8EAF2"
     Shell.TabBarTitleColor="#E8EAF2"
-    Shell.TabBarUnselectedColor="#6A7088">
+    Shell.TabBarUnselectedColor="#6A7088"
+    Shell.TabBarIsVisible="False">
 
     <TabBar>
         <Tab Title="Inicio">
