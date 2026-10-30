@@ -48,16 +48,27 @@ public partial class ClientLimitationsViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasConsent), nameof(NeedsConsent), nameof(CanAdd), nameof(ConsentText))]
     private DateTime? _consentAt;
 
-    /// <summary>La casilla «me ha dado su consentimiento», antes de guardar la primera.</summary>
+    /// <summary>
+    /// La casilla «me ha dado su consentimiento». Marcarla lo registra con su fecha: vale también para
+    /// apuntar su peso, aunque no tenga ninguna limitación.
+    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanAdd))]
     private bool _consentChecked;
+
+    /// <summary>La página lo llama al marcar la casilla.</summary>
+    public async Task GiveConsentAsync()
+    {
+        if (!ConsentChecked || HasConsent || ClientId == 0) return;
+        await _repository.GiveHealthConsentAsync(ClientId, _clock.GetLocalNow().DateTime);
+        await LoadAsync(ClientId);
+    }
 
     public bool HasConsent => ConsentAt is not null;
     public bool NeedsConsent => !HasConsent;
     public bool CanAdd => HasConsent || ConsentChecked;
     public string ConsentText => ConsentAt is DateTime d ? $"Consentimiento de {ClientName}\ndado el {d:dd/MM/yyyy}" : "";
-    public string ConsentLabel => $"{ClientName} me ha dado su consentimiento para guardar estos datos.";
+    public string ConsentLabel => $"{ClientName} me ha dado su consentimiento para guardar sus datos de salud (limitaciones y peso).";
 
     // ── Listas ──
 
@@ -187,7 +198,7 @@ public partial class ClientLimitationsViewModel : ObservableObject
     private async Task WithdrawConsentAsync()
     {
         var confirmed = await ConfirmDialogService.ConfirmAsync("Retirar consentimiento",
-            $"Se borrarán todas las limitaciones de {ClientName}, también las superadas.", accept: "Retirar y borrar", destructive: true);
+            $"Se borrarán todas las limitaciones de {ClientName} (también las superadas) y sus pesajes.", accept: "Retirar y borrar", destructive: true);
         if (!confirmed) return;
 
         await _repository.WithdrawHealthConsentAsync(ClientId);

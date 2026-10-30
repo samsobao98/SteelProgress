@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<ExerciseMedia> ExerciseMedia { get; set; }
     public DbSet<Client> Clients { get; set; }
     public DbSet<ClientLimitation> ClientLimitations { get; set; }
+    public DbSet<BodyWeightEntry> BodyWeights { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null)
         : base(options)
@@ -87,6 +88,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ClientLimitation>()
             .HasQueryFilter(l => _currentUserService == null || l.Client!.UserId == _currentUserService.CurrentUserId);
 
+        // Pesajes: como las sesiones, los del perfil o los del cliente activo
+        modelBuilder.Entity<BodyWeightEntry>()
+            .HasOne(w => w.UserProfile)
+            .WithMany()
+            .HasForeignKey(w => w.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BodyWeightEntry>()
+            .HasOne(w => w.Client)
+            .WithMany()
+            .HasForeignKey(w => w.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BodyWeightEntry>()
+            .HasQueryFilter(w => _currentUserService == null
+                || (w.UserId == _currentUserService.CurrentUserId && w.ClientId == _currentUserService.CurrentClientId));
+        modelBuilder.Entity<BodyWeightEntry>().HasIndex(w => new { w.UserId, w.ClientId, w.Date });
+
         // Igual que en la migración AddUserProfiles, para que el modelo no pida reconstruir la tabla
         modelBuilder.Entity<UserProfile>()
             .Property(p => p.AvatarColor)
@@ -142,6 +159,11 @@ public class AppDbContext : DbContext
                 }
                 else if (entry.Entity is Client c && c.UserId == 0)
                     c.UserId = userId;
+                else if (entry.Entity is BodyWeightEntry w && w.UserId == 0)
+                {
+                    w.UserId = userId;
+                    w.ClientId ??= clientId;
+                }
             }
         }
 

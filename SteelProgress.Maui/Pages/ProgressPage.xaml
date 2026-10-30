@@ -96,6 +96,69 @@
                     </Grid>
                 </Border>
 
+                <!-- ═════════════ PESO CORPORAL (en Resumen, con o sin entrenos) ═════════════ -->
+                <!-- BindingContext de WeightBlock: BodyWeightViewModel (se pone en ProgressPage) -->
+                <VerticalStackLayout IsVisible="{Binding IsSummary}">
+                    <VerticalStackLayout x:Name="WeightBlock" Spacing="10" Margin="0,0,0,14" IsVisible="{Binding IsVisible}">
+                        <!-- Con pesajes: la tendencia, no el número de un día -->
+                        <Border Style="{StaticResource SpCardStyle}" Padding="16" IsVisible="{Binding HasEntries}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnWeightCardTapped" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="{Binding Title}" Style="{StaticResource SpHeading}" FontSize="15" />
+                                    <Label Grid.Column="1" Text="tendencia" Style="{StaticResource StatCaption}" VerticalOptions="Center" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,140" ColumnSpacing="12">
+                                    <VerticalStackLayout Spacing="4" VerticalOptions="End">
+                                        <Label>
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding TrendText}" FontFamily="SpaceGroteskBold" FontSize="30" TextColor="{StaticResource SpText}" />
+                                                    <Span Text=" kg" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpText2}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{Binding ChangeText}" Style="{StaticResource StatCaption}" FontSize="13" TextColor="{StaticResource SpText2}" />
+                                    </VerticalStackLayout>
+                                    <lvc:CartesianChart Grid.Column="1" HeightRequest="48" BackgroundColor="Transparent" Series="{Binding Sparkline}"
+                                                        XAxes="{Binding SparkXAxes}" YAxes="{Binding SparkYAxes}"
+                                                        TooltipPosition="Hidden" LegendPosition="Hidden" InputTransparent="True" />
+                                </Grid>
+                                <BoxView HeightRequest="1" Color="{StaticResource SpLine}" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="{Binding LastText}" Style="{StaticResource StatCaption}" FontSize="13" />
+                                    <Label Grid.Column="1" Text="Ver ›" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel1}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Sin pesajes -->
+                        <Border Style="{StaticResource SpCardStyle}" Padding="16" IsVisible="{Binding IsEmpty}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Title}" Style="{StaticResource SpHeading}" FontSize="15" />
+                                <Label Text="Apúntalo de vez en cuando, siempre en las mismas condiciones, y aquí verás su tendencia."
+                                       Style="{StaticResource StatCaption}" FontSize="13" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border StrokeThickness="1" Stroke="{StaticResource SpText4}" StrokeDashArray="4,3" StrokeShape="RoundRectangle 14"
+                                HeightRequest="48" BackgroundColor="Transparent" IsVisible="{Binding IsAllowed}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAddWeightTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="+ Apuntar peso de hoy" Style="{StaticResource SpBody}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <!-- Cliente sin consentimiento: su peso es un dato de salud -->
+                        <Border Style="{StaticResource SpCardStyle}" Padding="16" IsVisible="{Binding NeedsConsent}">
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="{Binding Title}" Style="{StaticResource SpHeading}" FontSize="15" />
+                                <Label Text="{Binding ConsentText}" Style="{StaticResource StatCaption}" FontSize="13" />
+                                <Button Text="Ir a su consentimiento" Style="{StaticResource SpSecondaryButton}" Clicked="OnWeightConsentClicked" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
                 <!-- Sin entrenos todavía (para las tres pestañas) -->
                 <VerticalStackLayout Spacing="6" Margin="0,24,0,0" IsVisible="False">
                     <VerticalStackLayout.Triggers>

@@ -17,6 +17,33 @@ namespace SteelProgress.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.25");
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.BodyWeightEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Kg")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("UserId", "ClientId", "Date");
+
+                    b.ToTable("BodyWeights");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>
                 {
                     b.Property<int>("Id")
@@ -476,6 +503,24 @@ namespace SteelProgress.Data.Migrations
                     b.HasIndex("WorkoutExerciseId");
 
                     b.ToTable("WorkoutSets");
+                });
+
+            modelBuilder.Entity("SteelProgress.Domain.Entities.BodyWeightEntry", b =>
+                {
+                    b.HasOne("SteelProgress.Domain.Entities.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>

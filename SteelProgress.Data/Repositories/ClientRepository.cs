@@ -66,11 +66,22 @@ public class ClientRepository
         await _context.SaveChangesAsync();
     }
 
-    /// <summary>El cliente retira su consentimiento: se borran todas sus limitaciones.</summary>
+    /// <summary>El cliente da su consentimiento para guardar datos de salud (limitaciones y peso).</summary>
+    public async Task GiveHealthConsentAsync(int clientId, DateTime now)
+    {
+        var client = await _context.Clients.FirstAsync(c => c.Id == clientId);
+        client.HealthConsentAt ??= now;
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>El cliente retira su consentimiento: se borran sus limitaciones y sus pesajes.</summary>
     public async Task WithdrawHealthConsentAsync(int clientId)
     {
         var client = await _context.Clients.Include(c => c.Limitations).FirstAsync(c => c.Id == clientId);
         _context.ClientLimitations.RemoveRange(client.Limitations);
+        // Sus pesajes, aunque no sea el cliente activo (los filtros solo dejan ver los del activo)
+        _context.BodyWeights.RemoveRange(await _context.BodyWeights.IgnoreQueryFilters()
+            .Where(w => w.UserId == client.UserId && w.ClientId == clientId).ToListAsync());
         client.HealthConsentAt = null;
         await _context.SaveChangesAsync();
     }

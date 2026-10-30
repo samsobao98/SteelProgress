@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.BodyWeightPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    x:DataType="vm:BodyWeightViewModel"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <Style x:Key="RangeLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="SpaceGroteskMedium" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextColor" Value="{StaticResource SpText3}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="RangeSegment" TargetType="Border">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+            <Setter Property="Padding" Value="0,9" />
+        </Style>
+    </ContentPage.Resources>
+
+    <!-- Peso corporal (maqueta del 2026-10-30). Se abre desde la tarjeta de Progreso. -->
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="20,12,20,32" Spacing="16">
+                <!-- Volver -->
+                <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBackTapped" />
+                    </HorizontalStackLayout.GestureRecognizers>
+                    <Label Text="‹" FontSize="22" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                    <Label Text="Progreso" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Text="{Binding Title}" Style="{StaticResource SpTitle}" FontSize="24" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                    <Button Grid.Column="1" Text="+ Apuntar" Style="{StaticResource SpSecondaryButton}" Padding="14,0" HeightRequest="40" MinimumHeightRequest="40"
+                            VerticalOptions="Center" Command="{Binding StartEntryCommand}" IsVisible="{Binding IsAllowed}" />
+                </Grid>
+
+                <!-- Sin pesajes todavía -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding IsEmpty}" Margin="0,24,0,0">
+                    <Label Text="Aún no hay pesajes" Style="{StaticResource SpHeading}" HorizontalOptions="Center" />
+                    <Label Text="Apúntalo de vez en cuando, siempre en las mismas condiciones, y aquí verás su tendencia."
+                           Style="{StaticResource SpSecondary}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasEntries}">
+                    <!-- Periodo de la gráfica -->
+                    <Border BackgroundColor="{StaticResource SpCard}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                            <Border Style="{StaticResource RangeSegment}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsMonth}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowRangeCommand}" CommandParameter="0" />
+                                </Border.GestureRecognizers>
+                                <Label Text="1 mes" Style="{StaticResource RangeLabel}" />
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource RangeSegment}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsQuarter}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowRangeCommand}" CommandParameter="1" />
+                                </Border.GestureRecognizers>
+                                <Label Text="3 meses" Style="{StaticResource RangeLabel}" />
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource RangeSegment}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsAll}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource SpCardHi}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowRangeCommand}" CommandParameter="2" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Todo" Style="{StaticResource RangeLabel}" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Tendencia y gráfica -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Tendencia" Style="{StaticResource SpSecondary}" FontSize="12" />
+                            <Label>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding TrendText}" FontFamily="SpaceGroteskBold" FontSize="34" TextColor="{StaticResource SpText}" />
+                                        <Span Text=" kg" FontFamily="SpaceGroteskMedium" FontSize="16" TextColor="{StaticResource SpText2}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="{Binding ChangeText}" Style="{StaticResource SpSecondary}" />
+                            <lvc:CartesianChart HeightRequest="190" BackgroundColor="Transparent" Series="{Binding Series}" XAxes="{Binding XAxes}"
+                                                YAxes="{Binding YAxes}" TooltipPosition="Hidden" LegendPosition="Hidden" />
+                            <HorizontalStackLayout Spacing="16">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Ellipse Fill="{StaticResource SpText3}" WidthRequest="7" HeightRequest="7" VerticalOptions="Center" />
+                                    <Label Text="Cada pesaje" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6">
+                                    <BoxView Color="{StaticResource SpSteel3}" WidthRequest="14" HeightRequest="3" CornerRadius="2" VerticalOptions="Center" />
+                                    <Label Text="Tendencia" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Text="La tendencia suaviza el vaivén de cada día (agua, comida), así que cambia poco a poco."
+                                   Style="{StaticResource SpSecondary}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Media de cada semana -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Media de cada semana" Style="{StaticResource SpOverline}" />
+                        <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Weeks}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:WeekAverageItem">
+                                        <Grid ColumnDefinitions="*,Auto" Padding="0,12">
+                                            <Label Text="{Binding Week}" Style="{StaticResource SpBody}" FontSize="14" />
+                                            <Label Grid.Column="1" FontSize="14">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding Kg}" FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpText}" />
+                                                        <Span Text=" · " TextColor="{StaticResource SpText3}" />
+                                                        <Span Text="{Binding Count}" TextColor="{StaticResource SpText3}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Fuerza respecto al propio peso -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStrength}">
+                        <Label Text="Fuerza respecto al peso" Style="{StaticResource SpOverline}" />
+                        <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Strength}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StrengthItem">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="0,12">
+                                            <Label Text="{Binding Exercise}" Style="{StaticResource SpBody}" FontSize="14" LineBreakMode="TailTruncation" VerticalOptions="Center" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                                <Label Text="{Binding Ratio}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpText}" HorizontalOptions="End" />
+                                                <Label Text="{Binding Before}" Style="{StaticResource SpSecondary}" FontSize="12" HorizontalOptions="End" IsVisible="{Binding HasBefore}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                        <Label Text="1RM estimado dividido entre el peso (tendencia) de ese día. Solo ejercicios con series de 1 a 10 repeticiones. Sirve para compararse con uno mismo, no con otros."
+                               Style="{StaticResource SpSecondary}" FontSize="12" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Hoja: apuntar el peso -->
+        <Grid IsVisible="{Binding IsEntering}" BackgroundColor="#8C0A0A10">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelEntryCommand}" />
+            </Grid.GestureRecognizers>
+            <Border Style="{StaticResource SpSheetStyle}" VerticalOptions="End">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="18">
+                    <BoxView HeightRequest="4" WidthRequest="40" CornerRadius="2" Color="{StaticResource SpText4}" HorizontalOptions="Center" />
+                    <Label Text="Apuntar peso" Style="{StaticResource SpHeading}" />
+
+                    <Grid ColumnDefinitions="56,*,56" ColumnSpacing="12">
+                        <Button Text="−" FontSize="26" Style="{StaticResource SpSecondaryButton}" Padding="0" WidthRequest="56" HeightRequest="56"
+                                CornerRadius="28" Command="{Binding EntryMinusCommand}" SemanticProperties.Description="Restar 0,1 kg" VerticalOptions="Center" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                            <Entry Text="{Binding EntryText}" Keyboard="Numeric" FontFamily="SpaceGroteskBold" FontSize="44" HorizontalTextAlignment="Center"
+                                   TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText3}" Placeholder="0,0" BackgroundColor="Transparent" />
+                            <Label Text="kg" Style="{StaticResource SpSecondary}" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="+" FontSize="26" Style="{StaticResource SpSecondaryButton}" Padding="0" WidthRequest="56" HeightRequest="56"
+                                CornerRadius="28" Command="{Binding EntryPlusCommand}" SemanticProperties.Description="Sumar 0,1 kg" VerticalOptions="Center" />
+                    </Grid>
+                    <Label Text="{Binding EntryHint}" Style="{StaticResource SpSecondary}" HorizontalTextAlignment="Center" />
+
+                    <Grid ColumnDefinitions="*,Auto" BackgroundColor="{StaticResource SpBg}" Padding="12,0">
+                        <Label Text="Día" Style="{StaticResource SpSecondary}" FontSize="12" VerticalOptions="Center" />
+                        <DatePicker Grid.Column="1" Date="{Binding EntryDate}" Format="dd/MM/yyyy" TextColor="{StaticResource SpText}" />
+                    </Grid>
+
+                    <Border Style="{StaticResource SpCardStyle}" Padding="12,10">
+                        <Label Text="{Binding WeighTip}" Style="{StaticResource SpSecondary}" FontSize="13" />
+                    </Border>
+
+                    <Label Text="{Binding EntryError}" TextColor="{StaticResource SpDanger}" FontSize="13" IsVisible="{Binding HasEntryError}" />
+
+                    <Grid ColumnDefinitions="*,2*" ColumnSpacing="8">
+                        <Button Text="Cancelar" Style="{StaticResource SpSecondaryButton}" Command="{Binding CancelEntryCommand}" />
+                        <Button Grid.Column="1" Text="Guardar" Style="{StaticResource SpPrimaryButton}" Command="{Binding SaveEntryCommand}" />
+                    </Grid>
+                    <Button Text="Borrar el de ese día" Style="{StaticResource SpDangerTextButton}" Command="{Binding DeleteEntryCommand}"
+                            IsVisible="{Binding HasEntryOnDate}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+
+</ContentPage>

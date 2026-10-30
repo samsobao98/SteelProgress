@@ -72,6 +72,7 @@ public static class MauiProgram
         builder.Services.AddTransient<RoutineRepository>();
         builder.Services.AddTransient<WorkoutRepository>();
         builder.Services.AddTransient<ClientRepository>();
+        builder.Services.AddTransient<BodyWeightRepository>();
 
         // ViewModels
         builder.Services.AddTransient<HomeViewModel>();
@@ -84,6 +85,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddTransient<ClientsViewModel>();
         builder.Services.AddTransient<ClientLimitationsViewModel>();
+        builder.Services.AddTransient<BodyWeightViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
@@ -97,6 +99,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ImportPreviewPage>();
         builder.Services.AddTransient<ClientsPage>();
         builder.Services.AddTransient<ClientLimitationsPage>();
+        builder.Services.AddTransient<BodyWeightPage>();
 
         // La pantalla de perfiles vive toda la app; el Shell, uno nuevo por cada entrada en un perfil
         builder.Services.AddTransient<AppShell>();

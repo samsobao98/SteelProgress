@@ -14,6 +14,7 @@ public partial class ProgressPage : ContentPage
     private bool _coveredByPopup;
 
     private readonly ProgressViewModel _vm;
+    private readonly BodyWeightViewModel _weight;
     private readonly GoalRingDrawable _ring = new();
     private readonly ConsistencyDrawable _calendar = new();
     private ClientContextService? _clientContext;
@@ -24,10 +25,11 @@ public partial class ProgressPage : ContentPage
     /// <summary>Abre Progreso en una sección (y, en el historial, una sesión). Llamar antes de navegar.</summary>
     public static void Request(ProgressSection section, int? sessionId = null) => _request = (section, sessionId);
 
-    public ProgressPage(ProgressViewModel vm)
+    public ProgressPage(ProgressViewModel vm, BodyWeightViewModel weight)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
+        WeightBlock.BindingContext = _weight = weight;
         GoalRing.Drawable = _ring;
         CalendarView.Drawable = _calendar;
         BuildLegend();
@@ -44,7 +46,26 @@ public partial class ProgressPage : ContentPage
         DetailScroll.MaximumHeightRequest = Math.Max(160, Height * 0.85 - DetailHeader.Height - padding);
     }
 
-    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
+    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () =>
+    {
+        await _vm.RefreshAsync();
+        await _weight.LoadAsync();
+    });
+
+    // ── Peso corporal ──
+
+    private async void OnWeightCardTapped(object? sender, TappedEventArgs e) =>
+        await Shell.Current.GoToAsync(nameof(BodyWeightPage));
+
+    private async void OnAddWeightTapped(object? sender, TappedEventArgs e) =>
+        await Shell.Current.GoToAsync(nameof(BodyWeightPage), new Dictionary<string, object> { ["add"] = true });
+
+    // El consentimiento de un cliente se da en sus limitaciones: vale para limitaciones y peso
+    private async void OnWeightConsentClicked(object? sender, EventArgs e)
+    {
+        if (_weight.ClientId is int id)
+            await Shell.Current.GoToAsync(nameof(ClientLimitationsPage), new Dictionary<string, object> { ["clientId"] = id });
+    }
 
     protected override async void OnAppearing()
     {
@@ -58,6 +79,7 @@ public partial class ProgressPage : ContentPage
         }
 
         await _vm.RefreshAsync();
+        await _weight.LoadAsync();
 
         if (_request is { } request)
         {

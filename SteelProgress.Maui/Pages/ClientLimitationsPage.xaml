@@ -18,7 +18,7 @@
                         <TapGestureRecognizer Tapped="OnBackTapped" />
                     </HorizontalStackLayout.GestureRecognizers>
                     <Label Text="‹" FontSize="22" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
-                    <Label Text="Clientes" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
+                    <Label Text="Volver" FontSize="14" TextColor="{StaticResource SpText2}" VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
                 <Label Text="{Binding Title}" Style="{StaticResource SpTitle}" FontSize="24" />
@@ -36,12 +36,12 @@
                                 <Grid.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnConsentTextTapped" />
                                 </Grid.GestureRecognizers>
-                                <CheckBox IsChecked="{Binding ConsentChecked}" Color="{StaticResource SpSteel1}" VerticalOptions="Start" />
+                                <CheckBox IsChecked="{Binding ConsentChecked}" Color="{StaticResource SpSteel1}" VerticalOptions="Start" CheckedChanged="OnConsentChanged" />
                                 <Label Grid.Column="1" Text="{Binding ConsentLabel}" Style="{StaticResource SpBody}" FontSize="14" VerticalOptions="Center" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
-                    <Label Text="La app solo los apunta y te los recuerda. No propone ejercicios ni cambios: eso lo decides tú, con lo que diga su fisio o médico."
+                    <Label Text="La app solo los apunta y te los recuerda. No propone ejercicios ni cambios: eso lo decides tú, con lo que diga su fisio o médico. El consentimiento vale también para apuntar su peso."
                            Style="{StaticResource SpSecondary}" />
                     <Button Text="+ Añadir limitación" Style="{StaticResource SpPrimaryButton}" IsEnabled="{Binding CanAdd}" Command="{Binding StartNewCommand}" />
                 </VerticalStackLayout>

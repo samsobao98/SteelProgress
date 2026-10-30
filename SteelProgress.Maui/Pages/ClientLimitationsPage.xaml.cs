@@ -51,6 +51,12 @@ public partial class ClientLimitationsPage : ContentPage, IQueryAttributable
     private async void OnBackTapped(object? sender, TappedEventArgs e) =>
         await Shell.Current.GoToAsync("..");
 
+    // Marcar la casilla registra el consentimiento con su fecha (desmarcar no hace nada: se retira abajo)
+    private async void OnConsentChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        if (e.Value) await _vm.GiveConsentAsync();
+    }
+
     // El texto de la casilla también la marca
     private void OnConsentTextTapped(object? sender, TappedEventArgs e) =>
         _vm.ConsentChecked = !_vm.ConsentChecked;

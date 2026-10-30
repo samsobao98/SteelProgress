@@ -67,17 +67,21 @@ public class ClientLimitationsTests : IDisposable
         vm.StartNewCommand.Execute(null);
         Assert.False(vm.IsEditing);
 
-        vm.ConsentChecked = true;
-        Assert.True(vm.CanAdd);
         vm.StartNewCommand.Execute(null);
         vm.EditZone = "Rodilla";
-        Assert.False(vm.SaveCommand.CanExecute(null)); // falta el texto
-        vm.CancelEditCommand.Execute(null);
+        vm.EditText = "Sin saltos.";
+        await vm.SaveCommand.ExecuteAsync(null); // sin la casilla, no se guarda
+        using (var db = Db()) Assert.Empty(db.ClientLimitations);
 
-        // Marcar la casilla y no guardar nada no registra el consentimiento
-        using var db = Db();
-        Assert.Null(db.Clients.Single().HealthConsentAt);
-        Assert.Empty(db.ClientLimitations);
+        // Marcar la casilla registra el consentimiento, aunque aún no haya ninguna limitación (vale para el peso)
+        vm.ConsentChecked = true;
+        await vm.GiveConsentAsync();
+        Assert.True((vm.HasConsent, vm.CanAdd) == (true, true));
+        using (var db = Db())
+        {
+            Assert.NotNull(db.Clients.Single().HealthConsentAt);
+            Assert.Empty(db.ClientLimitations);
+        }
     }
 
     [Fact]
