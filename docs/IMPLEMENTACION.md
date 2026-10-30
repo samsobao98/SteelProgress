@@ -415,3 +415,14 @@ Probar limitaciones: Clientes → Felipe → Limitaciones → marcar la casilla 
 - **Consentimiento de datos de salud** de un cliente: ahora se registra al marcar la casilla (antes, al guardar la primera limitación) y vale para limitaciones y peso. Sin él, Progreso muestra «Ir a su consentimiento» en lugar del peso. Retirarlo borra sus limitaciones y sus pesajes. Un perfil de entrenador sin cliente activo no ve el peso.
 
 Probar peso: Clientes → Felipe → Historial → Resumen → «Ir a su consentimiento» → marcar la casilla → volver → «+ Apuntar peso de hoy» → Guardar; la tarjeta enseña la tendencia y «Ver ›» abre la pantalla. «Retirar y borrar» en sus limitaciones lo deja todo como al principio.
+
+## Datos de prueba (2026-10-30)
+
+`bash tools/demo-data.sh` (con el emulador encendido y la app abierta al menos una vez) **borra los perfiles** del dispositivo y carga dos, con fechas relativas a hoy (`tools/SteelProgress.DemoData`, usa el modelo de la app):
+
+- **Lucía**, personal, vista detallada: rutinas «Torso / Pierna» (activa, 4 días), «Full body 3 días» y «Fuerza 5×5»; ~4 meses de entrenos con cargas que suben, calentamientos, RPE y notas; series de más de 10 repeticiones en accesorios (sin 1RM estimado); 12 semanas de peso.
+- **Álex**, entrenador, vista detallada, con cuatro clientes:
+  - Felipe: L/X/V, toca hoy los días que le tocan, limitaciones (rodilla y lumbar vigentes, hombro superada), consentimiento, PAR-Q+ caducado y peso.
+  - Marta: M/J, «Sin noticias» (diez días sin venir), consentimiento, PAR-Q+ al día y peso.
+  - Jorge: sin días fijos, sin consentimiento ni PAR-Q+, rutina PPL tres días por semana.
+  - Ana: dada de alta ayer, sin rutina.

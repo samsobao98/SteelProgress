@@ -177,7 +177,6 @@ public partial class LauncherPage : ContentPage
         if (_currentSelectedColor != null && _colorDots.TryGetValue(_currentSelectedColor, out var old))
         {
             _ = old.dot.ScaleToAsync(1.0, 200, Easing.CubicOut);
-            _ = old.dot.TranslateToAsync(0, 0, 200, Easing.CubicOut);
             _ = old.halo.FadeToAsync(0, 200, Easing.CubicOut);
         }
 
@@ -190,14 +189,12 @@ public partial class LauncherPage : ContentPage
         _ = AnimateAvatarColorBounce();
     }
 
+    // El punto elegido crece dentro de su aro, centrado (antes subía 6 px y se salía del aro)
     private static async Task AnimateDotSelect(Border dot, Border halo)
     {
         _ = halo.FadeToAsync(0.35, 220, Easing.CubicOut);
-        await dot.ScaleToAsync(1.45, 120, Easing.CubicOut);
-        await Task.WhenAll(
-            dot.ScaleToAsync(1.15, 100, Easing.CubicIn),
-            dot.TranslateToAsync(0, -6, 100, Easing.CubicOut)
-        );
+        await dot.ScaleToAsync(1.3, 120, Easing.CubicOut);
+        await dot.ScaleToAsync(1.15, 100, Easing.CubicIn);
     }
 
     private void SyncColorDotSelection(string color)
@@ -207,13 +204,11 @@ public partial class LauncherPage : ContentPage
             if (c == color)
             {
                 pair.dot.Scale = 1.15;
-                pair.dot.TranslationY = -6;
                 pair.halo.Opacity = 0.35;
             }
             else
             {
                 pair.dot.Scale = 1.0;
-                pair.dot.TranslationY = 0;
                 pair.halo.Opacity = 0;
             }
         }
