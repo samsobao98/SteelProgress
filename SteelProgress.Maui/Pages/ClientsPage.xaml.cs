@@ -87,6 +87,18 @@ public partial class ClientsPage : ContentPage
 
     private void OnParqLabelTapped(object? sender, TappedEventArgs e) => _vm.EditHasParq = !_vm.EditHasParq;
 
+    private async void OnParqLinkTapped(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri("https://eparmedx.com/"));
+        }
+        catch (Exception)
+        {
+            await AppDialogs.AlertAsync("No se pudo abrir", "Busca «PAR-Q+» en eparmedx.com desde el navegador.");
+        }
+    }
+
     // Un botón redondo por día, de lunes a domingo; se marcan y desmarcan tocándolos
     private void BuildDayRow()
     {
