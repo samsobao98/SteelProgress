@@ -263,4 +263,62 @@ public class ClientTests : IDisposable
             if (Directory.Exists(root)) Directory.Delete(root, true);
         }
     }
+
+    // ── Inicio de un perfil de entrenador ──
+
+    private async Task TrainWithSetAsync(int day)
+    {
+        using var db = Db();
+        var session = await new WorkoutRepository(db).CreateSessionFromRoutineDayAsync(day);
+        var exercise = db.WorkoutExercises.First(we => we.WorkoutSessionId == session.Id);
+        db.WorkoutSets.Add(new WorkoutSet { WorkoutExerciseId = exercise.Id, Weight = 50, Reps = 10 });
+        await db.SaveChangesAsync();
+    }
+
+    private HomeViewModel CoachHomeViewModel()
+    {
+        var options = new ViewOptionsService();
+        options.Apply(new UserProfile { Kind = ProfileKind.Coach, ViewMode = ProfileViewMode.Detailed });
+        return new HomeViewModel(Db(), _user, new WorkoutRepository(Db()), new RoutineRepository(Db()), null,
+            options, _clientContext, new ClientRepository(Db()));
+    }
+
+    [Fact]
+    public async Task CoachHomeWithoutClientShowsTheClientsAndNotOwnTraining()
+    {
+        await TrainWithSetAsync(_dayId);                 // entreno propio de Laura: no debe salir
+        var marta = await AddClientAsync("Marta");
+        await AddClientAsync("Lucía");
+        _clientContext.Activate(marta);
+        await CreateRoutineForActiveClientAsync("Hipertrofia");
+        _clientContext.Clear();
+
+        var home = CoachHomeViewModel();
+        await home.RefreshAsync();
+
+        Assert.True(home.ShowCoachOverview);
+        Assert.False(home.ShowPersonal);
+        Assert.Equal(2, home.CoachClientCount);
+        var rows = home.ClientRows.ToDictionary(r => r.Client.Name);
+        Assert.Equal("Le toca Día 1 · Hipertrofia", rows["Marta"].Line);
+        Assert.Equal("Sin rutina activa", rows["Lucía"].Line);
+        Assert.Contains(home.PendingItems, p => p.Client.Name == "Lucía");
+        Assert.Equal(0, home.CoachSessionsThisWeek);   // el entreno propio no cuenta
+    }
+
+    [Fact]
+    public async Task CoachHomeWithClientSpeaksAboutTheClient()
+    {
+        var marta = await AddClientAsync("Marta");
+        _clientContext.Activate(marta);
+        await CreateRoutineForActiveClientAsync("Hipertrofia");
+
+        var home = CoachHomeViewModel();
+        await home.RefreshAsync();
+
+        Assert.False(home.ShowCoachOverview);
+        Assert.Equal("A Marta le toca", home.TodayLabel);
+        Assert.Equal("▶ Empezar sesión con Marta", home.StartTodayText);
+        Assert.Equal("Sus últimas sesiones", home.RecentTitle);
+    }
 }

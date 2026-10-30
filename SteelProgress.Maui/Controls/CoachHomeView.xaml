@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Inicio de un perfil de entrenador sin cliente activo (maqueta del 2026-10-30): sus clientes y qué les toca,
+    lo pendiente y tres números. Toma el HomeViewModel de la página. Tocar un cliente lo activa (ClientTapped).
+-->
+<ContentView
+    x:Class="SteelProgress.Maui.Controls.CoachHomeView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons">
+
+    <VerticalStackLayout Spacing="0">
+
+        <!-- ── Hoy con tus clientes ── -->
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+            <Label Text="Hoy con tus clientes" Style="{StaticResource SpOverline}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Todos ›" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel1}"
+                   IsVisible="{Binding ShowClientRows}" VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAllTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+
+        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ClientRows}" Spacing="8">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SpCardStyle}" Padding="12,11">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRowTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="40,*,Auto" ColumnSpacing="12">
+                            <Border BackgroundColor="{Binding Client.AvatarColor}" WidthRequest="40" HeightRequest="40"
+                                    StrokeShape="RoundRectangle 20" StrokeThickness="0" VerticalOptions="Center">
+                                <Label Text="{Binding Initial}" FontFamily="SpaceGroteskBold" FontSize="17" TextColor="{StaticResource SpOnAccent}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="{Binding Client.Name}" Style="{StaticResource SpHeading}" FontSize="16" LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding Line}" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center" HorizontalOptions="End">
+                                <Label Text="{Binding When}" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="End" />
+                                <Border IsVisible="{Binding HasChip}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,3"
+                                        BackgroundColor="{StaticResource SpCardHi}" HorizontalOptions="End">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding ChipIsGo}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="#1E2A22" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding ChipIsWarning}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="#33281E" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding Chip}" FontFamily="SpaceGroteskMedium" FontSize="11" TextColor="{StaticResource SpText2}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding ChipIsGo}" Value="True">
+                                                <Setter Property="TextColor" Value="{StaticResource SpOk}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding ChipIsWarning}" Value="True">
+                                                <Setter Property="TextColor" Value="{StaticResource SpIntensity}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+
+        <!-- Sin clientes todavía -->
+        <Border Style="{StaticResource SpCardStyle}" Padding="18" IsVisible="{Binding ShowNoClients}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Añade tu primer cliente" Style="{StaticResource SpHeading}" />
+                <Label Text="Con tus clientes aquí verás qué le toca a cada uno, hace cuánto entrenó y a quién hay que preparar algo."
+                       Style="{StaticResource SpSecondary}" />
+                <Border Background="{StaticResource SpSteelBrush}" Padding="0,15" StrokeShape="RoundRectangle 14" StrokeThickness="0" Margin="0,8,0,0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAllTapped" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Ir a Clientes" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                </Border>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ── Pendiente: solo si hay algo ── -->
+        <VerticalStackLayout IsVisible="{Binding HasPending}" Spacing="8" Margin="0,24,0,0">
+            <Label Text="Pendiente" Style="{StaticResource SpOverline}" />
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding PendingItems}" Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource SpCardStyle}" Padding="14,12">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPendingTapped" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <mi:MauiIcon Icon="{mi:Material Inbox}" IconColor="{StaticResource SpIntensity}" IconSize="20" VerticalOptions="Center" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="{StaticResource SpText}" />
+                                    <Label Text="{Binding Detail}" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="22" TextColor="{StaticResource SpText3}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- ── Números de la semana ── -->
+        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,16,0,0" IsVisible="{Binding ShowClientRows}">
+            <Border Style="{StaticResource SpCardStyle}" Padding="14,12">
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="{Binding CoachClientCount}" Style="{StaticResource SpNumber}" />
+                    <Label Text="Clientes" Style="{StaticResource SpSecondary}" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource SpCardStyle}" Padding="14,12">
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="{Binding CoachSessionsThisWeek}" Style="{StaticResource SpNumber}" />
+                    <Label Text="Sesiones esta semana" Style="{StaticResource SpSecondary}" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource SpCardStyle}" Padding="14,12">
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="{Binding CoachActiveThisWeek}" Style="{StaticResource SpNumber}" />
+                    <Label Text="Activos esta semana" Style="{StaticResource SpSecondary}" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </VerticalStackLayout>
+</ContentView>

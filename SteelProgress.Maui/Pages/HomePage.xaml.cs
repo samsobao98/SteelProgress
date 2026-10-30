@@ -13,14 +13,17 @@ public partial class HomePage : ContentPage
     private bool _coveredByPopup;
 
     private readonly HomeViewModel _vm;
-    private ClientContextService? _clientContext;
+    private readonly ClientContextService _clientContext;
 
-    public HomePage(HomeViewModel vm)
+    // Por constructor: Inicio es la primera pestaña y en su primer OnAppearing aún no hay Handler
+    // del que sacar los servicios (le pasaba lo mismo a Entreno)
+    public HomePage(HomeViewModel vm, ClientContextService clientContext)
     {
         InitializeComponent();
         // Workaround for MAUI bug with URL-style xmlns (dotnet/maui#7503)
         _ = new MauiIcon();
         BindingContext = _vm = vm;
+        _clientContext = clientContext;
         _vm.PropertyChanged += OnVmPropertyChanged;
     }
 
@@ -31,12 +34,8 @@ public partial class HomePage : ContentPage
     {
         base.OnAppearing();
         if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
-        _clientContext ??= Handler?.MauiContext?.Services.GetService<ClientContextService>();
-        if (_clientContext is not null)
-        {
-            _clientContext.Changed -= OnClientChanged;
-            _clientContext.Changed += OnClientChanged;
-        }
+        _clientContext.Changed -= OnClientChanged;
+        _clientContext.Changed += OnClientChanged;
 
         var first = !_vm.IsLoaded;
         try { await _vm.RefreshAsync(); }
@@ -55,7 +54,7 @@ public partial class HomePage : ContentPage
     {
         base.OnDisappearing();
         if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
-        if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
+        _clientContext.Changed -= OnClientChanged;
     }
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -162,8 +161,15 @@ public partial class HomePage : ContentPage
     private async void OnRoutinesTapped(object? sender, TappedEventArgs e)
     {
         await PressAsync(sender as VisualElement);
-        await Shell.Current.GoToAsync("//RoutinePage");
+        // Sin apartado Rutinas (vista simple de entrenador), a Ajustes para cambiar la vista
+        await Shell.Current.GoToAsync(_vm.CanEditRoutines ? "//RoutinePage" : "SettingsPage");
     }
+
+    // Inicio de entrenador: tocar un cliente lo activa e Inicio pasa a mostrar sus datos (OnClientChanged)
+    private void OnCoachClientTapped(object? sender, Domain.Entities.Client client) => _vm.OpenClient(client);
+
+    private async void OnGoToClientsTapped(object? sender, EventArgs e) =>
+        await Shell.Current.GoToAsync("//ClientsPage");
 
     private async void OnHistoryTapped(object? sender, TappedEventArgs e)
     {

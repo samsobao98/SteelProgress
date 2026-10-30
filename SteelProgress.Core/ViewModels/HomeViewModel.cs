@@ -12,6 +12,7 @@ namespace SteelProgress.Core.ViewModels;
 /// <summary>
 /// Inicio: qué toca hoy (y empezarlo con un toque), la semana, la racha, los récords del mes
 /// y las últimas sesiones. Muestra los datos del perfil y cliente activos, como Entreno.
+/// En un perfil de entrenador sin cliente activo es otro Inicio: «Hoy con tus clientes».
 /// </summary>
 public partial class HomeViewModel : ObservableObject
 {
@@ -20,6 +21,9 @@ public partial class HomeViewModel : ObservableObject
     private readonly WorkoutRepository _workoutRepository;
     private readonly RoutineRepository _routineRepository;
     private readonly TimeProvider _clock;
+    private readonly ViewOptionsService? _viewOptions;
+    private readonly ClientContextService? _clientContext;
+    private readonly ClientRepository? _clientRepository;
 
     // Cada repositorio tiene su DbContext, que no admite dos operaciones a la vez:
     // dos recargas seguidas (aparecer + cambio de cliente) se ponen en cola
@@ -68,19 +72,64 @@ public partial class HomeViewModel : ObservableObject
 
     public bool HasTodayMore => TodayMoreText.Length > 0;
     public bool HasSessions => RecentSessions.Count > 0;
-    public string StartTodayText => TodayDayName.Length > 0 ? $"▶ Empezar {TodayDayName}" : "▶ Empezar";
+    public string StartTodayText => ClientName is string client
+        ? $"▶ Empezar sesión con {client}"
+        : TodayDayName.Length > 0 ? $"▶ Empezar {TodayDayName}" : "▶ Empezar";
+
+    // ── Entrenador ──
+    // Sin cliente activo, Inicio es el de los clientes; con uno, el de siempre en tercera persona
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPersonal), nameof(ShowNoClients))]
+    private bool _showCoachOverview;
+    public bool ShowPersonal => !ShowCoachOverview;
+
+    // Nombre del cliente activo (solo en perfiles de entrenador): los textos pasan a hablar de él o ella
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StartTodayText), nameof(RecentTitle), nameof(RecentEmptyText), nameof(NoRoutinesTitle), nameof(NoRoutinesText))]
+    private string? _clientName;
+
+    public string RecentTitle => ClientName is null ? "Últimas sesiones" : "Sus últimas sesiones";
+    public string RecentEmptyText => ClientName is null
+        ? "Cuando termines tu primer entreno aparecerá aquí."
+        : "Cuando haga su primer entreno, o lo importes, aparecerá aquí.";
+    public string NoRoutinesTitle => ClientName is null ? "Empieza por una rutina" : $"Prepara la rutina de {ClientName}";
+    public string NoRoutinesText => ClientName is null
+        ? "Crea tu rutina con sus días y ejercicios, o importa la que te pase tu entrenador. Después, aquí verás qué te toca cada día."
+        : CanEditRoutines
+            ? "Crea su rutina con sus días y ejercicios. Después, aquí verás qué le toca cada día y podrás enviársela."
+            : "Las rutinas se crean en la vista detallada: cámbiala en Ajustes y prepárale una.";
+
+    // En la vista simple de entrenador no hay apartado Rutinas: el botón lleva a Ajustes
+    public bool CanEditRoutines => _viewOptions?.Current.ShowRoutines ?? true;
+    public string NoRoutinesButtonText => CanEditRoutines ? "Ir a Rutinas" : "Ir a Ajustes";
+
+    public ObservableCollection<CoachClientRow> ClientRows { get; } = new();
+    public ObservableCollection<CoachPendingItem> PendingItems { get; } = new();
+    [ObservableProperty] private int _coachClientCount;
+    [ObservableProperty] private int _coachSessionsThisWeek;
+    [ObservableProperty] private int _coachActiveThisWeek;
+    public bool HasPending => PendingItems.Count > 0;
+    public bool ShowNoClients => ShowCoachOverview && IsLoaded && ClientRows.Count == 0;
+    public bool ShowClientRows => ClientRows.Count > 0;
 
     public ObservableCollection<RecentSessionItem> RecentSessions { get; } = new();
 
     public HomeViewModel(AppDbContext dbContext, ICurrentUserService currentUser,
-        WorkoutRepository workoutRepository, RoutineRepository routineRepository, TimeProvider? clock = null)
+        WorkoutRepository workoutRepository, RoutineRepository routineRepository, TimeProvider? clock = null,
+        ViewOptionsService? viewOptions = null, ClientContextService? clientContext = null, ClientRepository? clientRepository = null)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _workoutRepository = workoutRepository;
         _routineRepository = routineRepository;
         _clock = clock ?? TimeProvider.System;
+        _viewOptions = viewOptions;
+        _clientContext = clientContext;
+        _clientRepository = clientRepository;
     }
+
+    /// <summary>Trabajar con un cliente desde Inicio: Inicio (y el resto) pasan a mostrar sus datos.</summary>
+    public void OpenClient(Client client) => _clientContext?.Activate(client);
 
     partial void OnTodayMoreTextChanged(string value) => OnPropertyChanged(nameof(HasTodayMore));
     partial void OnTodayDayNameChanged(string value) => OnPropertyChanged(nameof(StartTodayText));
@@ -125,6 +174,20 @@ public partial class HomeViewModel : ObservableObject
             ProfileInitial = string.IsNullOrEmpty(profile.Name) ? "?" : profile.Name[0].ToString().ToUpper();
         }
 
+        var isCoach = _viewOptions?.Current.IsCoach ?? false;
+        var client = isCoach ? _clientContext?.ActiveClient : null;
+        ClientName = client?.Name;
+        OnPropertyChanged(nameof(NoRoutinesText));
+        OnPropertyChanged(nameof(NoRoutinesButtonText));   // la vista pudo cambiar en Ajustes
+        ShowCoachOverview = isCoach && client is null && _clientRepository is not null;
+        if (ShowCoachOverview)
+        {
+            await LoadCoachAsync(now);
+            IsLoaded = true;
+            OnPropertyChanged(nameof(ShowNoClients));
+            return;
+        }
+
         // Los filtros globales del contexto ya limitan todo al perfil y cliente activos
         var log = await _workoutRepository.GetTrainingLogAsync();
         Week = TrainingStats.Week(log.Sessions, today);
@@ -146,8 +209,17 @@ public partial class HomeViewModel : ObservableObject
     {
         IsWorkoutActive = WorkoutStateService.IsWorkoutActive;
         var doneToday = log.Sessions.Where(s => s.Date.Date == today).Select(s => s.DayName).Distinct().ToList();
-        TodayLabel = doneToday.Count > 0 ? "Siguiente" : "Hoy toca";
-        TodayDoneText = doneToday.Count > 0 ? $"✓ Hoy ya has entrenado {string.Join(" y ", doneToday)}" : "";
+        // Con un cliente activo, en tercera persona: que nunca parezca tu entreno
+        TodayLabel = (ClientName, doneToday.Count > 0) switch
+        {
+            (null, true) => "Siguiente",
+            (null, false) => "Hoy toca",
+            (_, true) => $"Siguiente para {ClientName}",
+            (_, false) => $"A {ClientName} le toca"
+        };
+        TodayDoneText = doneToday.Count == 0 ? ""
+            : ClientName is null ? $"✓ Hoy ya has entrenado {string.Join(" y ", doneToday)}"
+            : $"✓ Hoy {ClientName} ya ha entrenado {string.Join(" y ", doneToday)}";
 
         // La rutina activa: la marcada a mano; si no hay, la última entrenada (como Entreno)
         _routineRepository.ForgetLoaded();
@@ -189,5 +261,25 @@ public partial class HomeViewModel : ObservableObject
             parts.Add($"~{(int)Math.Round(durations.Average())} min");
         parts.Add(RoutineSchedule.LastTrainedText(daySessions.FirstOrDefault()?.Date, today));
         TodayDetail = string.Join(" · ", parts);
+    }
+
+    private async Task LoadCoachAsync(DateTime now)
+    {
+        if (_currentUser.CurrentUserId is not int trainer || _clientRepository is null) return;
+        var today = now.Date;
+        var summaries = await _clientRepository.GetSummariesAsync(trainer, RoutineSchedule.WeekStart(today));
+
+        ClientRows.Clear();
+        foreach (var s in summaries)
+            ClientRows.Add(CoachHome.Row(s, today));
+        PendingItems.Clear();
+        foreach (var p in CoachHome.Pending(summaries, today))
+            PendingItems.Add(p);
+
+        CoachClientCount = summaries.Count;
+        CoachSessionsThisWeek = summaries.Sum(s => s.SessionsThisWeek);
+        CoachActiveThisWeek = summaries.Count(s => s.SessionsThisWeek > 0);
+        OnPropertyChanged(nameof(HasPending));
+        OnPropertyChanged(nameof(ShowClientRows));
     }
 }

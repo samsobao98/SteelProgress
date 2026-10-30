@@ -362,8 +362,13 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 4. Rutinas → ⋮ de un ejercicio → «Ver ejercicio»: la ficha sin el lápiz de editar.
 5. Crear un perfil «Para mis clientes»: sale Clientes en el abanico.
 
-**Pendiente**
-* Inicio de un perfil de entrenador: aún es el personal (siguiente paso: «Hoy con tus clientes», ver la maqueta).
+**Inicio de un perfil de entrenador**
+* Sin cliente activo, Inicio es el de los clientes: «Hoy con tus clientes», con una fila por cliente (qué le toca de su rutina activa, hace cuánto fue su última sesión y una etiqueta: «Toca hoy», «Hecho hoy», «Por empezar», «Sin noticias» a partir de 7 días como en Clientes, o «Crear rutina»); «Pendiente» solo si hay algo; y clientes, sesiones y clientes activos de la semana. Tocar un cliente lo activa.
+* Con un cliente activo, el Inicio de siempre en tercera persona: «A Marta le toca», «▶ Empezar sesión con Marta», «Sus últimas sesiones».
+* La rutina activa de un cliente es la misma en Clientes e Inicio: la marcada; si no, la última entrenada; si no, la primera (`ClientRepository.GetSummariesAsync`, que también calcula su semana de rutina).
+* En la vista simple de entrenador (sin Rutinas), Clientes no ofrece «Rutinas de…» y el botón de «Prepara la rutina» lleva a Ajustes.
+
+6. Perfil de entrenador con clientes y sin cliente activo: Inicio enseña solo a los clientes. Tocar uno: Inicio en tercera persona. «Salir»: vuelve la lista.
 
 ---
 

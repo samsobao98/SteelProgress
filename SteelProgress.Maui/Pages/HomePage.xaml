@@ -50,6 +50,9 @@
             <!-- Con un cliente activo, estos datos son los suyos -->
             <controls:ActiveClientBanner Margin="0,0,0,12" />
 
+            <!-- ══ Inicio personal (y el de un cliente activo, en tercera persona) ══ -->
+            <VerticalStackLayout IsVisible="{Binding ShowPersonal}" Spacing="0">
+
             <!-- ── Semana: días entrenados, hoy con contorno ── -->
             <Grid x:Name="WeekStrip" ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="6" Margin="0,0,0,16" />
 
@@ -106,14 +109,13 @@
             <!-- Sin rutinas -->
             <Border Style="{StaticResource SpCardStyle}" Padding="18" IsVisible="{Binding ShowNoRoutines}">
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Empieza por una rutina" Style="{StaticResource SpHeading}" />
-                    <Label Text="Crea tu rutina con sus días y ejercicios, o importa la que te pase tu entrenador. Después, aquí verás qué te toca cada día."
-                           Style="{StaticResource SpSecondary}" />
+                    <Label Text="{Binding NoRoutinesTitle}" Style="{StaticResource SpHeading}" />
+                    <Label Text="{Binding NoRoutinesText}" Style="{StaticResource SpSecondary}" />
                     <Border Background="{StaticResource SpSteelBrush}" Padding="0,15" StrokeShape="RoundRectangle 14" StrokeThickness="0" Margin="0,8,0,0">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnRoutinesTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="Ir a Rutinas" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
+                        <Label Text="{Binding NoRoutinesButtonText}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" />
                     </Border>
                 </VerticalStackLayout>
             </Border>
@@ -156,7 +158,7 @@
 
             <!-- ── Últimas sesiones ── -->
             <Grid ColumnDefinitions="*,Auto" Margin="0,24,0,8">
-                <Label Text="Últimas sesiones" Style="{StaticResource SpOverline}" VerticalOptions="Center" />
+                <Label Text="{Binding RecentTitle}" Style="{StaticResource SpOverline}" VerticalOptions="Center" />
                 <Label Grid.Column="1" Text="Ver historial ›" FontFamily="SpaceGroteskMedium" FontSize="13" TextColor="{StaticResource SpSteel1}"
                        IsVisible="{Binding HasSessions}" VerticalOptions="Center">
                     <Label.GestureRecognizers>
@@ -164,7 +166,7 @@
                     </Label.GestureRecognizers>
                 </Label>
             </Grid>
-            <Label Text="Cuando termines tu primer entreno aparecerá aquí." Style="{StaticResource SpSecondary}">
+            <Label Text="{Binding RecentEmptyText}" Style="{StaticResource SpSecondary}">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding HasSessions}" Value="True">
                         <Setter Property="IsVisible" Value="False" />
@@ -215,6 +217,11 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+            <!-- ══ Inicio de un perfil de entrenador sin cliente activo: sus clientes ══ -->
+            <controls:CoachHomeView IsVisible="{Binding ShowCoachOverview}" ClientTapped="OnCoachClientTapped" GoToClients="OnGoToClientsTapped" />
 
         </VerticalStackLayout>
     </ScrollView>

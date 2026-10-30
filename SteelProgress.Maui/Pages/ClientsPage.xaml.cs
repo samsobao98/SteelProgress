@@ -11,10 +11,13 @@ public partial class ClientsPage : ContentPage
 
     private readonly ClientsViewModel _vm;
 
-    public ClientsPage(ClientsViewModel vm)
+    private readonly Core.Services.ViewOptionsService _viewOptions;
+
+    public ClientsPage(ClientsViewModel vm, Core.Services.ViewOptionsService viewOptions)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
+        _viewOptions = viewOptions;
         _vm.PropertyChanged += OnViewModelChanged;
         BuildColorRow();
     }
@@ -50,7 +53,9 @@ public partial class ClientsPage : ContentPage
         var name = item.Client.Name;
         string routines = $"Rutinas de {name}", train = $"Entrenar con {name}", history = $"Historial de {name}";
         const string edit = "Editar", delete = "Eliminar cliente";
-        var choice = await AppDialogs.ChooseAsync(name, [train, routines, history, edit], destructive: delete);
+        // En la vista simple de entrenador no hay apartado Rutinas: sus rutinas se usan desde Entreno
+        string[] options = _viewOptions.Current.ShowRoutines ? [train, routines, history, edit] : [train, history, edit];
+        var choice = await AppDialogs.ChooseAsync(name, options, destructive: delete);
 
         if (choice == edit) { _vm.StartEdit(item.Client); return; }
         if (choice == delete) { await _vm.DeleteAsync(item.Client); return; }
