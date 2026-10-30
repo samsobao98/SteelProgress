@@ -20,6 +20,7 @@ public sealed class ClientItem
     /// <summary>«2 limitaciones» si tiene alguna vigente.</summary>
     public string? LimitationsText { get; init; }
     public bool HasLimitations => LimitationsText is not null;
+    public bool IsArchived => Client.ArchivedAt is not null;
 }
 
 public partial class ClientsViewModel : ObservableObject
@@ -29,6 +30,15 @@ public partial class ClientsViewModel : ObservableObject
     private readonly ClientContextService _context;
 
     public ObservableCollection<ClientItem> Clients { get; } = new();
+
+    // Archivados: fuera de la lista y de Inicio, pero con su historial; plegados al final
+    public ObservableCollection<ClientItem> ArchivedClients { get; } = new();
+    public bool HasArchived => ArchivedClients.Count > 0;
+    public string ArchivedHeader => $"Archivados ({ArchivedClients.Count})";
+    [ObservableProperty] private bool _showArchived;
+
+    [RelayCommand]
+    private void ToggleArchived() => ShowArchived = !ShowArchived;
 
     public IReadOnlyList<string> AvailableColors { get; } = new[]
     {
@@ -64,16 +74,27 @@ public partial class ClientsViewModel : ObservableObject
         var summaries = await _repository.GetSummariesAsync(trainer, weekStart);
 
         Clients.Clear();
+        ArchivedClients.Clear();
         foreach (var s in summaries)
-            Clients.Add(ToItem(s, today));
+            (s.IsArchived ? ArchivedClients : Clients).Add(ToItem(s, today));
+        OnPropertyChanged(nameof(HasArchived));
+        OnPropertyChanged(nameof(ArchivedHeader));
 
-        var active = summaries.Count(s => s.LastSession is DateTime d && (today - d.Date).TotalDays < 7);
-        Summary = summaries.Count == 0 ? "Añade tu primer cliente"
-            : $"{summaries.Count} {(summaries.Count == 1 ? "cliente" : "clientes")} · {active} {(active == 1 ? "activo" : "activos")} esta semana";
+        var current = summaries.Where(s => !s.IsArchived).ToList();
+        var active = current.Count(s => s.LastSession is DateTime d && (today - d.Date).TotalDays < 7);
+        Summary = current.Count == 0 ? (HasArchived ? "Sin clientes activos" : "Añade tu primer cliente")
+            : $"{current.Count} {(current.Count == 1 ? "cliente" : "clientes")} · {active} {(active == 1 ? "activo" : "activos")} esta semana";
     }
 
     public static ClientItem ToItem(ClientSummary s, DateTime today)
     {
+        if (s.Client.ArchivedAt is DateTime archived)
+            return new ClientItem
+            {
+                Client = s.Client,
+                Subtitle = $"Archivado el {archived:dd/MM/yyyy} · {(s.TotalSessions == 1 ? "1 sesión" : $"{s.TotalSessions} sesiones")}"
+            };
+
         var parts = new List<string>();
         if (!string.IsNullOrWhiteSpace(s.Client.Goal)) parts.Add(s.Client.Goal!);
         if (s.ActiveRoutineName is not null) parts.Add(s.ActiveRoutineName);
@@ -159,6 +180,27 @@ public partial class ClientsViewModel : ObservableObject
 
         IsEditing = false;
         await RefreshAsync();
+    }
+
+    /// <summary>Ya no entrena contigo: sale de la lista y de Inicio, sin borrar nada.</summary>
+    public async Task<bool> ArchiveAsync(Client client)
+    {
+        var confirmed = await ConfirmDialogService.ConfirmAsync("Archivar cliente",
+            $"{client.Name} deja de salir en Inicio y en la lista. Sus rutinas, sesiones y datos se guardan: puedes recuperarlo cuando quieras.",
+            accept: "Archivar");
+        if (!confirmed) return false;
+
+        if (_context.ActiveClient?.Id == client.Id) _context.Clear();
+        await _repository.SetArchivedAsync(client.Id, DateTime.Now);
+        await RefreshAsync();
+        return true;
+    }
+
+    public async Task RestoreAsync(Client client)
+    {
+        await _repository.SetArchivedAsync(client.Id, null);
+        await RefreshAsync();
+        NotificationService.Success($"{client.Name} vuelve a tu lista de clientes.");
     }
 
     public async Task<bool> DeleteAsync(Client client)

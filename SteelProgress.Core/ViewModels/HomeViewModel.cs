@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using SteelProgress.Core.Services;
 using SteelProgress.Data.Context;
@@ -119,6 +120,38 @@ public partial class HomeViewModel : ObservableObject
     public bool HasPending => PendingItems.Count > 0;
     public bool ShowNoClients => ShowCoachOverview && IsLoaded && ClientRows.Count == 0;
     public bool ShowClientRows => ClientRows.Count > 0;
+
+    // Con muchos clientes, Inicio no se llena: los que piden atención primero y como mucho CoachHome.HomeRows
+    [ObservableProperty] private string _moreClientsText = "";
+    public bool HasMoreClients => MoreClientsText.Length > 0;
+    partial void OnMoreClientsTextChanged(string value) => OnPropertyChanged(nameof(HasMoreClients));
+
+    // «Pendiente»: los primeros CoachHome.HomePending; el resto, al desplegar
+    private List<CoachPendingItem> _allPending = new();
+    [ObservableProperty] private bool _showAllPending;
+    public string MorePendingText => ShowAllPending ? "Ver menos" : $"Ver todo ({_allPending.Count})";
+    public bool HasMorePending => _allPending.Count > CoachHome.HomePending;
+
+    [RelayCommand]
+    private void ToggleAllPending()
+    {
+        ShowAllPending = !ShowAllPending;
+        FillPending();
+    }
+
+    private void FillPending()
+    {
+        PendingItems.Clear();
+        foreach (var p in ShowAllPending ? _allPending : _allPending.Take(CoachHome.HomePending))
+            PendingItems.Add(p);
+        OnPropertyChanged(nameof(HasPending));
+        OnPropertyChanged(nameof(HasMorePending));
+        OnPropertyChanged(nameof(MorePendingText));
+    }
+
+    [ObservableProperty] private string _receivedText = "";
+    public bool HasReceived => ReceivedText.Length > 0;
+    partial void OnReceivedTextChanged(string value) => OnPropertyChanged(nameof(HasReceived));
 
     public ObservableCollection<RecentSessionItem> RecentSessions { get; } = new();
 
@@ -280,17 +313,21 @@ public partial class HomeViewModel : ObservableObject
         var today = now.Date;
         var summaries = await _clientRepository.GetSummariesAsync(trainer, RoutineSchedule.WeekStart(today));
 
+        var rows = CoachHome.Rows(summaries, today);
         ClientRows.Clear();
-        foreach (var s in summaries)
-            ClientRows.Add(CoachHome.Row(s, today));
-        PendingItems.Clear();
-        foreach (var p in CoachHome.Pending(summaries, today))
-            PendingItems.Add(p);
+        foreach (var r in rows.Take(CoachHome.HomeRows))
+            ClientRows.Add(r);
+        var hidden = rows.Count - ClientRows.Count;
+        MoreClientsText = hidden switch { <= 0 => "", 1 => "y 1 cliente más", _ => $"y {hidden} clientes más" };
 
-        CoachClientCount = summaries.Count;
-        CoachSessionsThisWeek = summaries.Sum(s => s.SessionsThisWeek);
-        CoachActiveThisWeek = summaries.Count(s => s.SessionsThisWeek > 0);
-        OnPropertyChanged(nameof(HasPending));
+        _allPending = CoachHome.Pending(summaries, today);
+        FillPending();
+        ReceivedText = CoachHome.ReceivedText(summaries);
+
+        var current = summaries.Where(s => !s.IsArchived).ToList();
+        CoachClientCount = current.Count;
+        CoachSessionsThisWeek = current.Sum(s => s.SessionsThisWeek);
+        CoachActiveThisWeek = current.Count(s => s.SessionsThisWeek > 0);
         OnPropertyChanged(nameof(ShowClientRows));
     }
 }

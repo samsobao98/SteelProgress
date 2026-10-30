@@ -23,6 +23,8 @@ public class WorkoutSession
     // Entreno que el cliente le envió al entrenador: la identidad que tenía en el móvil del cliente.
     // Si lo reenvía (con una nota nueva, por ejemplo), se actualiza en vez de duplicarse.
     public Guid? SourceUid { get; set; }
+    // Cuándo llegó (si te lo envió el cliente): para «recibidos esta semana»
+    public DateTime? ReceivedAt { get; set; }
 
     public DateTime Date { get; set; }
 

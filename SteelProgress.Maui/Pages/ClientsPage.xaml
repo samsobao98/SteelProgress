@@ -70,6 +70,42 @@
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
+                <!-- Archivados, plegados al final -->
+                <CollectionView.Footer>
+                    <VerticalStackLayout x:DataType="vm:ClientsViewModel" Spacing="8" Padding="0,8,0,24" IsVisible="{Binding HasArchived}">
+                        <Grid ColumnDefinitions="*,Auto" Padding="2,8">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleArchivedCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Text="{Binding ArchivedHeader}" Style="{StaticResource SpBody}" TextColor="{StaticResource SpText2}" />
+                            <Label Grid.Column="1" Text="⌄" FontSize="18" TextColor="{StaticResource SpText3}" />
+                        </Grid>
+                        <Label Text="Ya no entrenan contigo: no salen en Inicio, pero su historial se guarda."
+                               Style="{StaticResource SpSecondary}" FontSize="12" IsVisible="{Binding ShowArchived}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ArchivedClients}" Spacing="8" IsVisible="{Binding ShowArchived}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ClientItem">
+                                    <Border Style="{StaticResource SpCardStyle}" Padding="12" Opacity="0.7">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnClientTapped" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                            <Border WidthRequest="40" HeightRequest="40" StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                                    BackgroundColor="{Binding Client.AvatarColor}" VerticalOptions="Center">
+                                                <Label Text="{Binding Initial}" FontFamily="SpaceGroteskMedium" FontSize="16"
+                                                       TextColor="{StaticResource SpOnAccent}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                <Label Text="{Binding Client.Name}" Style="{StaticResource SpBody}" FontFamily="SpaceGroteskMedium" />
+                                                <Label Text="{Binding Subtitle}" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </CollectionView.Footer>
             </CollectionView>
         </Grid>
 

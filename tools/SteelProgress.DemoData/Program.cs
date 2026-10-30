@@ -4,8 +4,9 @@ using SteelProgress.Domain.Entities;
 
 // Rellena una base de datos de SteelProgress con dos perfiles de prueba, sustituyendo los que tenga:
 //  · Lucía, personal (vista detallada): tres rutinas, unos cuatro meses de entrenos y su peso.
-//  · Álex, entrenador (vista detallada): cinco clientes en situaciones distintas (toca hoy, sin
-//    noticias, sin rutina, PAR-Q caducado, limitaciones, peso, con y sin consentimiento).
+//  · Álex, entrenador (vista detallada): ocho clientes en situaciones distintas (toca hoy, sin
+//    noticias, sin rutina, PAR-Q caducado, limitaciones, peso, con y sin consentimiento, entrenos
+//    que le han enviado) y uno archivado. Más de los que caben en Inicio, para ver el límite.
 //  Lucía es también clienta de Álex: su «Torso / Pierna» se la pasó él, así que al terminar un
 //  entreno le sale «Enviar a Álex» (y Álex reconoce lo que le llega).
 // Las fechas van en relación con hoy, así que sirve cualquier día. Uso: tools/demo-data.sh
@@ -201,6 +202,37 @@ sealed class Seeder(AppDbContext db, Dictionary<string, Exercise> library, Rando
         AddSessions(alex.Id, marta.Id, martaRoutine, Dates(Monday(today).AddDays(-56), today.AddDays(-10), [1, 3]), hour: 18, progress: 0.006, inPerson: true);
         // Jorge: tres días por semana, el último hace 3 días
         AddSessions(alex.Id, jorge.Id, jorgeRoutine, Dates(Monday(today).AddDays(-35), today.AddDays(-3), [0, 2, 4]), hour: 8, progress: 0.005, inPerson: true);
+
+        // Tres clientes más (Inicio enseña solo cinco) y uno archivado con su historial
+        (string Name, string Color, string Goal, int DaysAgo)[] more =
+            [("Raúl", "#89DCEB", "Perder grasa", 1), ("Sara", "#A6E3A1", "Correr mejor", 5), ("Tomás", "#F38BA8", "Volver a entrenar", 12)];
+        foreach (var m in more)
+        {
+            var c = AddClient(alex.Id, m.Name, m.Color, m.Goal, null, 0, consentDaysAgo: null, parq: null);
+            await db.SaveChangesAsync();
+            var r = AddRoutine(alex.Id, c.Id, "Full body", active: true,
+                ("A", [new("Sentadilla goblet", 3, 10, 12, 90, 16), new("Press con mancuernas", 3, 10, 12, 90, 14), new("Jalón al pecho", 3, 10, 12, 90, 35)]),
+                ("B", [new("Peso muerto rumano con mancuernas", 3, 10, 12, 90, 14), new("Press de hombros en máquina", 3, 10, 12, 90, 25), new("Remo en polea baja", 3, 10, 12, 90, 35)]));
+            await db.SaveChangesAsync();
+            AddSessions(alex.Id, c.Id, r, Dates(Monday(today).AddDays(-28), today.AddDays(-m.DaysAgo), [1, 3]), hour: 17, progress: 0.004, inPerson: true);
+        }
+        var pablo = AddClient(alex.Id, "Pablo", "#B3B7EC", "Fuerza", "Se mudó de ciudad.", 0, consentDaysAgo: null, parq: null);
+        pablo.ArchivedAt = today.AddDays(-20);
+        await db.SaveChangesAsync();
+        var pabloRoutine = AddRoutine(alex.Id, pablo.Id, "Fuerza 3 días", active: true,
+            ("A", [new("Sentadilla", 3, 5, null, 180, 90), new("Press banca", 3, 5, null, 180, 70)]));
+        await db.SaveChangesAsync();
+        AddSessions(alex.Id, pablo.Id, pabloRoutine, Dates(Monday(today).AddDays(-120), today.AddDays(-25), [0, 3]), hour: 18, progress: 0.003, inPerson: true);
+
+        // Dos entrenos de Felipe de esta semana, como si te los hubiera enviado él
+        await db.SaveChangesAsync();
+        foreach (var s in db.WorkoutSessions.Local.Where(s => s.ClientId == felipe.Id && s.Date >= Monday(today)).Take(2))
+        {
+            s.IsInPerson = false;
+            s.SourceUid = Guid.NewGuid();
+            s.ReceivedAt = s.Date.AddHours(1);
+            s.Notes ??= "Todo bien, la rodilla sin molestias.";
+        }
 
         AddWeights(alex.Id, felipe.Id, today.AddDays(-56), 84.2, 82.6, everyDays: 2, skipEvery: 0);
         AddWeights(alex.Id, marta.Id, today.AddDays(-50), 61.0, 61.4, everyDays: 3, skipEvery: 0);

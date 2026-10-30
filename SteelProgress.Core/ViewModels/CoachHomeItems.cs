@@ -21,6 +21,9 @@ public sealed class CoachClientRow
     public bool HasChip => Chip is not null;
     public bool ChipIsGo => ChipKind == ClientChipKind.Go;
     public bool ChipIsWarning => ChipKind == ClientChipKind.Warning;
+
+    /// <summary>Orden en Inicio: primero lo que pide atención (0), al final lo ya hecho hoy.</summary>
+    public int Priority { get; init; }
 }
 
 /// <summary>Algo que mirar de un cliente, en «Pendiente».</summary>
@@ -58,6 +61,32 @@ public static class CoachHome
     private static bool IsDueToday(Client client, int daysSinceLast, DateTime today) =>
         client.TrainingDays == 0 ? daysSinceLast >= RestDays : TrainingDays.Includes(client.TrainingDays, today);
 
+    /// <summary>Clientes que se ven en Inicio; el resto, en «Todos».</summary>
+    public const int HomeRows = 5;
+
+    /// <summary>Avisos de «Pendiente» que se ven sin desplegar.</summary>
+    public const int HomePending = 3;
+
+    /// <summary>Los clientes de Inicio por lo que piden: sin noticias, toca hoy, sin rutina, por empezar, el resto y lo hecho hoy.</summary>
+    public static List<CoachClientRow> Rows(IEnumerable<ClientSummary> summaries, DateTime today) =>
+        summaries.Where(s => !s.IsArchived)
+            .Select(s => Row(s, today))
+            .OrderBy(r => r.Priority)
+            .ThenBy(r => r.Client.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    /// <summary>«Esta semana te han enviado 3 entrenos: Lucía y Felipe.»; vacío si ninguno.</summary>
+    public static string ReceivedText(IEnumerable<ClientSummary> summaries)
+    {
+        var from = summaries.Where(s => s.ReceivedThisWeek > 0 && !s.IsArchived).ToList();
+        var total = from.Sum(s => s.ReceivedThisWeek);
+        if (total == 0) return "";
+        var names = from.OrderByDescending(s => s.ReceivedThisWeek)
+            .ThenBy(s => s.Client.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Client.Name).ToList();
+        var who = names.Count == 1 ? names[0] : string.Join(", ", names.Take(names.Count - 1)) + " y " + names[^1];
+        return total == 1 ? $"Esta semana te han enviado 1 entreno: {who}." : $"Esta semana te han enviado {total} entrenos: {who}.";
+    }
+
     public static CoachClientRow Row(ClientSummary s, DateTime today)
     {
         var week = s.ActiveRoutineWeek;
@@ -84,7 +113,16 @@ public static class CoachHome
             _ => (null, ClientChipKind.None)
         };
 
-        return new CoachClientRow { Client = s.Client, Line = line, When = when, Chip = chip, ChipKind = kind };
+        var priority = chip switch
+        {
+            "Sin noticias" => 0,
+            "Toca hoy" => 1,
+            "Crear rutina" => 2,
+            "Por empezar" => 3,
+            "Hecho hoy" => 5,
+            _ => 4
+        };
+        return new CoachClientRow { Client = s.Client, Line = line, When = when, Chip = chip, ChipKind = kind, Priority = priority };
     }
 
     /// <summary>
@@ -93,7 +131,7 @@ public static class CoachHome
     public static List<CoachPendingItem> Pending(IEnumerable<ClientSummary> summaries, DateTime today)
     {
         var items = new List<CoachPendingItem>();
-        foreach (var s in summaries)
+        foreach (var s in summaries.Where(s => !s.IsArchived))
         {
             if (s.ActiveRoutineName is null)
                 items.Add(new CoachPendingItem

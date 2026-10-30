@@ -206,6 +206,7 @@ public partial class LauncherViewModel : ObservableObject
             }
 
             var clients = await db.Clients.IgnoreQueryFilters()
+                .Where(c => c.ArchivedAt == null)
                 .GroupBy(c => c.UserId)
                 .Select(g => new { UserId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.UserId, x => x.Count);
@@ -241,6 +242,7 @@ public partial class LauncherViewModel : ObservableObject
         if (entity is null) return;
         db.UserProfiles.Remove(entity);
         await db.SaveChangesAsync();
+        await SteelProgress.Data.Repositories.ClientRepository.CompactAsync(db);
         _sp.GetService<ProfilePhotoStore>()?.Delete(entity.PhotoFile);
 
         Profiles.Remove(profile);

@@ -251,6 +251,27 @@ public partial class ProgressViewModel : ObservableObject
     public ObservableCollection<RecentSessionItem> Sessions { get; } = new();
     public bool HasSessions => Sessions.Count > 0;
 
+    // El historial por meses, los más recientes primero; con años de entrenos no se carga todo de golpe
+    public const int HistoryMonthsStep = 3;
+    public ObservableCollection<HistoryMonth> HistoryMonths { get; } = new();
+    private int _monthsShown = HistoryMonthsStep;
+    [ObservableProperty] private bool _hasMoreHistory;
+
+    [RelayCommand]
+    private void ShowMoreHistory()
+    {
+        _monthsShown += HistoryMonthsStep;
+        FillHistoryMonths();
+    }
+
+    private void FillHistoryMonths()
+    {
+        var months = HistoryMonth.Group(Sessions);
+        HistoryMonths.Clear();
+        foreach (var m in months.Take(_monthsShown)) HistoryMonths.Add(m);
+        HasMoreHistory = months.Count > _monthsShown;
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSessionDetail))]
     private SessionDetail? _sessionDetail;
@@ -264,6 +285,7 @@ public partial class ProgressViewModel : ObservableObject
         foreach (var s in _log.Sessions)
             Sessions.Add(new RecentSessionItem(s, _volumes.GetValueOrDefault(s.Id), today));
         OnPropertyChanged(nameof(HasSessions));
+        FillHistoryMonths();
 
         SessionDetail = open is int id && Sessions.FirstOrDefault(s => s.SessionId == id) is { } item
             ? BuildDetail(item.Session)
@@ -371,6 +393,32 @@ public class RecordItem
         RecordKind.Reps => "★ Récord de reps",
         _ => ""
     };
+}
+
+/// <summary>Un mes del historial: «Octubre 2026 · 14 sesiones» y sus sesiones.</summary>
+public sealed class HistoryMonth
+{
+    private static readonly System.Globalization.CultureInfo Es = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+
+    public required string Title { get; init; }
+    public required string CountText { get; init; }
+    public required IReadOnlyList<RecentSessionItem> Items { get; init; }
+
+    public static List<HistoryMonth> Group(IEnumerable<RecentSessionItem> sessions) =>
+        sessions.GroupBy(s => new DateTime(s.Session.Date.Year, s.Session.Date.Month, 1))
+            .OrderByDescending(g => g.Key)
+            .Select(g =>
+            {
+                var name = g.Key.ToString("MMMM yyyy", Es);
+                var count = g.Count();
+                return new HistoryMonth
+                {
+                    Title = char.ToUpper(name[0]) + name[1..],
+                    CountText = count == 1 ? "1 sesión" : $"{count} sesiones",
+                    Items = g.OrderByDescending(s => s.Session.Date).ToList()
+                };
+            })
+            .ToList();
 }
 
 /// <summary>Un ejercicio en la sección Ejercicios de Progreso.</summary>

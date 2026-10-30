@@ -21,6 +21,8 @@ public class Client
     // Cuándo firmó el PAR-Q+ (o trajo el informe médico) para empezar a entrenar. Solo la fecha, sin el
     // resultado: el resultado sería un dato de salud. Vale 12 meses; luego sale en «Pendiente».
     public DateTime? ParqSignedAt { get; set; }
+    // Archivado: ya no entrena contigo. Sale de Inicio y de la lista, pero su historial se guarda.
+    public DateTime? ArchivedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public ICollection<Routine> Routines { get; set; } = new List<Routine>();

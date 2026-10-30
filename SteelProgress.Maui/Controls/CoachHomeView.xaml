@@ -69,6 +69,22 @@
             </BindableLayout.ItemTemplate>
         </VerticalStackLayout>
 
+        <!-- Con más clientes de los que caben: el resto, en «Todos» -->
+        <Label Text="{Binding MoreClientsText}" IsVisible="{Binding HasMoreClients}" FontFamily="SpaceGroteskMedium" FontSize="13"
+               TextColor="{StaticResource SpSteel1}" HorizontalOptions="Center" Padding="0,10,0,0">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnAllTapped" />
+            </Label.GestureRecognizers>
+        </Label>
+
+        <!-- Entrenos que te han enviado esta semana: una línea, no un aviso por cada uno -->
+        <Border Style="{StaticResource SpCardStyle}" Padding="14,12" Margin="0,12,0,0" IsVisible="{Binding HasReceived}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <mi:MauiIcon Icon="{mi:Material MarkEmailRead}" IconColor="{StaticResource SpSteel1}" IconSize="20" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="{Binding ReceivedText}" Style="{StaticResource SpSecondary}" FontSize="13" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
         <!-- Sin clientes todavía -->
         <Border Style="{StaticResource SpCardStyle}" Padding="18" IsVisible="{Binding ShowNoClients}">
             <VerticalStackLayout Spacing="6">
@@ -106,6 +122,12 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
+            <Label Text="{Binding MorePendingText}" IsVisible="{Binding HasMorePending}" FontFamily="SpaceGroteskMedium" FontSize="13"
+                   TextColor="{StaticResource SpSteel1}" HorizontalOptions="Center" Padding="0,4">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleAllPendingCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
         </VerticalStackLayout>
 
         <!-- ── Números de la semana ── -->

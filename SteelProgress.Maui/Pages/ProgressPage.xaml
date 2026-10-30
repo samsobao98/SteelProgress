@@ -358,7 +358,7 @@
                 </VerticalStackLayout>
 
                 <!-- ═════════════ HISTORIAL ═════════════ -->
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sessions}" Spacing="8" IsVisible="False">
+                <VerticalStackLayout Spacing="8" IsVisible="False">
                     <VerticalStackLayout.Triggers>
                         <MultiTrigger TargetType="VerticalStackLayout">
                             <MultiTrigger.Conditions>
@@ -368,59 +368,76 @@
                             <Setter Property="IsVisible" Value="True" />
                         </MultiTrigger>
                     </VerticalStackLayout.Triggers>
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource SpCardStyle}" Padding="14,12">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnSessionTapped" />
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                    <VerticalStackLayout Spacing="1">
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Label Text="{Binding Title}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" />
-                                            <Border Style="{StaticResource SpChipStyle}" BackgroundColor="#3A3322" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasStatus}">
-                                                <Border.Triggers>
-                                                    <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
-                                                        <Setter Property="BackgroundColor" Value="#262B40" />
-                                                    </DataTrigger>
-                                                </Border.Triggers>
-                                                <Label Text="{Binding StatusText}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpIntensity}">
-                                                    <Label.Triggers>
-                                                        <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
-                                                            <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
-                                                </Label>
+                    <!-- Por meses, los más recientes primero; «Ver meses anteriores» carga más -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding HistoryMonths}" Spacing="18">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding Title}" Style="{StaticResource SpOverline}" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding CountText}" Style="{StaticResource StatCaption}" VerticalOptions="Center" />
+                                    </Grid>
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="8">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource SpCardStyle}" Padding="14,12">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnSessionTapped" />
+                                                </Border.GestureRecognizers>
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                    <VerticalStackLayout Spacing="1">
+                                                        <HorizontalStackLayout Spacing="8">
+                                                            <Label Text="{Binding Title}" FontFamily="SpaceGroteskMedium" FontSize="15" TextColor="{StaticResource SpText}" />
+                                                            <Border Style="{StaticResource SpChipStyle}" BackgroundColor="#3A3322" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasStatus}">
+                                                                <Border.Triggers>
+                                                                    <DataTrigger TargetType="Border" Binding="{Binding IsInProgress}" Value="True">
+                                                                        <Setter Property="BackgroundColor" Value="#262B40" />
+                                                                    </DataTrigger>
+                                                                </Border.Triggers>
+                                                                <Label Text="{Binding StatusText}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpIntensity}">
+                                                                    <Label.Triggers>
+                                                                        <DataTrigger TargetType="Label" Binding="{Binding IsInProgress}" Value="True">
+                                                                            <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
+                                                                        </DataTrigger>
+                                                                    </Label.Triggers>
+                                                                </Label>
+                                                            </Border>
+                                                            <!-- Entrenos de un cliente: «Enviado por Felipe» o «Contigo» -->
+                                                            <Border Style="{StaticResource SpChipStyle}" BackgroundColor="{StaticResource SpCardHi}" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasOrigin}">
+                                                                <Border.Triggers>
+                                                                    <DataTrigger TargetType="Border" Binding="{Binding IsReceived}" Value="True">
+                                                                        <Setter Property="BackgroundColor" Value="#262B40" />
+                                                                    </DataTrigger>
+                                                                </Border.Triggers>
+                                                                <Label Text="{Binding Origin}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpText2}">
+                                                                    <Label.Triggers>
+                                                                        <DataTrigger TargetType="Label" Binding="{Binding IsReceived}" Value="True">
+                                                                            <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
+                                                                        </DataTrigger>
+                                                                    </Label.Triggers>
+                                                                </Label>
+                                                            </Border>
+                                                        </HorizontalStackLayout>
+                                                        <Label Text="{Binding RoutineName}" Style="{StaticResource StatCaption}" LineBreakMode="TailTruncation" />
+                                                        <Label Text="{Binding Detail}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText3}" />
+                                                        <Label Text="{Binding NoteText}" IsVisible="{Binding HasNote}" FontAttributes="Italic" FontSize="12"
+                                                               TextColor="{StaticResource SpText2}" MaxLines="2" LineBreakMode="TailTruncation" Margin="0,2,0,0" />
+                                                    </VerticalStackLayout>
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding DateText}" Style="{StaticResource StatCaption}" HorizontalOptions="End" />
+                                                        <Label Text="{Binding FeelingEmoji}" FontSize="18" HorizontalOptions="End" IsVisible="{Binding HasFeeling}" />
+                                                    </VerticalStackLayout>
+                                                </Grid>
                                             </Border>
-                                            <!-- Entrenos de un cliente: «Enviado por Felipe» o «Contigo» -->
-                                            <Border Style="{StaticResource SpChipStyle}" BackgroundColor="{StaticResource SpCardHi}" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasOrigin}">
-                                                <Border.Triggers>
-                                                    <DataTrigger TargetType="Border" Binding="{Binding IsReceived}" Value="True">
-                                                        <Setter Property="BackgroundColor" Value="#262B40" />
-                                                    </DataTrigger>
-                                                </Border.Triggers>
-                                                <Label Text="{Binding Origin}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpText2}">
-                                                    <Label.Triggers>
-                                                        <DataTrigger TargetType="Label" Binding="{Binding IsReceived}" Value="True">
-                                                            <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
-                                                </Label>
-                                            </Border>
-                                        </HorizontalStackLayout>
-                                        <Label Text="{Binding RoutineName}" Style="{StaticResource StatCaption}" LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Detail}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText3}" />
-                                        <Label Text="{Binding NoteText}" IsVisible="{Binding HasNote}" FontAttributes="Italic" FontSize="12"
-                                               TextColor="{StaticResource SpText2}" MaxLines="2" LineBreakMode="TailTruncation" Margin="0,2,0,0" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
                                     </VerticalStackLayout>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                        <Label Text="{Binding DateText}" Style="{StaticResource StatCaption}" HorizontalOptions="End" />
-                                        <Label Text="{Binding FeelingEmoji}" FontSize="18" HorizontalOptions="End" IsVisible="{Binding HasFeeling}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Button Text="Ver meses anteriores" Style="{StaticResource SpSecondaryButton}" Command="{Binding ShowMoreHistoryCommand}"
+                            IsVisible="{Binding HasMoreHistory}" Margin="0,8,0,0" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

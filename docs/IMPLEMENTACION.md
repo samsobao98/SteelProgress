@@ -438,3 +438,16 @@ Sin servidor: el cliente envía el entreno como archivo .steel (tipo `Workouts`)
 - `MainActivity` pasa a `SingleTask`: con la app abierta, abrir un .steel desde otra app creaba otra ventana y la app se cerraba (pasaba también con rutinas).
 
 Probar (con `tools/demo-data.sh`): Lucía → Empezar → una serie → Terminar → «Guardar y enviar» → elegir SteelProgress en el menú → «Abrir en otro perfil» → Álex → «Guardar en Lucía» → su historial con «Enviado por Lucía».
+
+## Que el entrenador no se sature (2026-10-31)
+
+Prueba de carga (30 clientes, 3 días por semana, 2 años: 9.360 sesiones): 10,8 MB; Inicio 45 ms y Progreso de un cliente 150 ms en el ordenador. El problema era la pantalla, no los datos:
+
+- **Inicio por prioridad** (`CoachHome.Rows`): sin noticias, toca hoy, crear rutina, por empezar, el resto y lo hecho hoy; como mucho 5 (`HomeRows`) y «y N clientes más» → Clientes.
+- **Pendiente**: 3 (`HomePending`) y «Ver todo (N)».
+- **Entrenos recibidos**: una línea, «Esta semana te han enviado 3 entrenos: Felipe y Lucía» (`WorkoutSession.ReceivedAt`).
+- **Archivar clientes** (`Client.ArchivedAt`; migración `AddClientArchiveAndReceivedAt`): «Archivar» en su menú; salen de Inicio, de la lista, de los números y de la cuenta del perfil, y quedan plegados en «Archivados (N)» al final de Clientes con «Recuperar», «Ver su historial» y «Eliminar».
+- **Historial por meses** (`HistoryMonth`): «Octubre 2026 · 14 sesiones»; se ven 3 meses y «Ver meses anteriores» carga 3 más.
+- **Compactar** la base de datos (VACUUM) tras borrar un cliente o un perfil: SQLite no encoge el archivo solo.
+
+Datos de prueba: Álex tiene ahora 8 clientes activos (Raúl, Sara y Tomás nuevos), uno archivado (Pablo) y dos entrenos de esta semana enviados por Felipe.

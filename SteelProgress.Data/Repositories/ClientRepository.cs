@@ -7,7 +7,10 @@ namespace SteelProgress.Data.Repositories;
 // Resumen de un cliente para Clientes e Inicio. ActiveRoutineWeek: los días de su rutina activa y lo
 // entrenado de ella, para saber qué día le toca (RoutineSchedule.NextDay, en Core).
 public sealed record ClientSummary(Client Client, int SessionsThisWeek, int TotalSessions, DateTime? LastSession,
-    string? ActiveRoutineName, RoutineWeek? ActiveRoutineWeek = null);
+    string? ActiveRoutineName, RoutineWeek? ActiveRoutineWeek = null, int ReceivedThisWeek = 0)
+{
+    public bool IsArchived => Client.ArchivedAt is not null;
+}
 
 public class ClientRepository
 {
@@ -40,6 +43,25 @@ public class ClientRepository
         var entity = await _context.Clients.FindAsync(client.Id);
         if (entity is null) return;
         _context.Clients.Remove(entity);
+        await _context.SaveChangesAsync();
+        await CompactAsync(_context);
+    }
+
+    /// <summary>
+    /// SQLite no encoge el archivo al borrar: reutiliza el hueco. Tras borrar mucho (un cliente, un perfil)
+    /// se compacta para que ocupe lo que de verdad hay.
+    /// </summary>
+    public static async Task CompactAsync(AppDbContext context)
+    {
+        if (context.Database.IsSqlite())
+            await context.Database.ExecuteSqlRawAsync("VACUUM;");
+    }
+
+    /// <summary>Archiva un cliente (o lo recupera): su historial no se toca.</summary>
+    public async Task SetArchivedAsync(int clientId, DateTime? archivedAt)
+    {
+        var client = await _context.Clients.FirstAsync(c => c.Id == clientId);
+        client.ArchivedAt = archivedAt;
         await _context.SaveChangesAsync();
     }
 
@@ -104,7 +126,8 @@ public class ClientRepository
                 s.RoutineDayId,
                 RoutineId = s.RoutineDay!.RoutineId,
                 // Como en Inicio: un día cuenta como hecho si se apuntó alguna serie
-                HasSets = s.Exercises.Any(e => e.Sets.Any())
+                HasSets = s.Exercises.Any(e => e.Sets.Any()),
+                s.ReceivedAt
             })
             .ToListAsync();
 
@@ -149,7 +172,8 @@ public class ClientRepository
                 mine.Count,
                 mine.Count == 0 ? null : mine.Max(s => s.Date),
                 routine?.Name,
-                week);
+                week,
+                mine.Count(s => s.ReceivedAt >= weekStart));
         }).ToList();
     }
 }

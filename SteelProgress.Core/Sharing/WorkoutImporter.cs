@@ -78,6 +78,7 @@ public class WorkoutImporter
             }
 
             session.ClientId = client.Id;
+            session.ReceivedAt = DateTime.Now;
             session.RoutineDayId = dayId;
             session.Date = w.Date;
             session.DurationMinutes = w.DurationMinutes;

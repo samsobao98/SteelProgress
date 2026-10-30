@@ -52,15 +52,31 @@ public partial class ClientsPage : ContentPage
         }
 
         var name = item.Client.Name;
+        if (item.IsArchived)
+        {
+            const string restore = "Recuperar", seeHistory = "Ver su historial", remove = "Eliminar cliente";
+            var pick = await AppDialogs.ChooseAsync(name, [restore, seeHistory], destructive: remove, subtitle: "Archivado");
+            if (pick == restore) await _vm.RestoreAsync(item.Client);
+            else if (pick == remove) await _vm.DeleteAsync(item.Client);
+            else if (pick == seeHistory)
+            {
+                ProgressPage.Request(ProgressSection.History);
+                _vm.Open(item.Client);
+                await Shell.Current.GoToAsync("//ProgressPage");
+            }
+            return;
+        }
+
         string routines = $"Rutinas de {name}", train = $"Entrenar con {name}", history = $"Historial de {name}";
-        const string edit = "Editar", limitations = "Limitaciones", delete = "Eliminar cliente";
+        const string edit = "Editar", limitations = "Limitaciones", archive = "Archivar", delete = "Eliminar cliente";
         // En la vista simple de entrenador no hay apartado Rutinas: sus rutinas se usan desde Entreno
         string[] options = _viewOptions.Current.ShowRoutines
-            ? [train, routines, history, limitations, edit]
-            : [train, history, limitations, edit];
+            ? [train, routines, history, limitations, edit, archive]
+            : [train, history, limitations, edit, archive];
         var choice = await AppDialogs.ChooseAsync(name, options, destructive: delete);
 
         if (choice == edit) { _vm.StartEdit(item.Client); return; }
+        if (choice == archive) { await _vm.ArchiveAsync(item.Client); return; }
         if (choice == limitations)
         {
             await Shell.Current.GoToAsync(nameof(ClientLimitationsPage), new Dictionary<string, object> { ["clientId"] = item.Client.Id });

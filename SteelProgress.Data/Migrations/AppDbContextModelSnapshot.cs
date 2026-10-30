@@ -50,6 +50,9 @@ namespace SteelProgress.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("AvatarColor")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -449,6 +452,9 @@ namespace SteelProgress.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ReceivedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RoutineDayId")
