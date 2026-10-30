@@ -799,7 +799,7 @@ public partial class LauncherPage : ContentPage
     {
         bool confirmed = await AppDialogs.ConfirmAsync(
             "Eliminar perfil",
-            $"¿Eliminar «{profile.Name}»? Se borrarán para siempre todas sus rutinas y sesiones de entrenamiento.",
+            $"¿Eliminar «{profile.Name}»? Se borrarán para siempre todas sus rutinas, sesiones de entrenamiento y pesajes (y los de sus clientes).",
             "Eliminar",
             destructive: true);
 
