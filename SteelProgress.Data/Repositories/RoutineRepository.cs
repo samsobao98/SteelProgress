@@ -48,6 +48,10 @@ public class RoutineRepository
             .ToListAsync();
     }
 
+    /// <summary>La rutina a la que pertenece un día.</summary>
+    public Task<Routine?> GetRoutineOfDayAsync(int routineDayId) =>
+        _context.RoutineDays.Where(d => d.Id == routineDayId).Select(d => d.Routine).FirstOrDefaultAsync();
+
     // Avance de una rutina desde weekStart: qué días se han entrenado y cuál fue el último
     public async Task<RoutineWeek> GetRoutineWeekAsync(int routineId, DateTime weekStart)
     {

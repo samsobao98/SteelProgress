@@ -15,6 +15,9 @@ public static class PendingImport
         MainThread.BeginInvokeOnMainThread(() => _ = TryOpenAsync());
     }
 
+    /// <summary>Guarda el archivo hasta que se elija un perfil, sin abrirlo ya en el actual.</summary>
+    public static void Hold(string path) => _path = path;
+
     public static async Task TryOpenAsync()
     {
         if (_path is null || Shell.Current is not AppShell) return;
@@ -23,6 +26,15 @@ public static class PendingImport
 
         var path = _path;
         _path = null;
-        await Shell.Current.GoToAsync(nameof(ImportPreviewPage), new Dictionary<string, object> { ["path"] = path });
+        await OpenAsync(path);
+    }
+
+    /// <summary>Abre la vista previa que toca: entrenos de un cliente, o rutinas y ejercicios.</summary>
+    public static Task OpenAsync(string path)
+    {
+        var page = SteelProgress.Core.Sharing.SteelPackage.PeekKind(path) == SteelProgress.Core.Sharing.PackageKind.Workouts
+            ? nameof(WorkoutImportPage)
+            : nameof(ImportPreviewPage);
+        return Shell.Current.GoToAsync(page, new Dictionary<string, object> { ["path"] = path });
     }
 }

@@ -426,3 +426,15 @@ Probar peso: Clientes → Felipe → Historial → Resumen → «Ir a su consent
   - Marta: M/J, «Sin noticias» (diez días sin venir), consentimiento, PAR-Q+ al día y peso.
   - Jorge: sin días fijos, sin consentimiento ni PAR-Q+, rutina PPL tres días por semana.
   - Ana: dada de alta ayer, sin rutina.
+
+## Enviar entrenos al entrenador (2026-10-31)
+
+Sin servidor: el cliente envía el entreno como archivo .steel (tipo `Workouts`) por WhatsApp, Telegram, correo…
+
+- **Cliente:** en el fin del entreno sale «Enviar a Álex · Te pasó esta rutina» si la rutina es importada y recuerda su autor (`Routine.SourceUid` y `AuthorName`) y el perfil no es de entrenador. «Guardar y enviar» guarda y abre el menú de compartir (`PackageExporter.ExportWorkoutsAsync`). Lleva series (con calentamientos y RPE), duración, cómo se sintió y la nota.
+- **Entrenador:** al tocar el archivo se abre `WorkoutImportPage` (`PendingImport.OpenAsync` elige la vista previa según el tipo). `WorkoutImporter` reconoce al cliente por la rutina que le pasó y guarda la sesión en ese día; si la rutina no es suya, pide de qué cliente es y la guarda en una rutina con su nombre. Cada entreno recuerda su identidad de origen (`WorkoutSession.SourceUid`, migración `AddWorkoutSourceUid`): si se reenvía, se actualiza en vez de duplicarse. Los ejercicios se emparejan por identidad, luego por nombre (biblioteca primero) y, si no hay, se crea uno propio.
+- **Historial:** etiqueta «Enviado por Felipe» o «Contigo» y la nota del final, en Inicio y Progreso.
+- Abierto en un perfil personal: aviso y «Abrir en otro perfil» (el archivo espera en la lista de perfiles).
+- `MainActivity` pasa a `SingleTask`: con la app abierta, abrir un .steel desde otra app creaba otra ventana y la app se cerraba (pasaba también con rutinas).
+
+Probar (con `tools/demo-data.sh`): Lucía → Empezar → una serie → Terminar → «Guardar y enviar» → elegir SteelProgress en el menú → «Abrir en otro perfil» → Álex → «Guardar en Lucía» → su historial con «Enviado por Lucía».

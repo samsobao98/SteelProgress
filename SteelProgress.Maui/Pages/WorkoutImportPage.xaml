@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SteelProgress.Maui.Pages.WorkoutImportPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SteelProgress.Core.ViewModels;assembly=SteelProgress.Core"
+    xmlns:converters="clr-namespace:SteelProgress.Maui.Converters"
+    x:DataType="vm:WorkoutImportViewModel"
+    BackgroundColor="{StaticResource SpBg}"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="Not" />
+    </ContentPage.Resources>
+
+    <!-- Entreno que envía un cliente (maqueta del 2026-10-30). Se abre al tocar el archivo en WhatsApp, correo… -->
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,16" Spacing="14">
+                <Label Text="Entreno recibido" Style="{StaticResource SpSecondary}" />
+
+                <!-- No se puede abrir aquí (perfil personal, archivo dañado…) -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding HasError}" Margin="0,24,0,0">
+                    <Label Text="No se puede abrir" Style="{StaticResource SpHeading}" />
+                    <Label Text="{Binding Error}" Style="{StaticResource SpBody}" TextColor="{StaticResource SpText2}" />
+                    <Button Text="Abrir en otro perfil" Style="{StaticResource SpPrimaryButton}" IsVisible="{Binding NeedsCoachProfile}"
+                            Clicked="OnOtherProfileClicked" Margin="0,8,0,0" />
+                    <Label Text="Vuelves a la lista de perfiles; al elegir el de entrenador se abre el entreno."
+                           Style="{StaticResource SpSecondary}" FontSize="12" IsVisible="{Binding NeedsCoachProfile}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsLoaded}">
+                    <!-- De quién es -->
+                    <Grid ColumnDefinitions="52,*" ColumnSpacing="12" IsVisible="{Binding HasClient}">
+                        <Border WidthRequest="52" HeightRequest="52" StrokeThickness="0" StrokeShape="RoundRectangle 26" BackgroundColor="{Binding ClientColor}">
+                            <Label Text="{Binding ClientInitial}" FontFamily="SpaceGroteskMedium" FontSize="22" TextColor="{StaticResource SpOnAccent}"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Grid.Column="1" Text="{Binding ClientName}" Style="{StaticResource SpTitle}" FontSize="24" VerticalOptions="Center" />
+                    </Grid>
+                    <Label Text="{Binding SenderText}" Style="{StaticResource SpSecondary}" FontSize="12" />
+
+                    <!-- Sin reconocer: se elige el cliente -->
+                    <FlexLayout x:Name="ClientChoice" Wrap="Wrap" IsVisible="{Binding IsRecognized, Converter={StaticResource Not}}" />
+
+                    <Border BackgroundColor="#1F9DB4E6" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,10" IsVisible="{Binding IsUpdate}">
+                        <Label Text="Ya tenías este entreno: se actualizará con lo nuevo (te lo ha vuelto a enviar)." FontSize="13" TextColor="#C9D5F2" />
+                    </Border>
+
+                    <!-- Cada entreno -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Workouts}" Spacing="14">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ReceivedWorkoutItem">
+                                <VerticalStackLayout Spacing="10">
+                                    <VerticalStackLayout Spacing="0">
+                                        <Label Text="{Binding Title}" Style="{StaticResource SpHeading}" />
+                                        <Label Text="{Binding DateText}" Style="{StaticResource SpSecondary}" />
+                                    </VerticalStackLayout>
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                        <Border Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                            <VerticalStackLayout>
+                                                <Label Text="{Binding DurationText}" Style="{StaticResource SpNumber}" FontSize="19" HorizontalOptions="Center" />
+                                                <Label Text="Duración" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                        <Border Grid.Column="1" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                            <VerticalStackLayout>
+                                                <Label Text="{Binding FeelingText}" Style="{StaticResource SpNumber}" FontSize="19" HorizontalOptions="Center" />
+                                                <Label Text="Cómo se sintió" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                        <Border Grid.Column="2" Style="{StaticResource SpCardStyle}" Padding="8,12">
+                                            <VerticalStackLayout>
+                                                <Label Text="{Binding SetsText}" Style="{StaticResource SpNumber}" FontSize="19" HorizontalOptions="Center" />
+                                                <Label Text="Series" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </Grid>
+                                    <Border Style="{StaticResource SpCardStyle}" Padding="14,12" IsVisible="{Binding HasNote}">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="Su nota" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                            <Label Text="{Binding NoteText}" Style="{StaticResource SpBody}" FontSize="14" FontAttributes="Italic" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <Border Style="{StaticResource SpCardStyle}" Padding="14,4">
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Lines}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ReceivedLine">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="0,10">
+                                                        <Label Text="{Binding Exercise}" Style="{StaticResource SpBody}" FontSize="14" />
+                                                        <Label Grid.Column="1" Text="{Binding Sets}" Style="{StaticResource SpSecondary}" FontSize="13"
+                                                               HorizontalTextAlignment="End" MaximumWidthRequest="170" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <VerticalStackLayout Grid.Row="1" Padding="20,8,20,20" Spacing="6" BackgroundColor="{StaticResource SpBg}">
+            <Label Text="Se guarda en su historial y cuenta para su progreso, sus récords y los avisos del Inicio."
+                   Style="{StaticResource SpSecondary}" FontSize="12" HorizontalTextAlignment="Center" IsVisible="{Binding IsLoaded}" />
+            <Button Text="{Binding SaveText}" Style="{StaticResource SpPrimaryButton}" Command="{Binding SaveCommand}" IsVisible="{Binding IsLoaded}" />
+            <Button Text="Cerrar" Style="{StaticResource SpSecondaryButton}" Clicked="OnCloseClicked" />
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

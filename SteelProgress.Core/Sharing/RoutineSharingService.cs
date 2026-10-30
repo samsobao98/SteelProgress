@@ -33,6 +33,20 @@ public class RoutineSharingService
         return path;
     }
 
+    /// <summary>Un entreno guardado, para enviárselo al entrenador. Devuelve la ruta del archivo.</summary>
+    public async Task<string> ExportWorkoutToFileAsync(int sessionId, string fileName, string directory)
+    {
+        var author = _currentUser.CurrentUserId is int id ? (await _db.UserProfiles.FindAsync(id))?.Name : null;
+
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, SafeFileName(fileName) + SteelPackageFormat.Extension);
+
+        await using (var file = File.Create(path))
+            await _exporter.ExportWorkoutsAsync(new[] { sessionId }, new ExportOptions(false, author), file);
+
+        return path;
+    }
+
     // "Torso / Pierna" → "Torso - Pierna"
     public static string SafeFileName(string name)
     {

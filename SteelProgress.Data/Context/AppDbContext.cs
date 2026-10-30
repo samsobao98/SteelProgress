@@ -117,6 +117,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<RoutineDay>().HasIndex(d => d.Uid).IsUnique();
         modelBuilder.Entity<RoutineDayExercise>().HasIndex(rde => rde.Uid).IsUnique();
         modelBuilder.Entity<WorkoutSession>().HasIndex(ws => ws.Uid).IsUnique();
+        modelBuilder.Entity<WorkoutSession>().HasIndex(ws => new { ws.UserId, ws.SourceUid });
 
         // Al borrar un ejercicio se borran sus vídeos e imágenes (los archivos los borra ExerciseMediaService)
         modelBuilder.Entity<ExerciseMedia>()

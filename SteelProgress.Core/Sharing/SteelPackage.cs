@@ -27,7 +27,9 @@ public static class SteelPackageFormat
 public enum PackageKind
 {
     Routine,
-    Exercises
+    Exercises,
+    // Entrenos que un cliente le envía a su entrenador
+    Workouts
 }
 
 public sealed class PackageManifest
@@ -44,6 +46,40 @@ public sealed class PackageData
 {
     public List<PackageExercise> Exercises { get; set; } = new();
     public List<PackageRoutine> Routines { get; set; } = new();
+    public List<PackageWorkout> Workouts { get; set; } = new();
+}
+
+/// <summary>Un entreno hecho, tal como lo guardó el cliente. Se reconoce por la rutina que le pasó su entrenador.</summary>
+public sealed class PackageWorkout
+{
+    // Identidad del entreno en el móvil del cliente: al reenviarlo, se actualiza
+    public Guid Uid { get; set; }
+    // La rutina original (la del entrenador) y el día, por nombre y posición
+    public Guid? RoutineUid { get; set; }
+    public string RoutineName { get; set; } = "";
+    public string DayName { get; set; } = "";
+    public int DayOrder { get; set; }
+    public DateTime Date { get; set; }
+    public int? DurationMinutes { get; set; }
+    public int? Feeling { get; set; }
+    public string? Notes { get; set; }
+    public bool IsComplete { get; set; } = true;
+    public List<PackageWorkoutExercise> Exercises { get; set; } = new();
+}
+
+public sealed class PackageWorkoutExercise
+{
+    public Guid ExerciseUid { get; set; }
+    public List<PackageSet> Sets { get; set; } = new();
+}
+
+public sealed class PackageSet
+{
+    public double Weight { get; set; }
+    public int Reps { get; set; }
+    public bool IsWarmup { get; set; }
+    public double? Rpe { get; set; }
+    public string? Notes { get; set; }
 }
 
 public sealed class PackageExercise
@@ -161,6 +197,21 @@ public sealed class SteelPackage : IDisposable
     }
 
     public void Dispose() => _zip.Dispose();
+
+    /// <summary>Qué lleva un .steel, sin leerlo entero; null si no es un paquete válido.</summary>
+    public static PackageKind? PeekKind(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var package = Open(stream);
+            return package.Manifest.Kind;
+        }
+        catch (Exception e) when (e is SteelPackageException or IOException)
+        {
+            return null;
+        }
+    }
 
     private static T ReadJson<T>(ZipArchive zip, string entryName)
     {

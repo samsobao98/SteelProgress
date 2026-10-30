@@ -15,6 +15,15 @@ public class RecentSessionItem
     public string RoutineName => Session.RoutineName;
     public bool IsComplete => Session.IsComplete;
 
+    /// <summary>En los entrenos de un cliente: «Enviado por Felipe» o «Contigo».</summary>
+    public string? Origin => Session.Origin;
+    public bool HasOrigin => Origin is not null;
+    public bool IsReceived => Origin?.StartsWith("Enviado") == true;
+
+    /// <summary>La nota del final del entreno, entre comillas.</summary>
+    public string NoteText => string.IsNullOrWhiteSpace(Session.Notes) ? "" : $"«{Session.Notes.Trim()}»";
+    public bool HasNote => NoteText.Length > 0;
+
     // Estado: en curso, sin guardar (la app se cerró a medias) o guardada con series sin hacer
     public SessionStatus Status { get; }
     public bool IsInProgress => Status == SessionStatus.InProgress;

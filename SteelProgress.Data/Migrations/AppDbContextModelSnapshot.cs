@@ -454,6 +454,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<int>("RoutineDayId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("SourceUid")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("Uid")
                         .HasColumnType("TEXT");
 
@@ -469,7 +472,7 @@ namespace SteelProgress.Data.Migrations
                     b.HasIndex("Uid")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "SourceUid");
 
                     b.ToTable("WorkoutSessions");
                 });

@@ -217,12 +217,21 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
 
         var sessions = await _context.WorkoutSessions
             .Where(ws => ws.Exercises.Any(we => we.Sets.Any(s => !s.IsWarmup)))
-            .Select(ws => new LoggedSession(ws.Id, ws.Date, ws.DurationMinutes, ws.Feeling, ws.Notes, ws.IsComplete,
-                ws.RoutineDayId, ws.RoutineDay!.Name, ws.RoutineDay.Routine!.Name))
+            .Select(ws => new
+            {
+                ws.Id, ws.Date, ws.DurationMinutes, ws.Feeling, ws.Notes, ws.IsComplete, ws.RoutineDayId,
+                DayName = ws.RoutineDay!.Name, RoutineName = ws.RoutineDay.Routine!.Name,
+                IsReceived = ws.SourceUid != null, ws.IsInPerson, ClientName = ws.Client != null ? ws.Client.Name : null
+            })
             .ToListAsync();
 
         return new TrainingLog(
-            sessions.OrderByDescending(s => s.Date).ToList(),
+            sessions.OrderByDescending(s => s.Date)
+                .Select(s => new LoggedSession(s.Id, s.Date, s.DurationMinutes, s.Feeling, s.Notes, s.IsComplete,
+                    s.RoutineDayId, s.DayName, s.RoutineName,
+                    // De dónde viene un entreno de cliente: enviado por él o hecho juntos
+                    s.IsReceived ? $"Enviado por {s.ClientName}" : s.IsInPerson && s.ClientName is not null ? "Contigo" : null))
+                .ToList(),
             sets.OrderBy(x => x.Date).ThenBy(x => x.Id)
                 .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps, x.Notes))
                 .ToList());
@@ -257,7 +266,7 @@ public sealed record TrainingLog(IReadOnlyList<LoggedSession> Sessions, IReadOnl
 }
 
 public sealed record LoggedSession(int Id, DateTime Date, int? DurationMinutes, int? Feeling, string? Notes, bool IsComplete,
-    int RoutineDayId, string DayName, string RoutineName);
+    int RoutineDayId, string DayName, string RoutineName, string? Origin = null);
 
 public sealed record LoggedSet(int SessionId, DateTime Date, int ExerciseId, string ExerciseName, int SetId, double Weight, int Reps,
     string? Notes = null);

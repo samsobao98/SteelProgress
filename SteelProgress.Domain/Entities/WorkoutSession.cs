@@ -20,6 +20,10 @@ public class WorkoutSession
     // Registrada por el entrenador desde su móvil, con el cliente delante
     public bool IsInPerson { get; set; }
 
+    // Entreno que el cliente le envió al entrenador: la identidad que tenía en el móvil del cliente.
+    // Si lo reenvía (con una nota nueva, por ejemplo), se actualiza en vez de duplicarse.
+    public Guid? SourceUid { get; set; }
+
     public DateTime Date { get; set; }
 
     public int? DurationMinutes { get; set; }

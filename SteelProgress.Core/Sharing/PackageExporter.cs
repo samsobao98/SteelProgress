@@ -80,6 +80,48 @@ public class PackageExporter
         await WriteAsync(PackageKind.Exercises, options, data, exercises, output);
     }
 
+    /// <summary>Entrenos guardados, para enviárselos al entrenador (sin vídeos).</summary>
+    public async Task ExportWorkoutsAsync(IReadOnlyCollection<int> sessionIds, ExportOptions options, Stream output)
+    {
+        var sessions = await _db.WorkoutSessions
+            .Include(s => s.RoutineDay!).ThenInclude(d => d.Routine)
+            .Include(s => s.Exercises).ThenInclude(e => e.Sets)
+            .Include(s => s.Exercises).ThenInclude(e => e.Exercise)
+            .Where(s => sessionIds.Contains(s.Id))
+            .OrderBy(s => s.Date)
+            .ToListAsync();
+        if (sessions.Count == 0) throw new SteelPackageException("El entreno no existe.");
+
+        var exercises = sessions.SelectMany(s => s.Exercises).Select(e => e.Exercise!).DistinctBy(e => e.Id).OrderBy(e => e.Name).ToList();
+        var data = new PackageData
+        {
+            Exercises = exercises.Select(e => ToPackage(e, includeMedia: false)).ToList(),
+            Workouts = sessions.Select(s => new PackageWorkout
+            {
+                Uid = s.Uid,
+                RoutineUid = s.RoutineDay?.Routine is { } r ? r.SourceUid ?? r.Uid : null,
+                RoutineName = s.RoutineDay?.Routine?.Name ?? "",
+                DayName = s.RoutineDay?.Name ?? "Entreno",
+                DayOrder = s.RoutineDay?.Order ?? 0,
+                Date = s.Date,
+                DurationMinutes = s.DurationMinutes,
+                Feeling = s.Feeling,
+                Notes = s.Notes,
+                IsComplete = s.IsComplete,
+                Exercises = s.Exercises.OrderBy(e => e.Id).Select(e => new PackageWorkoutExercise
+                {
+                    ExerciseUid = e.Exercise!.Uid,
+                    Sets = e.Sets.OrderBy(x => x.Id).Select(x => new PackageSet
+                    {
+                        Weight = x.Weight, Reps = x.Reps, IsWarmup = x.IsWarmup, Rpe = x.Rpe, Notes = x.Notes
+                    }).ToList()
+                }).ToList()
+            }).ToList()
+        };
+
+        await WriteAsync(PackageKind.Workouts, options with { IncludeMedia = false }, data, exercises, output);
+    }
+
     private async Task<List<Exercise>> ExercisesOfRoutineAsync(int routineId)
     {
         var ids = await _db.RoutineDayExercises

@@ -23,12 +23,17 @@ public partial class WorkoutPage : ContentPage
     private IDispatcherTimer? _timer;
 
     // Por constructor: en el primer OnAppearing de la pestaña aún no hay Handler del que sacarlos
-    public WorkoutPage(WorkoutViewModel vm, ClientContextService clientContext, ViewOptionsService viewOptions)
+    private readonly Core.Sharing.RoutineSharingService _sharing;
+
+    public WorkoutPage(WorkoutViewModel vm, ClientContextService clientContext, ViewOptionsService viewOptions,
+        Core.Sharing.RoutineSharingService sharing)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
         _clientContext = clientContext;
         _viewOptions = viewOptions;
+        _sharing = sharing;
+        _vm.SendToCoachRequested += OnSendToCoachRequested;
 
         RestRing.Drawable = _ring;
         BuildFeelingButtons();
@@ -343,6 +348,30 @@ public partial class WorkoutPage : ContentPage
         if (_vm.SaveWorkoutCommand.IsRunning) return;
         await PressAsync(sender as VisualElement);
         await _vm.SaveWorkoutCommand.ExecuteAsync(null);
+    }
+
+    // ── Enviar el entreno a tu entrenador ─────────────────────────────────
+
+    private void OnSendToCoachTapped(object? sender, TappedEventArgs e) => _vm.SendToCoach = !_vm.SendToCoach;
+
+    // Ya guardado: se crea el archivo y se abre el menú de compartir (WhatsApp, Telegram, correo…)
+    private async void OnSendToCoachRequested(int sessionId, string coach, string dayName)
+    {
+        try
+        {
+            var folder = System.IO.Path.Combine(FileSystem.CacheDirectory, "compartir");
+            var name = $"Entreno {dayName} {DateTime.Now:dd-MM}";
+            var path = await _sharing.ExportWorkoutToFileAsync(sessionId, name, folder);
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = $"Enviar a {coach}",
+                File = new ShareFile(path, "application/octet-stream")
+            });
+        }
+        catch (Exception ex) when (ex is Core.Sharing.SteelPackageException or IOException)
+        {
+            NotificationService.Error($"No se pudo crear el archivo: {ex.Message}");
+        }
     }
 
     // ── Respuesta al tocar ────────────────────────────────────────────────

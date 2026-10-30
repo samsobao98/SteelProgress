@@ -713,6 +713,34 @@ public partial class WorkoutViewModel : ObservableObject
 
     [ObservableProperty] private string _finishNotes = "";
 
+    // ── Enviar a tu entrenador (si la rutina te la pasó él) ──
+
+    /// <summary>Quién te pasó la rutina; vacío si es tuya o si este perfil es de entrenador.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSendToCoach), nameof(SendToCoachTitle), nameof(SaveButtonText))]
+    private string _coachName = "";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SaveButtonText))]
+    private bool _sendToCoach = true;
+
+    public bool CanSendToCoach => CoachName.Length > 0;
+    public string SendToCoachTitle => $"Enviar a {CoachName}";
+    public string SaveButtonText => CanSendToCoach && SendToCoach ? "Guardar y enviar" : "Guardar entreno";
+
+    /// <summary>Al guardar con «Enviar a…» marcado: la página crea el archivo y abre el menú de compartir.</summary>
+    public event Action<int, string, string>? SendToCoachRequested;
+
+    // Una rutina importada recuerda quién la creó: a esa persona se le puede devolver el entreno
+    private async Task LoadCoachAsync(int routineDayId)
+    {
+        CoachName = "";
+        if (_viewOptions?.Current.IsCoach == true) return;
+        var routine = await _routineRepository.GetRoutineOfDayAsync(routineDayId);
+        if (routine is { SourceUid: not null, AuthorName: { Length: > 0 } author })
+            CoachName = author;
+    }
+
     [ObservableProperty] private string _summaryDuration = "";
     [ObservableProperty] private string _summaryVolume = "";
     [ObservableProperty] private int _summarySets;
@@ -769,6 +797,8 @@ public partial class WorkoutViewModel : ObservableObject
         RecordsText = string.Join(" · ", records.Select(r => $"{r.Name} {WorkoutExerciseState.FormatKg(r.d.Set.Weight)} × {r.d.Set.Reps}"));
 
         var missing = ExerciseStates.Where(e => e.MissingSets > 0).ToList();
+        _ = LoadCoachAsync(CurrentSession.RoutineDayId);
+
         MissingText = missing.Count switch
         {
             0 => "",
@@ -804,8 +834,11 @@ public partial class WorkoutViewModel : ObservableObject
         try { await _workoutRepository.UpdateSessionAsync(session); }
         finally { _dbLock.Release(); }
 
+        var send = CanSendToCoach && SendToCoach;
+        var (coach, dayName) = (CoachName, session.RoutineDay?.Name ?? "Entreno");
         ResetSession();
         NotificationService.Success("Entreno guardado.");
+        if (send) SendToCoachRequested?.Invoke(session.Id, coach, dayName);
     }
 
     [RelayCommand]
@@ -836,6 +869,7 @@ public partial class WorkoutViewModel : ObservableObject
         IsSessionActive = false;
         Feeling = null;
         FinishNotes = "";
+        CoachName = "";
         _previousVolume = null;
         WorkoutStateService.IsWorkoutActive = false;
         WorkoutStateService.ActiveSessionId = null;

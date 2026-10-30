@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sustituye los perfiles del emulador (o móvil conectado) por los de prueba: Lucía (personal) y
-# Álex (entrenador, con cuatro clientes). BORRA los perfiles que haya. Ver tools/SteelProgress.DemoData.
+# Álex (entrenador, con cinco clientes; Lucía es una de ellas). BORRA los perfiles que haya. Ver tools/SteelProgress.DemoData.
 #
 # Uso, desde la raíz del repo y con la app instalada y abierta al menos una vez:
 #   bash tools/demo-data.sh

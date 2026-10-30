@@ -502,6 +502,23 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- Enviar a tu entrenador: solo si la rutina te la pasó él -->
+                    <Border Style="{StaticResource SpCardStyle}" Margin="0,12,0,0" Padding="14,12" IsVisible="{Binding CanSendToCoach}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnSendToCoachTapped" />
+                                </Grid.GestureRecognizers>
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="{Binding SendToCoachTitle}" Style="{StaticResource SpBody}" FontFamily="SpaceGroteskMedium" />
+                                    <Label Text="Te pasó esta rutina" Style="{StaticResource SpSecondary}" FontSize="12" />
+                                </VerticalStackLayout>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding SendToCoach}" Color="{StaticResource SpSteel1}" VerticalOptions="Center" />
+                            </Grid>
+                            <Label Text="Le llegan tus series, cómo te has sentido y tu nota. Eliges por dónde en la siguiente pantalla: WhatsApp, Telegram, correo…"
+                                   Style="{StaticResource SpSecondary}" FontSize="12" IsVisible="{Binding SendToCoach}" />
+                        </VerticalStackLayout>
+                    </Border>
                     <!-- Series sin hacer -->
                     <Border BackgroundColor="#14FAB387" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="14,12" Margin="0,12,0,0" IsVisible="{Binding IsIncomplete}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
@@ -514,7 +531,7 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnSaveTapped" />
                         </Border.GestureRecognizers>
-                        <Label Text="Guardar entreno" Style="{StaticResource BigActionLabel}" />
+                        <Label Text="{Binding SaveButtonText}" Style="{StaticResource BigActionLabel}" />
                     </Border>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,8,0,0">
                         <Border Style="{StaticResource GhostButton}">

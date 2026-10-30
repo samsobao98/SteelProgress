@@ -54,6 +54,7 @@ public static class MauiProgram
         // Compartir rutinas (.steel)
         builder.Services.AddTransient<PackageExporter>();
         builder.Services.AddTransient<PackageImporter>();
+        builder.Services.AddTransient<WorkoutImporter>();
         builder.Services.AddTransient<RoutineSharingService>();
 
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "steelprogress.db");
@@ -86,6 +87,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ClientsViewModel>();
         builder.Services.AddTransient<ClientLimitationsViewModel>();
         builder.Services.AddTransient<BodyWeightViewModel>();
+        builder.Services.AddTransient<WorkoutImportViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
@@ -100,6 +102,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ClientsPage>();
         builder.Services.AddTransient<ClientLimitationsPage>();
         builder.Services.AddTransient<BodyWeightPage>();
+        builder.Services.AddTransient<WorkoutImportPage>();
 
         // La pantalla de perfiles vive toda la app; el Shell, uno nuevo por cada entrada en un perfil
         builder.Services.AddTransient<AppShell>();

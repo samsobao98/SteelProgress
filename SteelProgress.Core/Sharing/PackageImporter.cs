@@ -47,6 +47,9 @@ public class PackageImporter
 
     public async Task<ImportPreview> PreviewAsync(SteelPackage package)
     {
+        // Los entrenos que envía un cliente van por otro camino (WorkoutImporter)
+        if (package.Manifest.Kind == PackageKind.Workouts)
+            throw new SteelPackageException("Es un entreno que un cliente le envía a su entrenador: ábrelo desde un perfil de entrenador.");
         var data = package.Data;
         var uids = data.Exercises.Select(e => e.Uid).ToList();
         var existing = await _db.Exercises.CountAsync(e => uids.Contains(e.Uid));

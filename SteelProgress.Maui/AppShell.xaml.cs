@@ -71,6 +71,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(ImportPreviewPage), typeof(ImportPreviewPage));
         Routing.RegisterRoute(nameof(ClientLimitationsPage), typeof(ClientLimitationsPage));
         Routing.RegisterRoute(nameof(BodyWeightPage), typeof(BodyWeightPage));
+        Routing.RegisterRoute(nameof(WorkoutImportPage), typeof(WorkoutImportPage));
 
         // Avisos de los servicios: una sola suscripción para toda la vida de la app
         // Con el diseño de la app (docs/PLAN_VENTANAS.md): confirmación propia y avisos breves que se van solos

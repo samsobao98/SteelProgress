@@ -4,8 +4,10 @@ using SteelProgress.Domain.Entities;
 
 // Rellena una base de datos de SteelProgress con dos perfiles de prueba, sustituyendo los que tenga:
 //  · Lucía, personal (vista detallada): tres rutinas, unos cuatro meses de entrenos y su peso.
-//  · Álex, entrenador (vista detallada): cuatro clientes en situaciones distintas (toca hoy, sin
+//  · Álex, entrenador (vista detallada): cinco clientes en situaciones distintas (toca hoy, sin
 //    noticias, sin rutina, PAR-Q caducado, limitaciones, peso, con y sin consentimiento).
+//  Lucía es también clienta de Álex: su «Torso / Pierna» se la pasó él, así que al terminar un
+//  entreno le sale «Enviar a Álex» (y Álex reconoce lo que le llega).
 // Las fechas van en relación con hoy, así que sirve cualquier día. Uso: tools/demo-data.sh
 // (o: dotnet run --project tools/SteelProgress.DemoData -- ruta/a/steelprogress.db)
 
@@ -66,7 +68,7 @@ sealed class Seeder(AppDbContext db, Dictionary<string, Exercise> library, Rando
         db.UserProfiles.Add(lucia);
         await db.SaveChangesAsync();
 
-        var torsoPierna = AddRoutine(lucia.Id, null, "Torso / Pierna", active: true,
+        var torsoPierna = _luciaRoutine = AddRoutine(lucia.Id, null, "Torso / Pierna", active: true,
             ("Torso A", [
                 new("Press banca", 4, 5, 8, 180, 45, 8, Warmups: 2),
                 new("Remo con barra", 4, 6, 10, 150, 42.5),
@@ -157,6 +159,8 @@ sealed class Seeder(AppDbContext db, Dictionary<string, Exercise> library, Rando
         // Ana: recién dada de alta, sin rutina
         var ana = AddClient(alex.Id, "Ana", "#F38BA8", "Empezar a entrenar", "Nunca ha entrenado con pesas.", 0, consentDaysAgo: null, parq: today.AddDays(-1));
         ana.CreatedAt = today.AddDays(-1);
+        // Lucía: la rutina que tiene en su perfil se la pasó Álex (sin sesiones aquí: ella se las envía)
+        var luciaClient = AddClient(alex.Id, "Lucía", "#CBA6F7", "Fuerza e hipertrofia", null, mon | tue | thu | fri, consentDaysAgo: null, parq: today.AddMonths(-2));
         await db.SaveChangesAsync();
 
         var felipeA = AddRoutine(alex.Id, felipe.Id, "Rutina A", active: true,
@@ -182,6 +186,14 @@ sealed class Seeder(AppDbContext db, Dictionary<string, Exercise> library, Rando
             ("Pierna", [new("Sentadilla hack", 4, 8, 10, 150, 120), new("Peso muerto rumano", 3, 10, null, 120, 90),
                 new("Extensiones de cuádriceps", 3, 12, 15, 60, 55), new("Curl femoral sentado", 3, 12, 15, 60, 50)]));
         await db.SaveChangesAsync();
+
+        // La copia de Álex de la rutina de Lucía, y la de Lucía apuntando a ella (como al importarla)
+        var luciaPlans = _plans[_luciaRoutine!];
+        var coachCopy = AddRoutine(alex.Id, luciaClient.Id, "Torso / Pierna", active: true,
+            _luciaRoutine!.Days.OrderBy(d => d.Order).Select((d, i) => (d.Name, luciaPlans[i])).ToArray());
+        await db.SaveChangesAsync();
+        _luciaRoutine.SourceUid = coachCopy.Uid;
+        _luciaRoutine.AuthorName = "Álex";
 
         // Felipe: L/X/V las últimas 7 semanas, hasta hace dos días como mucho
         AddSessions(alex.Id, felipe.Id, felipeA, Dates(Monday(today).AddDays(-49), today.AddDays(-2), [0, 2, 4]), hour: 20, progress: 0.004, inPerson: true);
@@ -231,6 +243,7 @@ sealed class Seeder(AppDbContext db, Dictionary<string, Exercise> library, Rando
     }
 
     private readonly Dictionary<Routine, List<Plan[]>> _plans = new();
+    private Routine? _luciaRoutine;
 
     /// <summary>Sesiones en esas fechas, pasando por los días de la rutina en orden y subiendo poco a poco las cargas.</summary>
     private void AddSessions(int userId, int? clientId, Routine routine, IReadOnlyList<DateTime> dates, int hour, double progress, bool inPerson = false)

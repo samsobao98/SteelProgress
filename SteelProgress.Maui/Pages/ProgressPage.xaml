@@ -392,9 +392,26 @@
                                                     </Label.Triggers>
                                                 </Label>
                                             </Border>
+                                            <!-- Entrenos de un cliente: «Enviado por Felipe» o «Contigo» -->
+                                            <Border Style="{StaticResource SpChipStyle}" BackgroundColor="{StaticResource SpCardHi}" Padding="7,1" VerticalOptions="Center" IsVisible="{Binding HasOrigin}">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsReceived}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#262B40" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Label Text="{Binding Origin}" FontFamily="SpaceGroteskMedium" FontSize="10" TextColor="{StaticResource SpText2}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsReceived}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource SpSteel1}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Border>
                                         </HorizontalStackLayout>
                                         <Label Text="{Binding RoutineName}" Style="{StaticResource StatCaption}" LineBreakMode="TailTruncation" />
                                         <Label Text="{Binding Detail}" FontFamily="SpaceGroteskMedium" FontSize="12" TextColor="{StaticResource SpText3}" />
+                                        <Label Text="{Binding NoteText}" IsVisible="{Binding HasNote}" FontAttributes="Italic" FontSize="12"
+                                               TextColor="{StaticResource SpText2}" MaxLines="2" LineBreakMode="TailTruncation" Margin="0,2,0,0" />
                                     </VerticalStackLayout>
                                     <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                         <Label Text="{Binding DateText}" Style="{StaticResource StatCaption}" HorizontalOptions="End" />

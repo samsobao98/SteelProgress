@@ -107,8 +107,8 @@ public static class CoachHome
                 {
                     Client = s.Client,
                     Title = $"{s.Client.Name}: {(today.Date - last.Date).Days} días sin sesiones",
-                    // Sin servidor no se sabe si ha entrenado: solo lo que se ha importado o hecho juntos
-                    Detail = "Importa sus entrenos o haced una sesión juntos"
+                    // Sin servidor no se sabe si ha entrenado: solo lo que te envía o hacéis juntos
+                    Detail = "Pídele que te envíe sus entrenos o haced una sesión juntos"
                 });
             if (s.Client.ParqSignedAt is DateTime signed && today.Date >= signed.Date.AddMonths(ParqMonths))
                 items.Add(new CoachPendingItem

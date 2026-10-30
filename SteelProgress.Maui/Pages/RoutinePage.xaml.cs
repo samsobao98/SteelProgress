@@ -337,7 +337,7 @@ public partial class RoutinePage : ContentPage
         await using (var target = File.Create(path))
             await source.CopyToAsync(target);
 
-        await Shell.Current.GoToAsync(nameof(ImportPreviewPage), new Dictionary<string, object> { ["path"] = path });
+        await PendingImport.OpenAsync(path);
     }
 
     // ── FAB: abre el sheet de creación ─────────────────────────────────────
