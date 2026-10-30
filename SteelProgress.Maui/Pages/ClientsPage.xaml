@@ -47,6 +47,8 @@
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label Text="{Binding Client.Name}" Style="{StaticResource SpBody}" FontFamily="SpaceGroteskMedium" />
                                         <Label Text="{Binding Subtitle}" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding LimitationsText}" IsVisible="{Binding HasLimitations}" FontSize="12"
+                                               FontFamily="SpaceGroteskMedium" TextColor="{StaticResource SpIntensity}" />
                                     </VerticalStackLayout>
                                     <Border Grid.Column="2" Style="{StaticResource SpChipStyle}" BackgroundColor="#26A6E3A1"
                                             VerticalOptions="Center" IsVisible="{Binding HasBadge}">
@@ -96,7 +98,7 @@
                     </VerticalStackLayout>
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Notas" Style="{StaticResource SpSecondary}" FontSize="12" />
-                        <Editor Text="{Binding EditNotes}" AutoSize="TextChanges" Placeholder="Lesiones, preferencias, horarios…"
+                        <Editor Text="{Binding EditNotes}" AutoSize="TextChanges" Placeholder="Preferencias, horarios… (las lesiones, en Limitaciones)"
                                 BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
                     </VerticalStackLayout>
 

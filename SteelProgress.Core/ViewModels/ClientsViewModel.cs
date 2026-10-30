@@ -17,6 +17,9 @@ public sealed class ClientItem
     public string? Badge { get; init; }
     public bool BadgeIsWarning { get; init; }
     public bool HasBadge => Badge is not null;
+    /// <summary>«2 limitaciones» si tiene alguna vigente.</summary>
+    public string? LimitationsText { get; init; }
+    public bool HasLimitations => LimitationsText is not null;
 }
 
 public partial class ClientsViewModel : ObservableObject
@@ -86,7 +89,12 @@ public partial class ClientsViewModel : ObservableObject
             if (CoachHome.IsQuiet(s.Client, last, today)) { badge = $"{days} días"; warning = true; }
         }
 
-        return new ClientItem { Client = s.Client, Subtitle = string.Join(" · ", parts), Badge = badge, BadgeIsWarning = warning };
+        var limitations = s.Client.Limitations.Count(l => l.ResolvedAt is null);
+        return new ClientItem
+        {
+            Client = s.Client, Subtitle = string.Join(" · ", parts), Badge = badge, BadgeIsWarning = warning,
+            LimitationsText = limitations switch { 0 => null, 1 => "1 limitación", _ => $"{limitations} limitaciones" }
+        };
     }
 
     // Trabajar con un cliente: las demás pantallas pasan a mostrar sus datos

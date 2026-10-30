@@ -16,8 +16,11 @@ public class Client
     // Días de la semana que suele entrenar, un bit por día (lunes = 1, martes = 2 … domingo = 64).
     // 0 = sin indicar: los avisos del Inicio usan entonces los plazos fijos.
     public int TrainingDays { get; set; }
+    // Cuándo dio el cliente su consentimiento para guardar datos de salud (sus limitaciones); null = no lo ha dado
+    public DateTime? HealthConsentAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public ICollection<Routine> Routines { get; set; } = new List<Routine>();
     public ICollection<WorkoutSession> WorkoutSessions { get; set; } = new List<WorkoutSession>();
+    public ICollection<ClientLimitation> Limitations { get; set; } = new List<ClientLimitation>();
 }

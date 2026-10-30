@@ -407,3 +407,6 @@ Sale de la investigación en `docs/INVESTIGACION_DATOS_PERFIL.md`.
 - **Días que entrena** el cliente (`Client.TrainingDays`, un bit por día; migración `AddClientTrainingDays`). Con días marcados, «Toca hoy» sale solo esos días y «Sin noticias» (Inicio, Pendiente y Clientes) cuando se salta dos seguidos. Sin marcar, todo sigue como antes (aviso a los 7 días). Lógica en `CoachHome.IsQuiet` y `TrainingDays`.
 
 Probar: Clientes → un cliente → Editar → marcar días → Guardar; al volver a Editar siguen marcados.
+- **Limitaciones del cliente** (`ClientLimitation`, `Client.HealthConsentAt`; migración `AddClientLimitations`). Clientes → un cliente → «Limitaciones». Zona, lado, qué tener en cuenta, de quién son las pautas y desde cuándo. Son datos de salud: no se guarda ninguna sin marcar el consentimiento, que queda con su fecha al guardar la primera; «Retirar y borrar» las borra todas. Las vigentes salen en el aviso «Trabajando con» (`ActiveClientBanner`) y como «N limitaciones» en la lista de Clientes. Nunca señalan ejercicios ni proponen cambios (ver la investigación).
+
+Probar limitaciones: Clientes → Felipe → Limitaciones → marcar la casilla → Añadir (Rodilla, Derecha, texto, Fisio) → Guardar; en Clientes sale «1 limitación»; «Entrenar con Felipe» muestra el aviso; «Retirar y borrar» vuelve al principio.

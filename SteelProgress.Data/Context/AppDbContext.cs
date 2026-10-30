@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<WorkoutSet> WorkoutSets { get; set; }
     public DbSet<ExerciseMedia> ExerciseMedia { get; set; }
     public DbSet<Client> Clients { get; set; }
+    public DbSet<ClientLimitation> ClientLimitations { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null)
         : base(options)
@@ -77,6 +78,14 @@ public class AppDbContext : DbContext
             .WithMany(c => c.WorkoutSessions)
             .HasForeignKey(s => s.ClientId)
             .OnDelete(DeleteBehavior.Cascade);
+        // Limitaciones: se borran con su cliente y se filtran como él
+        modelBuilder.Entity<ClientLimitation>()
+            .HasOne(l => l.Client)
+            .WithMany(c => c.Limitations)
+            .HasForeignKey(l => l.ClientId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ClientLimitation>()
+            .HasQueryFilter(l => _currentUserService == null || l.Client!.UserId == _currentUserService.CurrentUserId);
 
         // Igual que en la migración AddUserProfiles, para que el modelo no pida reconstruir la tabla
         modelBuilder.Entity<UserProfile>()

@@ -33,6 +33,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("Goal")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("HealthConsentAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -57,6 +60,42 @@ namespace SteelProgress.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("SteelProgress.Domain.Entities.ClientLimitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Side")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Since")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Zone")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("ClientLimitations");
                 });
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>
@@ -447,6 +486,17 @@ namespace SteelProgress.Data.Migrations
                     b.Navigation("UserProfile");
                 });
 
+            modelBuilder.Entity("SteelProgress.Domain.Entities.ClientLimitation", b =>
+                {
+                    b.HasOne("SteelProgress.Domain.Entities.Client", "Client")
+                        .WithMany("Limitations")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
             modelBuilder.Entity("SteelProgress.Domain.Entities.Exercise", b =>
                 {
                     b.HasOne("SteelProgress.Domain.Entities.UserProfile", "UserProfile")
@@ -574,6 +624,8 @@ namespace SteelProgress.Data.Migrations
 
             modelBuilder.Entity("SteelProgress.Domain.Entities.Client", b =>
                 {
+                    b.Navigation("Limitations");
+
                     b.Navigation("Routines");
 
                     b.Navigation("WorkoutSessions");

@@ -28,11 +28,15 @@ public class ClientContextService
     public Client? ActiveClient { get; private set; }
     public bool HasActiveClient => ActiveClient is not null;
 
+    /// <summary>Las limitaciones vigentes del cliente activo, para el aviso «Trabajando con».</summary>
+    public IReadOnlyList<ClientLimitation> ActiveLimitations { get; private set; } = Array.Empty<ClientLimitation>();
+
     public event Action? Changed;
 
     public void Activate(Client client)
     {
         ActiveClient = client;
+        ActiveLimitations = Current(client.Limitations);
         _currentUser.SetCurrentClient(client.Id);
         Changed?.Invoke();
     }
@@ -41,7 +45,19 @@ public class ClientContextService
     {
         if (ActiveClient is null && _currentUser.CurrentClientId is null) return;
         ActiveClient = null;
+        ActiveLimitations = Array.Empty<ClientLimitation>();
         _currentUser.SetCurrentClient(null);
         Changed?.Invoke();
     }
+
+    /// <summary>Tras cambiar las limitaciones de un cliente: si es el activo, el aviso se pone al día.</summary>
+    public void LimitationsChanged(int clientId, IEnumerable<ClientLimitation> limitations)
+    {
+        if (ActiveClient?.Id != clientId) return;
+        ActiveLimitations = Current(limitations);
+        Changed?.Invoke();
+    }
+
+    private static List<ClientLimitation> Current(IEnumerable<ClientLimitation> limitations) =>
+        limitations.Where(l => l.ResolvedAt is null).OrderBy(l => l.Since).ToList();
 }

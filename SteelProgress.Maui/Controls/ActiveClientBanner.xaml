@@ -11,6 +11,7 @@
         StrokeShape="RoundRectangle 12"
         Padding="12,8"
         Margin="0">
+        <VerticalStackLayout Spacing="10">
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
             <Border x:Name="Avatar" WidthRequest="28" HeightRequest="28" StrokeThickness="0" StrokeShape="RoundRectangle 14"
                     BackgroundColor="{StaticResource SpIntensity}" VerticalOptions="Center">
@@ -29,5 +30,8 @@
                 <Label Text="Salir" FontSize="13" TextColor="{StaticResource SpText}" />
             </Border>
         </Grid>
+        <!-- Sus limitaciones vigentes: solo se recuerdan, no señalan ejercicios -->
+        <VerticalStackLayout x:Name="LimitationList" Spacing="8" IsVisible="False" />
+        </VerticalStackLayout>
     </Border>
 </ContentView>

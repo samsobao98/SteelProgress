@@ -53,12 +53,19 @@ public partial class ClientsPage : ContentPage
 
         var name = item.Client.Name;
         string routines = $"Rutinas de {name}", train = $"Entrenar con {name}", history = $"Historial de {name}";
-        const string edit = "Editar", delete = "Eliminar cliente";
+        const string edit = "Editar", limitations = "Limitaciones", delete = "Eliminar cliente";
         // En la vista simple de entrenador no hay apartado Rutinas: sus rutinas se usan desde Entreno
-        string[] options = _viewOptions.Current.ShowRoutines ? [train, routines, history, edit] : [train, history, edit];
+        string[] options = _viewOptions.Current.ShowRoutines
+            ? [train, routines, history, limitations, edit]
+            : [train, history, limitations, edit];
         var choice = await AppDialogs.ChooseAsync(name, options, destructive: delete);
 
         if (choice == edit) { _vm.StartEdit(item.Client); return; }
+        if (choice == limitations)
+        {
+            await Shell.Current.GoToAsync(nameof(ClientLimitationsPage), new Dictionary<string, object> { ["clientId"] = item.Client.Id });
+            return;
+        }
         if (choice == delete) { await _vm.DeleteAsync(item.Client); return; }
 
         if (choice == history) ProgressPage.Request(ProgressSection.History);

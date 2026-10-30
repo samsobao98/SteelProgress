@@ -83,6 +83,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ProfileViewModel>();
         builder.Services.AddTransient<ImportViewModel>();
         builder.Services.AddTransient<ClientsViewModel>();
+        builder.Services.AddTransient<ClientLimitationsViewModel>();
         builder.Services.AddSingleton<LauncherViewModel>();
 
         // Pages
@@ -95,6 +96,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ProfilePage>();
         builder.Services.AddTransient<ImportPreviewPage>();
         builder.Services.AddTransient<ClientsPage>();
+        builder.Services.AddTransient<ClientLimitationsPage>();
 
         // La pantalla de perfiles vive toda la app; el Shell, uno nuevo por cada entrada en un perfil
         builder.Services.AddTransient<AppShell>();

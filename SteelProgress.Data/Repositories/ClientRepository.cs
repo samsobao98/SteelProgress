@@ -29,7 +29,8 @@ public class ClientRepository
 
     public async Task UpdateAsync(Client client)
     {
-        _context.Clients.Update(client);
+        // Solo la ficha: sus limitaciones (cargadas para el aviso) se guardan aparte
+        _context.Entry(client).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
 
@@ -42,10 +43,44 @@ public class ClientRepository
         await _context.SaveChangesAsync();
     }
 
+    // ── Limitaciones (datos de salud: solo con consentimiento) ──
+
+    public async Task<Client?> GetWithLimitationsAsync(int clientId) =>
+        await _context.Clients.Include(c => c.Limitations).FirstOrDefaultAsync(c => c.Id == clientId);
+
+    /// <summary>Guarda una limitación nueva o cambiada. La primera registra el consentimiento.</summary>
+    public async Task SaveLimitationAsync(ClientLimitation limitation, DateTime now)
+    {
+        var client = await _context.Clients.FirstAsync(c => c.Id == limitation.ClientId);
+        client.HealthConsentAt ??= now;
+        if (limitation.Id == 0) _context.ClientLimitations.Add(limitation);
+        else _context.ClientLimitations.Update(limitation);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteLimitationAsync(ClientLimitation limitation)
+    {
+        var entity = await _context.ClientLimitations.FindAsync(limitation.Id);
+        if (entity is null) return;
+        _context.ClientLimitations.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>El cliente retira su consentimiento: se borran todas sus limitaciones.</summary>
+    public async Task WithdrawHealthConsentAsync(int clientId)
+    {
+        var client = await _context.Clients.Include(c => c.Limitations).FirstAsync(c => c.Id == clientId);
+        _context.ClientLimitations.RemoveRange(client.Limitations);
+        client.HealthConsentAt = null;
+        await _context.SaveChangesAsync();
+    }
+
     // Los filtros solo dejan ver los datos del cliente activo: aquí se consultan todos los del entrenador
     public async Task<List<ClientSummary>> GetSummariesAsync(int trainerUserId, DateTime weekStart)
     {
-        var clients = await _context.Clients.Where(c => c.UserId == trainerUserId).OrderBy(c => c.Name).ToListAsync();
+        // Con sus limitaciones, para el aviso al trabajar con él (ActiveClientBanner)
+        var clients = await _context.Clients.Where(c => c.UserId == trainerUserId).Include(c => c.Limitations)
+            .OrderBy(c => c.Name).ToListAsync();
         var ids = clients.Select(c => c.Id).ToList();
 
         // Siempre limitado al entrenador: sin filtros se verían los datos de todos los perfiles
