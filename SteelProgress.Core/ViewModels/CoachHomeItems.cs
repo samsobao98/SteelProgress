@@ -39,6 +39,9 @@ public static class CoachHome
     /// <summary>Días desde la última sesión para que, si queda día por hacer esta semana, «toque hoy».</summary>
     public const int RestDays = 2;
 
+    /// <summary>Meses que vale el PAR-Q+ firmado.</summary>
+    public const int ParqMonths = 12;
+
     /// <summary>Con días de entreno indicados: cuántos de esos días seguidos sin sesión para avisar.</summary>
     public const int MissedDays = 2;
 
@@ -84,7 +87,9 @@ public static class CoachHome
         return new CoachClientRow { Client = s.Client, Line = line, When = when, Chip = chip, ChipKind = kind };
     }
 
-    /// <summary>Lo que hay que mirar: clientes sin rutina y clientes sin sesiones desde hace días.</summary>
+    /// <summary>
+    /// Lo que hay que mirar: clientes sin rutina, clientes sin sesiones desde hace días y PAR-Q+ caducados.
+    /// </summary>
     public static List<CoachPendingItem> Pending(IEnumerable<ClientSummary> summaries, DateTime today)
     {
         var items = new List<CoachPendingItem>();
@@ -104,6 +109,13 @@ public static class CoachHome
                     Title = $"{s.Client.Name}: {(today.Date - last.Date).Days} días sin sesiones",
                     // Sin servidor no se sabe si ha entrenado: solo lo que se ha importado o hecho juntos
                     Detail = "Importa sus entrenos o haced una sesión juntos"
+                });
+            if (s.Client.ParqSignedAt is DateTime signed && today.Date >= signed.Date.AddMonths(ParqMonths))
+                items.Add(new CoachPendingItem
+                {
+                    Client = s.Client,
+                    Title = $"{s.Client.Name}: renovar el PAR-Q+",
+                    Detail = $"Lo firmó el {signed:dd/MM/yyyy}; vale {ParqMonths} meses"
                 });
         }
         return items;

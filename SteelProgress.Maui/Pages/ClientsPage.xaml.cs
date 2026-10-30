@@ -85,6 +85,8 @@ public partial class ClientsPage : ContentPage
             UpdateDaySelection();
     }
 
+    private void OnParqLabelTapped(object? sender, TappedEventArgs e) => _vm.EditHasParq = !_vm.EditHasParq;
+
     // Un botón redondo por día, de lunes a domingo; se marcan y desmarcan tocándolos
     private void BuildDayRow()
     {

@@ -42,6 +42,8 @@ public partial class ClientsViewModel : ObservableObject
     [ObservableProperty] private string _editNotes = "";
     [ObservableProperty] private string _editColor = "#FAB387";
     [ObservableProperty] private int _editTrainingDays;
+    [ObservableProperty] private bool _editHasParq;
+    [ObservableProperty] private DateTime _editParqDate = DateTime.Today;
     [ObservableProperty] private string _editTitle = "Nuevo cliente";
     private Client? _editing;
 
@@ -110,6 +112,8 @@ public partial class ClientsViewModel : ObservableObject
         EditNotes = "";
         EditColor = AvailableColors[Clients.Count % AvailableColors.Count];
         EditTrainingDays = 0;
+        EditHasParq = false;
+        EditParqDate = DateTime.Today;
         IsEditing = true;
     }
 
@@ -122,6 +126,8 @@ public partial class ClientsViewModel : ObservableObject
         EditNotes = client.Notes ?? "";
         EditColor = client.AvatarColor;
         EditTrainingDays = client.TrainingDays;
+        EditHasParq = client.ParqSignedAt is not null;
+        EditParqDate = client.ParqSignedAt ?? DateTime.Today;
         IsEditing = true;
     }
 
@@ -146,6 +152,7 @@ public partial class ClientsViewModel : ObservableObject
         client.Notes = string.IsNullOrWhiteSpace(EditNotes) ? null : EditNotes.Trim();
         client.AvatarColor = EditColor;
         client.TrainingDays = EditTrainingDays;
+        client.ParqSignedAt = EditHasParq ? EditParqDate.Date : null;
 
         if (_editing is null) await _repository.AddAsync(client);
         else await _repository.UpdateAsync(client);

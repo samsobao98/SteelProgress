@@ -43,6 +43,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("ParqSignedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("TrainingDays")
                         .HasColumnType("INTEGER");
 

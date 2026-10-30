@@ -94,6 +94,23 @@ public class CoachHomeTests
     }
 
     [Fact]
+    public void ParqDeHaceUnAnio_PideRenovarlo()
+    {
+        // Firmado el 30/10/2025: hoy cumple los 12 meses
+        var summary = Summary("Fuerza", Today.AddDays(-1), new[] { 1 }, 1);
+        summary.Client.ParqSignedAt = new DateTime(2025, 10, 30);
+        var item = Assert.Single(CoachHome.Pending(new[] { summary }, Today));
+        Assert.Equal(("Marta: renovar el PAR-Q+", "Lo firmó el 30/10/2025; vale 12 meses"), (item.Title, item.Detail));
+
+        // Un día antes, todavía vale
+        summary.Client.ParqSignedAt = new DateTime(2025, 10, 31);
+        Assert.Empty(CoachHome.Pending(new[] { summary }, Today));
+        // Sin fecha no se pide: no todos los entrenadores lo usan
+        summary.Client.ParqSignedAt = null;
+        Assert.Empty(CoachHome.Pending(new[] { summary }, Today));
+    }
+
+    [Fact]
     public void SemanaHecha_NoTocaHoy()
     {
         var row = CoachHome.Row(Summary("Fuerza", Today.AddDays(-3), new[] { 1, 2 }, 2), Today);

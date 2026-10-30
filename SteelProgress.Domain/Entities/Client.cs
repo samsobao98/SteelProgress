@@ -18,6 +18,9 @@ public class Client
     public int TrainingDays { get; set; }
     // Cuándo dio el cliente su consentimiento para guardar datos de salud (sus limitaciones); null = no lo ha dado
     public DateTime? HealthConsentAt { get; set; }
+    // Cuándo firmó el PAR-Q+ (o trajo el informe médico) para empezar a entrenar. Solo la fecha, sin el
+    // resultado: el resultado sería un dato de salud. Vale 12 meses; luego sale en «Pendiente».
+    public DateTime? ParqSignedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     public ICollection<Routine> Routines { get; set; } = new List<Routine>();

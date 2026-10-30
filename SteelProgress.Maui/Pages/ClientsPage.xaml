@@ -102,6 +102,18 @@
                                 BackgroundColor="{StaticResource SpBg}" TextColor="{StaticResource SpText}" PlaceholderColor="{StaticResource SpText4}" />
                     </VerticalStackLayout>
 
+                    <!-- Solo la fecha de firma: el cuestionario se rellena fuera de la app -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                        <CheckBox IsChecked="{Binding EditHasParq}" Color="{StaticResource SpSteel1}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="Ha firmado el PAR-Q+" Style="{StaticResource SpBody}" FontSize="14" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnParqLabelTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <DatePicker Grid.Column="2" Date="{Binding EditParqDate}" Format="dd/MM/yyyy" IsVisible="{Binding EditHasParq}"
+                                    TextColor="{StaticResource SpText}" VerticalOptions="Center" />
+                    </Grid>
+
                     <VerticalStackLayout Spacing="6">
                         <Label Text="Días que entrena" Style="{StaticResource SpSecondary}" FontSize="12" />
                         <HorizontalStackLayout x:Name="DayRow" Spacing="6" />

@@ -222,11 +222,21 @@ public class ClientTests : IDisposable
         vm.ToggleTrainingDay(DayOfWeek.Monday);
         vm.ToggleTrainingDay(DayOfWeek.Thursday);
         vm.ToggleTrainingDay(DayOfWeek.Monday);
+        vm.EditHasParq = true;
+        vm.EditParqDate = new DateTime(2026, 10, 12, 18, 30, 0);
         await vm.SaveAsync();
 
         Assert.False(vm.IsEditing);
         var item = Assert.Single(vm.Clients);
         Assert.Equal(("Marta", "Fuerza", 8), (item.Client.Name, item.Client.Goal, item.Client.TrainingDays));
+        Assert.Equal(new DateTime(2026, 10, 12), item.Client.ParqSignedAt);
+
+        // Al editar se ve marcado con su fecha; desmarcarlo la quita
+        vm.StartEdit(item.Client);
+        Assert.Equal((true, new DateTime(2026, 10, 12)), (vm.EditHasParq, vm.EditParqDate));
+        vm.EditHasParq = false;
+        await vm.SaveAsync();
+        Assert.Null(Assert.Single(vm.Clients).Client.ParqSignedAt);
     }
 
     [Fact]
