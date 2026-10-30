@@ -398,3 +398,12 @@ Ajustes pasa a llamarse **Perfil** (`ProfilePage`, `ProfileViewModel`): todo lo 
 * `ExerciseViewModel` y `RoutineDetailViewModel` aceptan sus servicios nuevos (multimedia, opciones de vista) como opcionales para poder crearlos a mano en las pruebas. La app WPF, que era el motivo original, ya no está en la solución.
 * Corregido durante las pruebas: al quitar un vídeo de un ejercicio cargado, EF Core lo «resucitaba» en vez de borrarlo (`ExerciseRepository.RemoveMediaAsync`). Lo mismo se evita al quitar días en una actualización de rutina.
 * Ojo: la asignación automática del perfil a los datos nuevos (`AppDbContext.SaveChangesAsync`) solo actúa con `SaveChangesAsync`, no con `SaveChanges`. El código nuevo usa siempre la versión asíncrona.
+
+## Datos de cliente y 1RM (2026-10-30)
+
+Sale de la investigación en `docs/INVESTIGACION_DATOS_PERFIL.md`.
+
+- **1RM estimado** solo con series de 1 a 10 repeticiones (`WorkoutRepository.EstimatedOneRepMax` devuelve 0 fuera de ese rango). Las sesiones sin estimación no entran en la línea del 1RM y la ficha del ejercicio dice «1RM est. (series de hasta 10 reps)».
+- **Días que entrena** el cliente (`Client.TrainingDays`, un bit por día; migración `AddClientTrainingDays`). Con días marcados, «Toca hoy» sale solo esos días y «Sin noticias» (Inicio, Pendiente y Clientes) cuando se salta dos seguidos. Sin marcar, todo sigue como antes (aviso a los 7 días). Lógica en `CoachHome.IsQuiet` y `TrainingDays`.
+
+Probar: Clientes → un cliente → Editar → marcar días → Guardar; al volver a Editar siguen marcados.

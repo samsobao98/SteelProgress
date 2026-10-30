@@ -219,11 +219,14 @@ public class ClientTests : IDisposable
 
         vm.EditName = " Marta ";
         vm.EditGoal = "Fuerza";
+        vm.ToggleTrainingDay(DayOfWeek.Monday);
+        vm.ToggleTrainingDay(DayOfWeek.Thursday);
+        vm.ToggleTrainingDay(DayOfWeek.Monday);
         await vm.SaveAsync();
 
         Assert.False(vm.IsEditing);
         var item = Assert.Single(vm.Clients);
-        Assert.Equal(("Marta", "Fuerza"), (item.Client.Name, item.Client.Goal));
+        Assert.Equal(("Marta", "Fuerza", 8), (item.Client.Name, item.Client.Goal, item.Client.TrainingDays));
     }
 
     [Fact]

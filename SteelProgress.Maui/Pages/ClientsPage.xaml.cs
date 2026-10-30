@@ -20,6 +20,7 @@ public partial class ClientsPage : ContentPage
         _viewOptions = viewOptions;
         _vm.PropertyChanged += OnViewModelChanged;
         BuildColorRow();
+        BuildDayRow();
     }
 
     protected override async void OnAppearing()
@@ -73,6 +74,47 @@ public partial class ClientsPage : ContentPage
     {
         if (e.PropertyName == nameof(ClientsViewModel.EditColor))
             UpdateColorSelection();
+        else if (e.PropertyName == nameof(ClientsViewModel.EditTrainingDays))
+            UpdateDaySelection();
+    }
+
+    // Un botón redondo por día, de lunes a domingo; se marcan y desmarcan tocándolos
+    private void BuildDayRow()
+    {
+        foreach (var (day, letter) in Core.Services.TrainingDays.Week)
+        {
+            var chip = new Border
+            {
+                WidthRequest = 38,
+                HeightRequest = 38,
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 19 },
+                StrokeThickness = 1,
+                ClassId = day.ToString(),
+                Content = new Label { Text = letter, FontSize = 14, FontAttributes = FontAttributes.Bold,
+                    HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center }
+            };
+            SemanticProperties.SetDescription(chip, Core.Services.TrainingDays.Name(day));
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += (_, _) => _vm.ToggleTrainingDay(day);
+            chip.GestureRecognizers.Add(tap);
+            DayRow.Children.Add(chip);
+        }
+        UpdateDaySelection();
+    }
+
+    private void UpdateDaySelection()
+    {
+        var accent = (Color)Application.Current!.Resources["SpSteel1"];
+        foreach (var chip in DayRow.Children.OfType<Border>())
+        {
+            var selected = (_vm.EditTrainingDays & Core.Services.TrainingDays.Bit(Enum.Parse<DayOfWeek>(chip.ClassId))) != 0;
+            chip.BackgroundColor = selected ? accent : (Color)Application.Current.Resources["SpBg"];
+            chip.Stroke = selected ? accent : (Color)Application.Current.Resources["SpLine"];
+            ((Label)chip.Content!).TextColor = selected ? (Color)Application.Current.Resources["SpOnAccent"] : (Color)Application.Current.Resources["SpText2"];
+        }
+        DayHint.Text = _vm.EditTrainingDays == 0
+            ? "Sin marcar, el Inicio avisa a los 7 días sin sesiones."
+            : "El Inicio le marca «Toca hoy» esos días y avisa si se salta dos seguidos.";
     }
 
     private void BuildColorRow()

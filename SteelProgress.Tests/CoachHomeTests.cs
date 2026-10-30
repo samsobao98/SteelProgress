@@ -1,3 +1,4 @@
+using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
 using SteelProgress.Data.Repositories;
 using SteelProgress.Domain.Entities;
@@ -9,7 +10,7 @@ public class CoachHomeTests
 {
     private static readonly DateTime Today = new(2026, 10, 30);
 
-    private static ClientSummary Summary(string? routine, DateTime? last, int[]? done = null, int? lastDay = null)
+    private static ClientSummary Summary(string? routine, DateTime? last, int[]? done = null, int? lastDay = null, int trainingDays = 0)
     {
         var days = new List<RoutineDay>
         {
@@ -17,7 +18,7 @@ public class CoachHomeTests
             new() { Id = 2, Name = "Día 2", Order = 2 }
         };
         var week = routine is null ? null : new RoutineWeek(days, done ?? Array.Empty<int>(), lastDay);
-        return new ClientSummary(new Client { Name = "Marta" }, 0, last is null ? 0 : 1, last, routine, week);
+        return new ClientSummary(new Client { Name = "Marta", TrainingDays = trainingDays }, 0, last is null ? 0 : 1, last, routine, week);
     }
 
     private static (string, string?) LineAndChip(CoachClientRow row) => (row.Line, row.Chip);
@@ -54,6 +55,42 @@ public class CoachHomeTests
         Assert.Equal("Sin noticias", row.Chip);
         Assert.True(row.ChipIsWarning);
         Assert.Equal("Marta: 7 días sin sesiones", Assert.Single(CoachHome.Pending(new[] { summary }, Today)).Title);
+    }
+
+    // Hoy (30/10/2026) es viernes
+    private static readonly int LunesMiercolesViernes =
+        TrainingDays.Bit(DayOfWeek.Monday) | TrainingDays.Bit(DayOfWeek.Wednesday) | TrainingDays.Bit(DayOfWeek.Friday);
+
+    [Fact]
+    public void ConDias_TocaHoySoloEnSusDias()
+    {
+        // Entrenó ayer jueves, pero hoy viernes es uno de sus días
+        Assert.Equal("Toca hoy", CoachHome.Row(Summary("Fuerza", Today.AddDays(-1), new[] { 1 }, 1, LunesMiercolesViernes), Today).Chip);
+        // Hace tres días, pero los viernes no entrena
+        var martesJueves = TrainingDays.Bit(DayOfWeek.Tuesday) | TrainingDays.Bit(DayOfWeek.Thursday);
+        Assert.Null(CoachHome.Row(Summary("Fuerza", Today.AddDays(-3), new[] { 1 }, 1, martesJueves), Today).Chip);
+    }
+
+    [Fact]
+    public void ConDias_SinNoticiasAlSaltarseDosSeguidos()
+    {
+        // Último lunes 26: se ha saltado el miércoles; hoy viernes aún puede venir
+        Assert.NotEqual("Sin noticias", CoachHome.Row(Summary("Fuerza", Today.AddDays(-4), new[] { 1 }, 1, LunesMiercolesViernes), Today).Chip);
+        // Último miércoles 21: lunes 26 y miércoles 28 sin sesión
+        var summary = Summary("Fuerza", Today.AddDays(-9), new[] { 1 }, 1, LunesMiercolesViernes);
+        Assert.Equal("Sin noticias", CoachHome.Row(summary, Today).Chip);
+        Assert.Single(CoachHome.Pending(new[] { summary }, Today));
+    }
+
+    [Fact]
+    public void UnDiaPorSemana_NoAvisaALosSieteDias()
+    {
+        var soloLunes = TrainingDays.Bit(DayOfWeek.Monday);
+        // Último lunes 19: solo se ha saltado el 26
+        var summary = Summary("Fuerza", Today.AddDays(-11), new[] { 1 }, 1, soloLunes);
+        Assert.NotEqual("Sin noticias", CoachHome.Row(summary, Today).Chip);
+        Assert.Empty(CoachHome.Pending(new[] { summary }, Today));
+        Assert.False(ClientsViewModel.ToItem(summary, Today).BadgeIsWarning);
     }
 
     [Fact]

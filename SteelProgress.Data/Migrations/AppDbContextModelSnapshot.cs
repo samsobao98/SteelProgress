@@ -40,6 +40,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TrainingDays")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("Uid")
                         .HasColumnType("TEXT");
 

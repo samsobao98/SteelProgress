@@ -38,6 +38,7 @@ public partial class ClientsViewModel : ObservableObject
     [ObservableProperty] private string _editGoal = "";
     [ObservableProperty] private string _editNotes = "";
     [ObservableProperty] private string _editColor = "#FAB387";
+    [ObservableProperty] private int _editTrainingDays;
     [ObservableProperty] private string _editTitle = "Nuevo cliente";
     private Client? _editing;
 
@@ -82,7 +83,7 @@ public partial class ClientsViewModel : ObservableObject
         else if (s.LastSession is DateTime last)
         {
             var days = (int)(today - last.Date).TotalDays;
-            if (days >= 7) { badge = $"{days} días"; warning = true; }
+            if (CoachHome.IsQuiet(s.Client, last, today)) { badge = $"{days} días"; warning = true; }
         }
 
         return new ClientItem { Client = s.Client, Subtitle = string.Join(" · ", parts), Badge = badge, BadgeIsWarning = warning };
@@ -100,6 +101,7 @@ public partial class ClientsViewModel : ObservableObject
         EditGoal = "";
         EditNotes = "";
         EditColor = AvailableColors[Clients.Count % AvailableColors.Count];
+        EditTrainingDays = 0;
         IsEditing = true;
     }
 
@@ -111,11 +113,14 @@ public partial class ClientsViewModel : ObservableObject
         EditGoal = client.Goal ?? "";
         EditNotes = client.Notes ?? "";
         EditColor = client.AvatarColor;
+        EditTrainingDays = client.TrainingDays;
         IsEditing = true;
     }
 
     [RelayCommand]
     private void CancelEdit() => IsEditing = false;
+
+    public void ToggleTrainingDay(DayOfWeek day) => EditTrainingDays ^= TrainingDays.Bit(day);
 
     [RelayCommand]
     public async Task SaveAsync()
@@ -132,6 +137,7 @@ public partial class ClientsViewModel : ObservableObject
         client.Goal = string.IsNullOrWhiteSpace(EditGoal) ? null : EditGoal.Trim();
         client.Notes = string.IsNullOrWhiteSpace(EditNotes) ? null : EditNotes.Trim();
         client.AvatarColor = EditColor;
+        client.TrainingDays = EditTrainingDays;
 
         if (_editing is null) await _repository.AddAsync(client);
         else await _repository.UpdateAsync(client);

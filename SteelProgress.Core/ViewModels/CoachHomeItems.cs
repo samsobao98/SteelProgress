@@ -39,6 +39,22 @@ public static class CoachHome
     /// <summary>Días desde la última sesión para que, si queda día por hacer esta semana, «toque hoy».</summary>
     public const int RestDays = 2;
 
+    /// <summary>Con días de entreno indicados: cuántos de esos días seguidos sin sesión para avisar.</summary>
+    public const int MissedDays = 2;
+
+    /// <summary>
+    /// Sin noticias del cliente: con sus días de entreno, si se ha saltado <see cref="MissedDays"/>
+    /// seguidos; sin ellos, a los <see cref="QuietDays"/> días. Mismo criterio en Inicio y en Clientes.
+    /// </summary>
+    public static bool IsQuiet(Client client, DateTime lastSession, DateTime today) =>
+        client.TrainingDays == 0
+            ? (today.Date - lastSession.Date).Days >= QuietDays
+            : TrainingDays.MissedBetween(client.TrainingDays, lastSession, today) >= MissedDays;
+
+    /// <summary>Si hoy es uno de sus días; sin días indicados, si ya ha descansado <see cref="RestDays"/>.</summary>
+    private static bool IsDueToday(Client client, int daysSinceLast, DateTime today) =>
+        client.TrainingDays == 0 ? daysSinceLast >= RestDays : TrainingDays.Includes(client.TrainingDays, today);
+
     public static CoachClientRow Row(ClientSummary s, DateTime today)
     {
         var week = s.ActiveRoutineWeek;
@@ -53,14 +69,15 @@ public static class CoachHome
         else line = $"Le toca {next.Name} · {s.ActiveRoutineName}";
 
         var when = s.LastSession is DateTime lastDate ? RoutineSchedule.AgoText(lastDate, today) : "sin sesiones";
+        var quiet = s.LastSession is DateTime l && IsQuiet(s.Client, l, today);
 
         (string? chip, ClientChipKind kind) = (s.ActiveRoutineName, days) switch
         {
             (null, _) => ("Crear rutina", ClientChipKind.Neutral),
             (_, 0) => ("Hecho hoy", ClientChipKind.Go),
             (_, null) => ("Por empezar", ClientChipKind.Neutral),
-            (_, >= QuietDays) => ("Sin noticias", ClientChipKind.Warning),
-            _ when next is not null && !weekDone && days >= RestDays => ("Toca hoy", ClientChipKind.Go),
+            _ when quiet => ("Sin noticias", ClientChipKind.Warning),
+            (_, int d) when next is not null && !weekDone && IsDueToday(s.Client, d, today) => ("Toca hoy", ClientChipKind.Go),
             _ => (null, ClientChipKind.None)
         };
 
@@ -80,7 +97,7 @@ public static class CoachHome
                     Title = $"{s.Client.Name} no tiene rutina",
                     Detail = "Entra en su ficha para prepararle una"
                 });
-            else if (s.LastSession is DateTime last && (today.Date - last.Date).Days >= QuietDays)
+            else if (s.LastSession is DateTime last && IsQuiet(s.Client, last, today))
                 items.Add(new CoachPendingItem
                 {
                     Client = s.Client,

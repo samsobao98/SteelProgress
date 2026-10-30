@@ -101,6 +101,12 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
+                        <Label Text="Días que entrena" Style="{StaticResource SpSecondary}" FontSize="12" />
+                        <HorizontalStackLayout x:Name="DayRow" Spacing="6" />
+                        <Label x:Name="DayHint" Style="{StaticResource SpSecondary}" FontSize="12" LineBreakMode="WordWrap" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
                         <Label Text="Color" Style="{StaticResource SpSecondary}" FontSize="12" />
                         <HorizontalStackLayout x:Name="ColorRow" Spacing="10" />
                     </VerticalStackLayout>
