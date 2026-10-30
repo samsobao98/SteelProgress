@@ -35,10 +35,12 @@ public partial class ExerciseDetailViewModel : ObservableObject
     public bool HasProgress => Progress is not null;
     public string BestSetText => Progress is null ? "" : $"{WorkoutExerciseState.FormatKg(Progress.BestWeight)}×{Progress.BestReps}";
     public string E1rmText => Progress is { BestE1rm: > 0 } p ? $"{WorkoutExerciseState.FormatKg(Math.Round(p.BestE1rm))} kg" : "—";
+    // Sin estimación (solo series de más de 10 repeticiones), se dice por qué
+    public string E1rmCaption => Progress is { BestE1rm: <= 0 } ? "1RM est. (series de hasta 10 reps)" : "1RM estimado";
     public string SessionsText => Progress is null ? "" : Progress.Points.Count.ToString();
     public string SessionsCaption => Progress?.Points.Count == 1 ? "Sesión" : "Sesiones";
     /// <summary>La gráfica, con dos sesiones o más.</summary>
-    public bool HasChart => Progress?.Points.Count >= 2;
+    public bool HasChart => Series.Length > 0;
     public string ChartCaption { get; }
 
     public IReadOnlyList<string> Steps { get; }
@@ -117,19 +119,23 @@ public partial class ExerciseDetailViewModel : ObservableObject
             .ToList();
     }
 
-    /// <summary>Las sesiones de los últimos 90 días; si son menos de dos, las últimas ocho.</summary>
+    /// <summary>
+    /// Las sesiones de los últimos 90 días; si son menos de dos, las últimas ocho. Solo las que
+    /// tienen 1RM estimado (alguna serie de 1 a 10 repeticiones).
+    /// </summary>
     public static List<ExercisePoint> ChartPoints(ExerciseProgress? progress, DateTime today, out string caption)
     {
         caption = "1RM est.";
         if (progress is null) return new();
-        var recent = progress.Points.Where(p => p.Date >= today.AddDays(-90)).ToList();
+        var estimated = progress.Points.Where(p => p.BestE1rm > 0).ToList();
+        var recent = estimated.Where(p => p.Date >= today.AddDays(-90)).ToList();
         if (recent.Count >= 2)
         {
             caption = "1RM est. · 3 meses";
             return recent;
         }
         caption = "1RM est. · últimas sesiones";
-        return progress.Points.TakeLast(8).ToList();
+        return estimated.TakeLast(8).ToList();
     }
 
     private static (ISeries[], Axis[], Axis[]) BuildChart(IReadOnlyList<ExercisePoint> points)

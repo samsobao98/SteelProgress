@@ -106,7 +106,8 @@
                         <Border Grid.Column="1" Style="{StaticResource StatCard}">
                             <VerticalStackLayout HorizontalOptions="Center" Spacing="2">
                                 <Label Text="{Binding E1rmText}" Style="{StaticResource SpNumber}" HorizontalOptions="Center" />
-                                <Label Text="1RM estimado" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center" />
+                                <Label Text="{Binding E1rmCaption}" Style="{StaticResource SpSecondary}" FontSize="11" HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
                             </VerticalStackLayout>
                         </Border>
                         <Border Grid.Column="2" Style="{StaticResource StatCard}">

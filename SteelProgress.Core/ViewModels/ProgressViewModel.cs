@@ -212,7 +212,9 @@ public partial class ProgressViewModel : ObservableObject
             new LineSeries<ObservablePoint>
             {
                 Name = "1RM estimado",
-                Values = progress.Points.Select(p => new ObservablePoint(p.Date.Ticks, Math.Round(p.BestE1rm, 1))).ToList(),
+                // Solo las sesiones con alguna serie de 1 a 10 repeticiones (las demás no tienen estimación)
+                Values = progress.Points.Where(p => p.BestE1rm > 0)
+                    .Select(p => new ObservablePoint(p.Date.Ticks, Math.Round(p.BestE1rm, 1))).ToList(),
                 Stroke = new SolidColorPaint(e1rm) { StrokeThickness = 2, PathEffect = new DashEffect([6, 6]) },
                 GeometryStroke = null,
                 GeometryFill = null,

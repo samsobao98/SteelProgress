@@ -195,9 +195,14 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
             .ToDictionaryAsync(x => x.DayId, x => x.Last);
     }
 
-    // 1RM estimado (Epley; con 1 repetición es el propio peso). Orientativo: no decide los récords
+    /// <summary>Repeticiones máximas con las que se estima el 1RM.</summary>
+    public const int MaxRepsForEstimate = 10;
+
+    // 1RM estimado (Epley; con 1 repetición es el propio peso). Orientativo: no decide los récords.
+    // Solo con series de 1 a 10 repeticiones: con más, las fórmulas pierden precisión y lo inflan
+    // (LeSuer 1997; Reynolds, Gordon y Robergs 2006). Fuera de ese rango devuelve 0, «sin estimación».
     public static double EstimatedOneRepMax(double weight, int reps) =>
-        reps <= 1 ? weight : weight * (1 + reps / 30.0);
+        reps < 1 || reps > MaxRepsForEstimate ? 0 : reps == 1 ? weight : weight * (1 + reps / 30.0);
 
     // Todo el historial del perfil y cliente activos en dos consultas planas, para las
     // estadísticas de Inicio y Progreso. Solo cuentan las sesiones con alguna serie que no sea
