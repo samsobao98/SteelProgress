@@ -307,6 +307,9 @@ namespace SteelProgress.Data.Migrations
                     b.Property<string>("GymPlates")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");

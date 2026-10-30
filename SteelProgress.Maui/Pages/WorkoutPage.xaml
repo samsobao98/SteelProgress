@@ -155,6 +155,25 @@
             </VerticalStackLayout>
         </ScrollView>
 
+        <!-- Perfil de entrenador sin cliente activo: las sesiones son siempre con un cliente y se
+             guardan en su ficha. Tapa «Preparar» hasta que se elige uno (WorkoutPage.UpdateNeedsClient). -->
+        <Grid x:Name="ChooseClientState" IsVisible="False" BackgroundColor="{StaticResource SpBg}">
+            <VerticalStackLayout Padding="20,20,20,28" Spacing="0">
+                <Label Text="¿Con quién entrenas?" Style="{StaticResource SpTitle}" />
+                <VerticalStackLayout Margin="0,48,0,0" Spacing="10">
+                    <Label Text="Elige un cliente para empezar" Style="{StaticResource SpHeading}" HorizontalTextAlignment="Center" />
+                    <Label Text="En un perfil de entrenador, cada sesión se guarda en la ficha de su cliente. Para tus propios entrenos, usa un perfil personal."
+                           Style="{StaticResource SpSecondary}" HorizontalTextAlignment="Center" />
+                    <Border Style="{StaticResource BigAction}" Margin="0,14,0,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnGoToClientsTapped" />
+                        </Border.GestureRecognizers>
+                        <Label Text="Ir a Clientes" Style="{StaticResource BigActionLabel}" />
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+
         <!-- ═════════════ REGISTRANDO ═════════════ -->
         <Grid IsVisible="{Binding IsSessionActive}" RowDefinitions="Auto,*,Auto">
             <!-- Orb decorativo -->

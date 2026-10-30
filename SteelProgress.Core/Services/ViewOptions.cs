@@ -2,15 +2,17 @@ using SteelProgress.Domain.Entities;
 
 namespace SteelProgress.Core.Services;
 
-// Qué opciones de edición ve el perfil actual.
+// Qué ve y qué edita el perfil actual. Dos ejes independientes (2026-10-30):
+// el tipo de perfil (personal o entrenador) decide si hay clientes; la vista (simple o detallada)
+// decide cuánto se edita y cuántos apartados hay.
 // Regla de diseño: la vista simple quita opciones de edición, nunca datos. Lo que una rutina
 // ya tenga (RPE, tempo, notas...) se muestra siempre; estas banderas solo deciden qué se edita.
-public sealed record ViewOptions(ProfileViewMode Mode, SimpleViewBlocks Blocks, bool TrainsSelf)
+public sealed record ViewOptions(ProfileKind Kind, ProfileViewMode Mode, SimpleViewBlocks Blocks)
 {
-    public static ViewOptions Default { get; } = new(ProfileViewMode.Simple, SimpleViewBlocks.None, false);
+    public static ViewOptions Default { get; } = new(ProfileKind.Personal, ProfileViewMode.Simple, SimpleViewBlocks.None);
 
     public static ViewOptions For(UserProfile profile) =>
-        new(profile.ViewMode, profile.SimpleViewBlocks, profile.TrainsSelf)
+        new(profile.Kind, profile.ViewMode, profile.SimpleViewBlocks)
         {
             Gym = GymSetup.From(profile.GymPlates, profile.BarWeight)
         };
@@ -18,7 +20,8 @@ public sealed record ViewOptions(ProfileViewMode Mode, SimpleViewBlocks Blocks, 
     /// <summary>Discos y barra del gimnasio del perfil.</summary>
     public GymSetup Gym { get; init; } = GymSetup.Default;
 
-    public bool IsTrainer => Mode == ProfileViewMode.Trainer;
+    public bool IsCoach => Kind == ProfileKind.Coach;
+    public bool IsDetailed => Mode == ProfileViewMode.Detailed;
 
     public bool EditIntensity => Allows(SimpleViewBlocks.Intensity);
     public bool EditTempoAndRest => Allows(SimpleViewBlocks.TempoAndRest);
@@ -26,14 +29,20 @@ public sealed record ViewOptions(ProfileViewMode Mode, SimpleViewBlocks Blocks, 
     public bool EditRepRanges => Allows(SimpleViewBlocks.RepRanges);
     public bool EditDetailedNotes => Allows(SimpleViewBlocks.DetailedNotes);
 
-    // Material, instrucciones y clientes: solo vista entrenador
-    public bool EditExerciseDetails => IsTrainer;
-    public bool ShowClients => IsTrainer;
+    // Material e instrucciones de los ejercicios, y crear ejercicios propios: vista detallada
+    public bool EditExerciseDetails => IsDetailed;
 
-    // En vista entrenador, "Yo" solo aparece en Entreno si el perfil también entrena
-    public bool ShowOwnTraining => !IsTrainer || TrainsSelf;
+    // Apartados del menú
+    public bool ShowClients => IsCoach;
+    public bool ShowExercises => IsDetailed;
+    // El entrenador en vista simple usa las rutinas de cada cliente desde Clientes y Entreno;
+    // crearlas y enviarlas es de la detallada
+    public bool ShowRoutines => !IsCoach || IsDetailed;
 
-    private bool Allows(SimpleViewBlocks block) => IsTrainer || Blocks.HasFlag(block);
+    // El entrenador no entrena con su perfil: su entreno va en un perfil personal
+    public bool ShowOwnTraining => !IsCoach;
+
+    private bool Allows(SimpleViewBlocks block) => IsDetailed || Blocks.HasFlag(block);
 }
 
 // Opciones del perfil actual, compartidas por todas las pantallas

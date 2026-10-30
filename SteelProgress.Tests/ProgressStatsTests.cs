@@ -427,13 +427,13 @@ public class ProgressStatsTests : IDisposable
         Assert.False(Workout(null).CanNoteSets);
         Assert.False(Workout(Options(ProfileViewMode.Simple)).CanNoteSets);
         Assert.True(Workout(Options(ProfileViewMode.Simple, SimpleViewBlocks.DetailedNotes)).CanNoteSets);
-        Assert.True(Workout(Options(ProfileViewMode.Trainer)).CanNoteSets);
+        Assert.True(Workout(Options(ProfileViewMode.Detailed)).CanNoteSets);
     }
 
     [Fact]
     public async Task SetNoteShowsInHistoryAndNextTime()
     {
-        var workout = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock, Options(ProfileViewMode.Trainer));
+        var workout = new WorkoutViewModel(new WorkoutRepository(Db()), new RoutineRepository(Db()), _clock, Options(ProfileViewMode.Detailed));
         await workout.StartDayAsync(_dayA);
         workout.Weight = 60;
         workout.Reps = 8;
@@ -473,7 +473,7 @@ public class ProgressStatsTests : IDisposable
         var simple = new ExerciseViewModel(new ExerciseRepository(Db()), viewOptions: Options(ProfileViewMode.Simple));
         Assert.False(simple.ShowDetailFields);
 
-        var trainer = new ExerciseViewModel(new ExerciseRepository(Db()), viewOptions: Options(ProfileViewMode.Trainer));
+        var trainer = new ExerciseViewModel(new ExerciseRepository(Db()), viewOptions: Options(ProfileViewMode.Detailed));
         trainer.ClearForm();
         Assert.True(trainer.ShowDetailFields);
         trainer.Name = "Remo en polea";

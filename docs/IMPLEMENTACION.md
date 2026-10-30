@@ -342,6 +342,31 @@ Samuel eligió (2026-10-29) el estilo de las maquetas del canvas de diseño (19 
 
 ---
 
+### Tipo de perfil y vista (2026-10-30)
+
+> Sustituye a la «vista entrenador» y a «Yo también entreno» de las secciones anteriores, que se quedan como historia.
+
+**Qué hace**
+* Dos ejes independientes en lugar de uno. **Tipo de perfil** (`UserProfile.Kind`: Personal o Entrenador), que se elige al crear el perfil («Para entrenar yo» / «Para mis clientes») y decide si hay clientes. **Vista** (`ProfileViewMode`: Simple o Detallada; Detallada es la antigua Trainer, mismo valor guardado), que decide cuánto se edita y cuántos apartados hay. Los bloques de la vista simple siguen igual, para los dos tipos.
+* Un perfil de entrenador es solo para clientes: el entreno propio va en un perfil personal. «Yo también entreno» desaparece (la columna `TrainsSelf` se queda sin usar para no rehacer la tabla).
+* Apartados del menú (`ViewOptions`): Clientes en perfiles de entrenador; Ejercicios en vista detallada; Rutinas salvo en la simple de entrenador; Progreso en perfiles personales, o en el de entrenador con un cliente activo. Si se oculta el apartado en el que se está, se vuelve a Clientes o a Inicio.
+* Crear ejercicios propios, su material e instrucciones: vista detallada. En simple, la ficha de un ejercicio (con su vídeo) se abre desde la rutina: ⋮ → «Ver ejercicio», solo para ver.
+* Entreno en un perfil de entrenador sin cliente activo: «¿Con quién entrenas?» con «Ir a Clientes», también si se llega desde Inicio; ya no se pueden guardar sesiones que no son de nadie.
+* Ajustes: «Tipo de perfil» (cambiarlo pide confirmación; pasar a personal suelta el cliente activo) y «Vista».
+* Migración `AddProfileKind`: los perfiles con la antigua vista entrenador pasan a Detallada, y son de entrenador solo si tienen clientes; si no, personales (sus entrenos se siguen viendo).
+
+**Probar**
+1. Un perfil que estuviera en vista entrenador: con clientes, la fila dice «Entrenador · N clientes»; sin clientes, su último entreno.
+2. Ajustes → Vista → Simple estando en Ejercicios: vuelve a Inicio y Ejercicios desaparece del abanico.
+3. Perfil de entrenador sin cliente → Entreno: «¿Con quién entrenas?». Con un cliente activo, se entrena con él como siempre.
+4. Rutinas → ⋮ de un ejercicio → «Ver ejercicio»: la ficha sin el lápiz de editar.
+5. Crear un perfil «Para mis clientes»: sale Clientes en el abanico.
+
+**Pendiente**
+* Inicio de un perfil de entrenador: aún es el personal (siguiente paso: «Hoy con tus clientes», ver la maqueta).
+
+---
+
 ## Pendiente de decidir
 
 * Límite de vídeo configurable en Ajustes (hoy fijo en 50 MB).

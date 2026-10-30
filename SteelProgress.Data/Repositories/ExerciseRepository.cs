@@ -19,6 +19,12 @@ public class ExerciseRepository //Se encarga de trabajar con la tabla Exercise
         _context = context;
     }
 
+    /// <summary>Un ejercicio con sus vídeos e imágenes, para abrir su ficha desde una rutina.</summary>
+    public Task<Exercise?> GetWithMediaAsync(int id) =>
+        _context.Exercises
+            .Include(e => e.Media.OrderBy(m => m.Order))
+            .FirstOrDefaultAsync(e => e.Id == id);
+
     public async Task<List<Exercise>> GetAllAsync()
     {
         return await _context.Exercises

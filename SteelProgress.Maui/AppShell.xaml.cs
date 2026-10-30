@@ -20,8 +20,9 @@ public partial class AppShell : Shell
         ProgressContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<ProgressPage>(), "ProgressPage"));
         ClientsContent.ContentTemplate = new DataTemplate(() => FanMenuHost.Wrap(services.GetRequiredService<ClientsPage>(), "ClientsPage"));
 
-        // Barra según la vista: en vista entrenador aparece Clientes y, si el perfil no entrena, Progreso
-        // solo se ve mientras se trabaja con un cliente (es su progreso e historial)
+        // Apartados según el tipo de perfil y la vista (ViewOptions): Clientes en perfiles de entrenador,
+        // Ejercicios en vista detallada, Rutinas salvo en la simple de entrenador. Un entrenador solo ve
+        // Progreso mientras trabaja con un cliente (es el progreso y el historial de ese cliente).
         var viewOptions = services.GetRequiredService<ViewOptionsService>();
         var clientContext = services.GetRequiredService<ClientContextService>();
         // En el hilo principal, al momento: Clientes activa al cliente y navega a Progreso justo después
@@ -30,12 +31,19 @@ public partial class AppShell : Shell
             void Apply()
             {
                 var o = viewOptions.Current;
-                ClientsTab.IsVisible = o.ShowClients;
-                var showProgress = o.ShowOwnTraining || clientContext.HasActiveClient;
-                // «Salir» del cliente estando en Progreso: antes de ocultar la pestaña se vuelve a Clientes
-                if (!showProgress && CurrentItem?.CurrentItem == ProgressTab)
-                    CurrentItem.CurrentItem = ClientsTab.IsVisible ? ClientsTab : CurrentItem.Items[0];
-                ProgressTab.IsVisible = showProgress;
+                SetVisible(ClientsTab, o.ShowClients);
+                SetVisible(ExerciseTab, o.ShowExercises);
+                SetVisible(RoutineTab, o.ShowRoutines);
+                SetVisible(ProgressTab, o.ShowOwnTraining || clientContext.HasActiveClient);
+            }
+
+            // Antes de ocultar el apartado en el que se está (p. ej. pasar a vista simple desde Ejercicios,
+            // o «Salir» del cliente en Progreso), se vuelve a Clientes si se ve, o a Inicio
+            void SetVisible(Tab tab, bool visible)
+            {
+                if (!visible && CurrentItem?.CurrentItem == tab)
+                    CurrentItem.CurrentItem = ClientsTab.IsVisible && tab != ClientsTab ? ClientsTab : CurrentItem.Items[0];
+                tab.IsVisible = visible;
             }
             if (MainThread.IsMainThread) Apply();
             else MainThread.BeginInvokeOnMainThread(Apply);

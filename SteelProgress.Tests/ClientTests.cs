@@ -22,7 +22,7 @@ public class ClientTests : IDisposable
         _user.SetCurrentUser(1);
         using var db = Db();
         db.Database.Migrate();
-        db.UserProfiles.Add(new UserProfile { Id = 1, Name = "Laura", ViewMode = ProfileViewMode.Trainer });
+        db.UserProfiles.Add(new UserProfile { Id = 1, Name = "Laura", Kind = ProfileKind.Coach, ViewMode = ProfileViewMode.Detailed });
         db.UserProfiles.Add(new UserProfile { Id = 2, Name = "Pablo" });
         db.SaveChanges();
 

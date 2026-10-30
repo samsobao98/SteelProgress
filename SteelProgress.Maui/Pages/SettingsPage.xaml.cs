@@ -41,15 +41,17 @@ public partial class SettingsPage : ContentPage
 
     private void OnViewModelChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(SettingsViewModel.IsTrainer))
+        if (e.PropertyName is nameof(SettingsViewModel.IsDetailed) or nameof(SettingsViewModel.IsCoach))
             UpdateModeSelector();
     }
 
     // El seleccionado lleva el degradado acero; el otro queda transparente
     private void UpdateModeSelector()
     {
-        Paint(SimpleOption, !_vm.IsTrainer);
-        Paint(TrainerOption, _vm.IsTrainer);
+        Paint(PersonalOption, !_vm.IsCoach);
+        Paint(CoachOption, _vm.IsCoach);
+        Paint(SimpleOption, !_vm.IsDetailed);
+        Paint(DetailedOption, _vm.IsDetailed);
     }
 
     private static void Paint(Border option, bool selected)

@@ -24,17 +24,17 @@ public partial class LauncherViewModel : ObservableObject
         _summaries.TryGetValue(profile.Id, out var text) ? text : ProfileSummaryText(profile, null, null, 0, DateTime.Today);
 
     /// <summary>
-    /// «Último entreno hace 3 días · Empuje», «Sin entrenar aún» o, en vista entrenador,
-    /// «Vista entrenador · 6 clientes».
+    /// «Último entreno hace 3 días · Empuje», «Sin entrenar aún» o, en un perfil de entrenador,
+    /// «Entrenador · 6 clientes».
     /// </summary>
     public static string ProfileSummaryText(UserProfile profile, DateTime? lastSession, string? lastDayName, int clientCount, DateTime today)
     {
-        if (profile.ViewMode == ProfileViewMode.Trainer)
+        if (profile.Kind == ProfileKind.Coach)
             return clientCount switch
             {
-                0 => "Vista entrenador · sin clientes aún",
-                1 => "Vista entrenador · 1 cliente",
-                _ => $"Vista entrenador · {clientCount} clientes"
+                0 => "Entrenador · sin clientes aún",
+                1 => "Entrenador · 1 cliente",
+                _ => $"Entrenador · {clientCount} clientes"
             };
 
         if (lastSession is not DateTime date)
@@ -85,6 +85,12 @@ public partial class LauncherViewModel : ObservableObject
     private string _newProfileDescription = string.Empty;
 
     [ObservableProperty] private string _newProfileName = string.Empty;
+
+    // Para qué es el perfil nuevo: tus entrenos o tus clientes
+    [ObservableProperty] private bool _newProfileIsCoach;
+
+    [RelayCommand]
+    private void SetNewProfileKind(string kind) => NewProfileIsCoach = kind == "coach";
     [ObservableProperty] private string _selectedColor = "#A6E3A1";
 
     public bool HasDescription => !string.IsNullOrWhiteSpace(NewProfileDescription);
@@ -247,6 +253,7 @@ public partial class LauncherViewModel : ObservableObject
     public void StartCreating()
     {
         NewProfileName = string.Empty;
+        NewProfileIsCoach = false;
         NewProfileDescription = string.Empty;
         SelectedColor = "#A6E3A1";
         IsCreating = true;
@@ -277,6 +284,7 @@ public partial class LauncherViewModel : ObservableObject
             {
                 Name = name,
                 AvatarColor = SelectedColor,
+                Kind = NewProfileIsCoach ? ProfileKind.Coach : ProfileKind.Personal,
                 Description = desc.Length > 0 ? desc : null
             };
             db.UserProfiles.Add(profile);

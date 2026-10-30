@@ -22,10 +22,13 @@ public partial class WorkoutPage : ContentPage
     private readonly List<Border> _feelingButtons = new();
     private IDispatcherTimer? _timer;
 
-    public WorkoutPage(WorkoutViewModel vm)
+    // Por constructor: en el primer OnAppearing de la pestaña aún no hay Handler del que sacarlos
+    public WorkoutPage(WorkoutViewModel vm, ClientContextService clientContext, ViewOptionsService viewOptions)
     {
         InitializeComponent();
         BindingContext = _vm = vm;
+        _clientContext = clientContext;
+        _viewOptions = viewOptions;
 
         RestRing.Drawable = _ring;
         BuildFeelingButtons();
@@ -36,16 +39,31 @@ public partial class WorkoutPage : ContentPage
         _vm.RestFinished += OnRestFinished;
     }
 
-    private Core.Services.ClientContextService? _clientContext;
+    private readonly ClientContextService _clientContext;
+
+    private readonly ViewOptionsService _viewOptions;
 
     // Al entrar o salir de un cliente, la pantalla vuelve a cargar sus datos
-    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () => await _vm.RefreshAsync());
+    private void OnClientChanged() => MainThread.BeginInvokeOnMainThread(async () =>
+    {
+        UpdateNeedsClient();
+        await _vm.RefreshAsync();
+    });
+
+    // Un perfil de entrenador solo entrena con un cliente: sin uno activo, se pide elegirlo
+    private void UpdateNeedsClient() =>
+        ChooseClientState.IsVisible = _viewOptions.Current.IsCoach
+                                      && !_clientContext.HasActiveClient
+                                      && !_vm.IsSessionActive;
+
+    private void OnGoToClientsTapped(object? sender, TappedEventArgs e) =>
+        _ = Shell.Current.GoToAsync("//ClientsPage");
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
         if (AppDialogs.IsShowing) { _coveredByPopup = true; return; } // solo se abrió una ventana encima
-        if (_clientContext is not null) _clientContext.Changed -= OnClientChanged;
+        _clientContext.Changed -= OnClientChanged;
         _timer?.Stop();
     }
 
@@ -53,12 +71,9 @@ public partial class WorkoutPage : ContentPage
     {
         base.OnAppearing();
         if (_coveredByPopup) { _coveredByPopup = false; return; } // vuelve de una ventana propia, no de otra pantalla
-        _clientContext ??= Handler?.MauiContext?.Services.GetService<Core.Services.ClientContextService>();
-        if (_clientContext is not null)
-        {
-            _clientContext.Changed -= OnClientChanged;
-            _clientContext.Changed += OnClientChanged;
-        }
+        _clientContext.Changed -= OnClientChanged;
+        _clientContext.Changed += OnClientChanged;
+        UpdateNeedsClient();
 
         // El cronómetro y el descanso se calculan con la hora: al volver a la pestaña siguen bien
         _timer ??= CreateTimer();
@@ -72,7 +87,8 @@ public partial class WorkoutPage : ContentPage
         }
 
         // Inicio o Rutinas han pedido empezar un día: se empieza directamente, sin pasar por preparar
-        if (WorkoutLaunch.Take() is int dayId)
+        // (Salvo en un perfil de entrenador sin cliente: esa sesión no sería de nadie)
+        if (WorkoutLaunch.Take() is int dayId && !ChooseClientState.IsVisible)
             await _vm.StartDayAsync(dayId);
         await _vm.RefreshAsync();
     }
@@ -115,6 +131,9 @@ public partial class WorkoutPage : ContentPage
     {
         switch (e.PropertyName)
         {
+            case nameof(WorkoutViewModel.IsSessionActive):
+                UpdateNeedsClient();
+                break;
             case nameof(WorkoutViewModel.SelectedRoutine):
                 StyleRoutineChips();
                 break;

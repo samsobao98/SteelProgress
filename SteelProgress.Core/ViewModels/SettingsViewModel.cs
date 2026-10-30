@@ -7,13 +7,14 @@ using SteelProgress.Domain.Services;
 
 namespace SteelProgress.Core.ViewModels;
 
-// Ajustes del perfil actual: vista simple o de entrenador y bloques extra de la vista simple.
-// Cada cambio se guarda al momento, sin botón de guardar.
+// Ajustes del perfil actual: tipo de perfil (personal o entrenador), vista simple o detallada y
+// bloques extra de la vista simple. Cada cambio se guarda al momento, sin botón de guardar.
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly AppDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
     private readonly ViewOptionsService _viewOptions;
+    private readonly ClientContextService? _clientContext;
     private bool _loading;
 
     [ObservableProperty] private string _profileName = "";
@@ -21,16 +22,19 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSimple))]
     [NotifyPropertyChangedFor(nameof(ModeDescription))]
-    private bool _isTrainer;
+    private bool _isDetailed;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(KindDescription))]
+    private bool _isCoach;
 
     [ObservableProperty] private bool _showIntensity;
     [ObservableProperty] private bool _showTempoAndRest;
     [ObservableProperty] private bool _showAdvancedStructure;
     [ObservableProperty] private bool _showRepRanges;
     [ObservableProperty] private bool _showDetailedNotes;
-    [ObservableProperty] private bool _trainsSelf;
 
-    public bool IsSimple => !IsTrainer;
+    public bool IsSimple => !IsDetailed;
 
     // ── Tu gimnasio: discos que hay y peso de la barra ──
 
@@ -58,15 +62,21 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnBarWeightChanged(double value) => _ = SaveAsync();
 
-    public string ModeDescription => IsTrainer
-        ? "Todas las opciones de edición, notas en cada serie, material e instrucciones de los ejercicios, ficha de clientes y envío de rutinas."
-        : "Solo lo necesario para entrenar y editar rutinas de forma sencilla. Los datos que tenga una rutina se ven siempre.";
+    public string KindDescription => IsCoach
+        ? "Para llevar a tus clientes: su ficha, sus rutinas y las sesiones con ellos. Tu propio entreno, en otro perfil."
+        : "Para tus propios entrenos.";
 
-    public SettingsViewModel(AppDbContext dbContext, ICurrentUserService currentUser, ViewOptionsService viewOptions)
+    public string ModeDescription => IsDetailed
+        ? "Todas las opciones: biblioteca de ejercicios, crear los tuyos con su material e instrucciones, intensidad, tempo, superseries y notas en cada serie."
+        : "Lo justo para entrenar y consultar, con menos apartados. Los datos que tenga una rutina se ven siempre.";
+
+    public SettingsViewModel(AppDbContext dbContext, ICurrentUserService currentUser, ViewOptionsService viewOptions,
+        ClientContextService? clientContext = null)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _viewOptions = viewOptions;
+        _clientContext = clientContext;
     }
 
     public async Task LoadAsync()
@@ -76,13 +86,13 @@ public partial class SettingsViewModel : ObservableObject
 
         _loading = true;
         ProfileName = profile.Name;
-        IsTrainer = profile.ViewMode == ProfileViewMode.Trainer;
+        IsCoach = profile.Kind == ProfileKind.Coach;
+        IsDetailed = profile.ViewMode == ProfileViewMode.Detailed;
         ShowIntensity = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.Intensity);
         ShowTempoAndRest = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.TempoAndRest);
         ShowAdvancedStructure = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.AdvancedStructure);
         ShowRepRanges = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.RepRanges);
         ShowDetailedNotes = profile.SimpleViewBlocks.HasFlag(SimpleViewBlocks.DetailedNotes);
-        TrainsSelf = profile.TrainsSelf;
         var gym = GymSetup.From(profile.GymPlates, profile.BarWeight);
         foreach (var plate in Plates)
             plate.IsAvailable = gym.Plates.Contains(plate.Weight);
@@ -93,18 +103,41 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SetSimple() => IsTrainer = false;
+    private void SetSimple() => IsDetailed = false;
 
     [RelayCommand]
-    private void SetTrainer() => IsTrainer = true;
+    private void SetDetailed() => IsDetailed = true;
 
-    partial void OnIsTrainerChanged(bool value) => _ = SaveAsync();
+    [RelayCommand]
+    private Task SetPersonal() => ChangeKindAsync(coach: false);
+
+    [RelayCommand]
+    private Task SetCoach() => ChangeKindAsync(coach: true);
+
+    // Cambiar el tipo no borra nada, pero cambia qué datos se ven: se pide confirmación
+    public async Task ChangeKindAsync(bool coach)
+    {
+        if (coach == IsCoach) return;
+        var ok = await ConfirmDialogService.ConfirmAsync(
+            coach ? "Pasar a perfil de entrenador" : "Pasar a perfil personal",
+            coach
+                ? "Aparecerán Clientes y el Inicio de clientes. Tus propios entrenos de este perfil dejarán de verse (no se borran); para entrenar tú, usa un perfil personal."
+                : "Dejarán de verse tus clientes con sus rutinas y sesiones (no se borran). Volverán si lo pones otra vez como entrenador.",
+            coach ? "Pasar a entrenador" : "Pasar a personal");
+        if (!ok) return;
+
+        // Un perfil personal no trabaja con clientes: con uno activo, sus datos seguirían filtrándolo todo
+        if (!coach) _clientContext?.Clear();
+        IsCoach = coach;
+    }
+
+    partial void OnIsDetailedChanged(bool value) => _ = SaveAsync();
+    partial void OnIsCoachChanged(bool value) => _ = SaveAsync();
     partial void OnShowIntensityChanged(bool value) => _ = SaveAsync();
     partial void OnShowTempoAndRestChanged(bool value) => _ = SaveAsync();
     partial void OnShowAdvancedStructureChanged(bool value) => _ = SaveAsync();
     partial void OnShowRepRangesChanged(bool value) => _ = SaveAsync();
     partial void OnShowDetailedNotesChanged(bool value) => _ = SaveAsync();
-    partial void OnTrainsSelfChanged(bool value) => _ = SaveAsync();
 
     public SimpleViewBlocks CurrentBlocks =>
         (ShowIntensity ? SimpleViewBlocks.Intensity : 0)
@@ -124,9 +157,9 @@ public partial class SettingsViewModel : ObservableObject
             var profile = await GetProfileAsync();
             if (profile is null) return;
 
-            profile.ViewMode = IsTrainer ? ProfileViewMode.Trainer : ProfileViewMode.Simple;
+            profile.Kind = IsCoach ? ProfileKind.Coach : ProfileKind.Personal;
+            profile.ViewMode = IsDetailed ? ProfileViewMode.Detailed : ProfileViewMode.Simple;
             profile.SimpleViewBlocks = CurrentBlocks;
-            profile.TrainsSelf = TrainsSelf;
             profile.GymPlates = GymSetup.Format(Plates.Where(p => p.IsAvailable).Select(p => p.Weight));
             profile.BarWeight = BarWeight;
             await _dbContext.SaveChangesAsync();

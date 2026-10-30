@@ -284,11 +284,46 @@
                         HorizontalOptions="Fill" />
                 </Grid>
 
-                <!-- Row 3: Color picker -->
+                <!-- Row 3: tipo de perfil y color -->
                 <VerticalStackLayout
                     Grid.Row="3"
                     Spacing="10"
                     Margin="0,20,0,0">
+                    <!-- Para qué es el perfil (se puede cambiar luego en Ajustes) -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="32,0,32,8">
+                        <Border Grid.Column="0" Padding="0,12" StrokeShape="RoundRectangle 12" StrokeThickness="1.5"
+                                BackgroundColor="#262A37" Stroke="#A6E3A1">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding NewProfileIsCoach}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                    <Setter Property="Stroke" Value="#2A2E3C" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetNewProfileKindCommand}" CommandParameter="personal" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Para entrenar yo" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="#E8EAF2" HorizontalOptions="Center" />
+                                <Label Text="Personal" FontSize="11" TextColor="#8A91A8" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Padding="0,12" StrokeShape="RoundRectangle 12" StrokeThickness="1.5"
+                                BackgroundColor="Transparent" Stroke="#2A2E3C">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding NewProfileIsCoach}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="#262A37" />
+                                    <Setter Property="Stroke" Value="#A6E3A1" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetNewProfileKindCommand}" CommandParameter="coach" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Para mis clientes" FontFamily="SpaceGroteskMedium" FontSize="14" TextColor="#E8EAF2" HorizontalOptions="Center" />
+                                <Label Text="Entrenador" FontSize="11" TextColor="#8A91A8" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
                     <Label
                         Text="COLOR"
                         TextColor="#8A91A8"

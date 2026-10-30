@@ -180,9 +180,15 @@ public partial class RoutineDetailPage : ContentPage
             return;
 
         var title = rde.Exercise?.Name ?? "Ejercicio";
-        var action = await AppDialogs.ChooseAsync(title, ["Editar series, reps e intensidad"], destructive: "Quitar del día");
+        var action = await AppDialogs.ChooseAsync(title, ["Ver ejercicio", "Editar series, reps e intensidad"], destructive: "Quitar del día");
 
-        if (action == "Editar series, reps e intensidad")
+        if (action == "Ver ejercicio")
+        {
+            // La ficha con su vídeo: en vista simple no hay apartado Ejercicios
+            if (Handler?.MauiContext?.Services is IServiceProvider services)
+                await ExerciseDetailLauncher.OpenAsync(Navigation, services, rde.ExerciseId);
+        }
+        else if (action == "Editar series, reps e intensidad")
         {
             _vm.EditPrescription(rde);
         }

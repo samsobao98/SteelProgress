@@ -10,7 +10,8 @@ public class ViewOptionsTests
     {
         var o = ViewOptions.For(new UserProfile());
 
-        Assert.False(o.IsTrainer);
+        Assert.False(o.IsCoach);
+        Assert.False(o.IsDetailed);
         Assert.False(o.EditIntensity);
         Assert.False(o.EditTempoAndRest);
         Assert.False(o.EditAdvancedStructure);
@@ -18,6 +19,8 @@ public class ViewOptionsTests
         Assert.False(o.EditDetailedNotes);
         Assert.False(o.EditExerciseDetails);
         Assert.False(o.ShowClients);
+        Assert.False(o.ShowExercises);
+        Assert.True(o.ShowRoutines);
         Assert.True(o.ShowOwnTraining);
     }
 
@@ -33,23 +36,31 @@ public class ViewOptionsTests
         Assert.False(o.ShowClients);
     }
 
+    // La vista detallada ya no trae Clientes: eso depende del tipo de perfil
     [Fact]
-    public void TrainerViewShowsEverythingRegardlessOfBlocks()
+    public void DetailedViewShowsEverythingButNotClients()
     {
-        var o = ViewOptions.For(new UserProfile { ViewMode = ProfileViewMode.Trainer });
+        var o = ViewOptions.For(new UserProfile { ViewMode = ProfileViewMode.Detailed });
 
         Assert.True(o.EditIntensity && o.EditTempoAndRest && o.EditAdvancedStructure && o.EditRepRanges && o.EditDetailedNotes);
         Assert.True(o.EditExerciseDetails);
-        Assert.True(o.ShowClients);
+        Assert.True(o.ShowExercises);
+        Assert.False(o.ShowClients);
+        Assert.True(o.ShowOwnTraining);
     }
 
+    // Las cuatro combinaciones: qué apartados salen en el menú
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, true)]
-    public void TrainerSeesOwnTrainingOnlyIfTrainsSelf(bool trainsSelf, bool expected)
+    [InlineData(ProfileKind.Personal, ProfileViewMode.Simple, false, false, true, true)]
+    [InlineData(ProfileKind.Personal, ProfileViewMode.Detailed, false, true, true, true)]
+    [InlineData(ProfileKind.Coach, ProfileViewMode.Simple, true, false, false, false)]
+    [InlineData(ProfileKind.Coach, ProfileViewMode.Detailed, true, true, true, false)]
+    public void KindAndViewDecideTheSections(ProfileKind kind, ProfileViewMode mode,
+        bool clients, bool exercises, bool routines, bool ownTraining)
     {
-        var o = ViewOptions.For(new UserProfile { ViewMode = ProfileViewMode.Trainer, TrainsSelf = trainsSelf });
-        Assert.Equal(expected, o.ShowOwnTraining);
+        var o = ViewOptions.For(new UserProfile { Kind = kind, ViewMode = mode });
+
+        Assert.Equal((clients, exercises, routines, ownTraining), (o.ShowClients, o.ShowExercises, o.ShowRoutines, o.ShowOwnTraining));
     }
 
     [Fact]
@@ -60,11 +71,11 @@ public class ViewOptionsTests
         service.Changed += () => raised++;
 
         service.Apply(new UserProfile());          // igual que el valor por defecto
-        service.Apply(new UserProfile { ViewMode = ProfileViewMode.Trainer });
-        service.Apply(new UserProfile { ViewMode = ProfileViewMode.Trainer });
+        service.Apply(new UserProfile { ViewMode = ProfileViewMode.Detailed });
+        service.Apply(new UserProfile { ViewMode = ProfileViewMode.Detailed });
 
         Assert.Equal(1, raised);
-        Assert.True(service.Current.IsTrainer);
+        Assert.True(service.Current.IsDetailed);
     }
 }
 

@@ -73,7 +73,7 @@ public class PrescriptionEditorTests : IDisposable
     [Fact]
     public void TrainerViewShowsAllFields()
     {
-        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Trainer }));
+        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Detailed }));
         Assert.True(editor.ShowRepRange && editor.ShowIntensity && editor.ShowTempoAndRest && editor.ShowStructure);
     }
 
@@ -100,7 +100,7 @@ public class PrescriptionEditorTests : IDisposable
     [Fact]
     public void SavesParsedValuesWithCommaDecimals()
     {
-        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Trainer }));
+        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Detailed }));
         var saved = false;
         editor.Saved += () => saved = true;
 
@@ -153,7 +153,7 @@ public class PrescriptionEditorTests : IDisposable
     [InlineData("RestSeconds", "1,5")]
     public void InvalidInputShowsErrorAndDoesNotSave(string field, string value)
     {
-        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Trainer }));
+        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Detailed }));
         typeof(PrescriptionEditorViewModel).GetProperty(field)!.SetValue(editor, value);
 
         editor.Save();
@@ -167,7 +167,7 @@ public class PrescriptionEditorTests : IDisposable
     [Fact]
     public void RangeMaxBelowMinIsRejected()
     {
-        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Trainer }));
+        var (editor, _) = OpenEditor(Options(new UserProfile { ViewMode = ProfileViewMode.Detailed }));
         editor.Reps = "10";
         editor.RepsMax = "8";
         editor.Save();

@@ -41,8 +41,32 @@
                 <Label Text="Ajustes" Style="{StaticResource SpTitle}" Margin="0,8,0,0" />
                 <Label Text="{Binding ProfileName, StringFormat='Perfil: {0}'}" Style="{StaticResource SpSecondary}" />
 
-                <!-- ── Modo de uso ── -->
-                <Label Text="Modo de uso" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
+                <!-- ── Tipo de perfil: para tus entrenos o para tus clientes ── -->
+                <Label Text="Tipo de perfil" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
+                <Border Style="{StaticResource SpCardStyle}">
+                    <VerticalStackLayout Spacing="12">
+                        <Border BackgroundColor="{StaticResource SpCardHi}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                            <Border x:Name="PersonalOption" Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetPersonalCommand}" Tapped="OnOptionTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Personal" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
+                            </Border>
+                            <Border x:Name="CoachOption" Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetCoachCommand}" Tapped="OnOptionTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Entrenador" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
+                            </Border>
+                        </Grid>
+                        </Border>
+                        <Label Text="{Binding KindDescription}" Style="{StaticResource SpSecondary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ── Vista: cuánto detalle, para los dos tipos ── -->
+                <Label Text="Vista" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
                 <Border Style="{StaticResource SpCardStyle}">
                     <VerticalStackLayout Spacing="12">
                         <Border BackgroundColor="{StaticResource SpCardHi}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="4">
@@ -53,11 +77,11 @@
                                 </Border.GestureRecognizers>
                                 <Label Text="Simple" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
                             </Border>
-                            <Border x:Name="TrainerOption" Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
+                            <Border x:Name="DetailedOption" Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,11">
                                 <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SetTrainerCommand}" Tapped="OnOptionTapped" />
+                                    <TapGestureRecognizer Command="{Binding SetDetailedCommand}" Tapped="OnOptionTapped" />
                                 </Border.GestureRecognizers>
-                                <Label Text="Entrenador" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
+                                <Label Text="Detallada" HorizontalOptions="Center" FontFamily="SpaceGroteskMedium" FontSize="14" />
                             </Border>
                         </Grid>
                         </Border>
@@ -69,7 +93,7 @@
                 <Label Text="Mostrar también en vista simple" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
                 <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
                     <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsTrainer}" Value="True">
+                        <DataTrigger TargetType="Border" Binding="{Binding IsDetailed}" Value="True">
                             <Setter Property="Opacity" Value="0.5" />
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
@@ -116,9 +140,9 @@
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
-                <Label Text="En vista entrenador todas las opciones están siempre visibles."
+                <Label Text="En vista detallada todas las opciones están siempre visibles."
                        Style="{StaticResource SpSecondary}" FontSize="12" Margin="4,8,0,0"
-                       IsVisible="{Binding IsTrainer}" />
+                       IsVisible="{Binding IsDetailed}" />
 
                 <!-- ── Tu gimnasio: discos que hay y peso de la barra (para enseñar cómo cargarla) ── -->
                 <Label Text="Tu gimnasio" Style="{StaticResource SpOverline}" Margin="4,24,0,4" />
@@ -159,24 +183,6 @@
                                MinimumWidthRequest="64" HorizontalTextAlignment="Center" VerticalOptions="Center" />
                         <Button Grid.Column="3" Text="+" Style="{StaticResource SpSecondaryButton}" Padding="0" WidthRequest="40" HeightRequest="40" MinimumHeightRequest="40"
                                 Command="{Binding ChangeBarWeightCommand}" CommandParameter="+" />
-                    </Grid>
-                </Border>
-
-                <!-- ── Vista entrenador ── -->
-                <Label Text="Vista entrenador" Style="{StaticResource SpOverline}" Margin="4,24,0,8" />
-                <Border Style="{StaticResource SpCardStyle}" Padding="16,4">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsSimple}" Value="True">
-                            <Setter Property="Opacity" Value="0.5" />
-                            <Setter Property="IsEnabled" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <Grid ColumnDefinitions="*,Auto" Padding="0,12">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Yo también entreno con este perfil" Style="{StaticResource SpBody}" />
-                            <Label Text="Muestra Progreso con tus propios entrenos aunque no estés con un cliente" Style="{StaticResource SpSecondary}" FontSize="12" />
-                        </VerticalStackLayout>
-                        <Switch Grid.Column="1" IsToggled="{Binding TrainsSelf}" OnColor="{StaticResource SpOk}" ThumbColor="{StaticResource SpText}" VerticalOptions="Center" />
                     </Grid>
                 </Border>
 

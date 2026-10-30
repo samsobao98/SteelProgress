@@ -56,14 +56,24 @@ public class LauncherViewModelTests
     }
 
     [Theory]
-    [InlineData(0, "Vista entrenador · sin clientes aún")]
-    [InlineData(1, "Vista entrenador · 1 cliente")]
-    [InlineData(6, "Vista entrenador · 6 clientes")]
-    public void Resumen_VistaEntrenador_CuentaLosClientes(int clientes, string esperado)
+    [InlineData(0, "Entrenador · sin clientes aún")]
+    [InlineData(1, "Entrenador · 1 cliente")]
+    [InlineData(6, "Entrenador · 6 clientes")]
+    public void Resumen_PerfilDeEntrenador_CuentaLosClientes(int clientes, string esperado)
     {
-        var perfil = new UserProfile { ViewMode = ProfileViewMode.Trainer };
+        var perfil = new UserProfile { Kind = ProfileKind.Coach };
 
         Assert.Equal(esperado, LauncherViewModel.ProfileSummaryText(perfil, Hoy, "Pierna", clientes, Hoy));
+    }
+
+    // La vista detallada ya no es «de entrenador»: un perfil personal detallado sigue diciendo su último entreno
+    [Fact]
+    public void Resumen_PersonalDetallado_EsComoElSimple()
+    {
+        var perfil = new UserProfile { ViewMode = ProfileViewMode.Detailed };
+
+        Assert.Equal("Último entreno ayer · Push",
+            LauncherViewModel.ProfileSummaryText(perfil, Hoy.AddDays(-1), "Push", 0, Hoy));
     }
 
     private static LauncherViewModel NuevoViewModel() =>

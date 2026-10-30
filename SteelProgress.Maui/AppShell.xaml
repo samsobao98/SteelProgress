@@ -17,10 +17,10 @@
         <Tab x:Name="ClientsTab" Title="Clientes" IsVisible="False">
             <ShellContent x:Name="ClientsContent" Route="ClientsPage" />
         </Tab>
-        <Tab Title="Ejercicios">
+        <Tab x:Name="ExerciseTab" Title="Ejercicios">
             <ShellContent x:Name="ExerciseContent" Route="ExercisePage" />
         </Tab>
-        <Tab Title="Rutinas">
+        <Tab x:Name="RoutineTab" Title="Rutinas">
             <ShellContent x:Name="RoutineContent" Route="RoutinePage" />
         </Tab>
         <Tab Title="Entreno">

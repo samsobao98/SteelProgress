@@ -28,7 +28,9 @@ public partial class ExerciseDetailViewModel : ObservableObject
     public string OriginText { get; }
     public bool HasOrigin => OriginText.Length > 0;
     /// <summary>Solo los propios o importados: los de la biblioteca no se editan.</summary>
-    public bool CanEdit => !Exercise.IsSystem;
+    // Desde una rutina (vista simple) la ficha se abre solo para ver: editar es del apartado Ejercicios
+    public bool CanEdit => !Exercise.IsSystem && !ReadOnly;
+    public bool ReadOnly { get; init; }
 
     public bool HasProgress => Progress is not null;
     public string BestSetText => Progress is null ? "" : $"{WorkoutExerciseState.FormatKg(Progress.BestWeight)}×{Progress.BestReps}";

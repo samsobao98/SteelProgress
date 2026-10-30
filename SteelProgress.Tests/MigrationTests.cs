@@ -115,13 +115,39 @@ public class MigrationTests : IDisposable
         Assert.Equal(1, check.Exercises.Single(e => e.Uid == uid).Id);
     }
 
+    // AddProfileKind: la antigua «vista entrenador» es la detallada, y solo con clientes el perfil es de entrenador
+    [Fact]
+    public void AddProfileKind_SoloLosPerfilesConClientesPasanAEntrenador()
+    {
+        using (var db = CreateContext())
+        {
+            db.GetService<IMigrator>().Migrate("20261029201625_AddProfileGym");
+            db.Database.ExecuteSqlRaw("""
+                INSERT INTO UserProfiles (Id, Name, AvatarColor, ViewMode, SimpleViewBlocks, TrainsSelf) VALUES
+                    (1, 'Samuel', '#89B4FA', 1, 0, 0),
+                    (2, 'Laura', '#A6E3A1', 1, 0, 0),
+                    (3, 'Álex', '#F9E2AF', 0, 0, 0);
+                INSERT INTO Clients (Id, Uid, UserId, Name, AvatarColor, CreatedAt) VALUES
+                    (1, '6f1c2a3e-0000-4000-8000-000000000001', 2, 'Marta', '#FAB387', '2026-10-01 10:00:00');
+                """);
+            db.Database.Migrate();
+        }
+
+        using var check = CreateContext();
+        var profiles = check.UserProfiles.IgnoreQueryFilters().OrderBy(p => p.Id)
+            .Select(p => new { p.Kind, p.ViewMode }).ToList();
+        Assert.Equal(new { Kind = ProfileKind.Personal, ViewMode = ProfileViewMode.Detailed }, profiles[0]);  // entrenaba él mismo
+        Assert.Equal(new { Kind = ProfileKind.Coach, ViewMode = ProfileViewMode.Detailed }, profiles[1]);     // tiene clientes
+        Assert.Equal(new { Kind = ProfileKind.Personal, ViewMode = ProfileViewMode.Simple }, profiles[2]);
+    }
+
     [Fact]
     public void NewPrescriptionAndSessionFieldsRoundTrip()
     {
         using (var db = CreateContext())
         {
             db.Database.Migrate();
-            var profile = new UserProfile { Name = "Laura", ViewMode = ProfileViewMode.Trainer, SimpleViewBlocks = SimpleViewBlocks.Intensity | SimpleViewBlocks.TempoAndRest };
+            var profile = new UserProfile { Name = "Laura", ViewMode = ProfileViewMode.Detailed, SimpleViewBlocks = SimpleViewBlocks.Intensity | SimpleViewBlocks.TempoAndRest };
             var exercise = new Exercise { Name = "Press banca", MuscleGroup = "Pecho", Equipment = "Barra", UserProfile = profile };
             var day = new RoutineDay { Name = "Torso A", Order = 1 };
             day.Exercises.Add(new RoutineDayExercise

@@ -62,7 +62,7 @@ public class SettingsViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task SwitchingToTrainerKeepsBlocksForWhenSwitchingBack()
+    public async Task SwitchingToDetailedKeepsBlocksForWhenSwitchingBack()
     {
         var options = new ViewOptionsService();
         var vm = new SettingsViewModel(CreateContext(), _user, options);
@@ -70,16 +70,43 @@ public class SettingsViewModelTests : IDisposable
         vm.ShowIntensity = true;
         await vm.SaveAsync();
 
-        vm.SetTrainerCommand.Execute(null);
+        vm.SetDetailedCommand.Execute(null);
         await vm.SaveAsync();
-        Assert.True(options.Current.IsTrainer);
-        Assert.True(options.Current.ShowClients);
+        Assert.True(options.Current.IsDetailed);
+        Assert.True(options.Current.EditTempoAndRest);
+        Assert.False(options.Current.ShowClients);   // la vista no cambia el tipo de perfil
 
         vm.SetSimpleCommand.Execute(null);
         await vm.SaveAsync();
-        Assert.False(options.Current.ShowClients);
         Assert.True(options.Current.EditIntensity);
         Assert.False(options.Current.EditTempoAndRest);
+    }
+
+    // Cambiar el tipo cambia qué datos se ven: solo se hace si se confirma
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task ChangingKindAsksFirst(bool confirms, bool becomesCoach)
+    {
+        var options = new ViewOptionsService();
+        var vm = new SettingsViewModel(CreateContext(), _user, options);
+        await vm.LoadAsync();
+
+        Func<ConfirmRequest, Task<bool>> answer = _ => Task.FromResult(confirms);
+        ConfirmDialogService.OnConfirmationRequested += answer;
+        try
+        {
+            await vm.ChangeKindAsync(coach: true);
+            await vm.SaveAsync();
+        }
+        finally
+        {
+            ConfirmDialogService.OnConfirmationRequested -= answer;
+        }
+
+        Assert.Equal(becomesCoach, options.Current.ShowClients);
+        using var check = CreateContext();
+        Assert.Equal(becomesCoach ? ProfileKind.Coach : ProfileKind.Personal, check.UserProfiles.Single(p => p.Id == 1).Kind);
     }
 
     [Fact]
