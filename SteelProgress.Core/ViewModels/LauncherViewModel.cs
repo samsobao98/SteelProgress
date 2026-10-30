@@ -17,6 +17,33 @@ public partial class LauncherViewModel : ObservableObject
 
     public ObservableCollection<UserProfile> Profiles { get; } = new();
 
+    // Línea bajo el nombre de cada perfil en la lista («Último entreno ayer · Pierna»), por Id.
+    // Si la consulta falla la lista se enseña igual, sin esa línea.
+    private Dictionary<int, string> _summaries = new();
+    public string SummaryOf(UserProfile profile) =>
+        _summaries.TryGetValue(profile.Id, out var text) ? text : ProfileSummaryText(profile, null, null, 0, DateTime.Today);
+
+    /// <summary>
+    /// «Último entreno hace 3 días · Empuje», «Sin entrenar aún» o, en vista entrenador,
+    /// «Vista entrenador · 6 clientes».
+    /// </summary>
+    public static string ProfileSummaryText(UserProfile profile, DateTime? lastSession, string? lastDayName, int clientCount, DateTime today)
+    {
+        if (profile.ViewMode == ProfileViewMode.Trainer)
+            return clientCount switch
+            {
+                0 => "Vista entrenador · sin clientes aún",
+                1 => "Vista entrenador · 1 cliente",
+                _ => $"Vista entrenador · {clientCount} clientes"
+            };
+
+        if (lastSession is not DateTime date)
+            return "Sin entrenar aún";
+
+        var text = $"Último entreno {RoutineSchedule.AgoText(date, today)}";
+        return string.IsNullOrWhiteSpace(lastDayName) ? text : $"{text} · {lastDayName}";
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotCreating))]
     [NotifyPropertyChangedFor(nameof(CanAddProfile))]
@@ -132,6 +159,7 @@ public partial class LauncherViewModel : ObservableObject
             // La consulta va antes de tocar Profiles: si falla, la lista que ya
             // se estuviera mostrando se queda como está en vez de vaciarse.
             var list = await db.UserProfiles.IgnoreQueryFilters().OrderBy(p => p.Id).ToListAsync();
+            _summaries = await LoadSummariesAsync(db, list);
             Profiles.Clear();
             foreach (var p in list)
                 Profiles.Add(p);
@@ -148,6 +176,47 @@ public partial class LauncherViewModel : ObservableObject
 
         if (!HasError && !HasProfiles)
             IsCreating = true;
+    }
+
+    private static async Task<Dictionary<int, string>> LoadSummariesAsync(AppDbContext db, List<UserProfile> profiles)
+    {
+        try
+        {
+            // Solo los entrenos propios: los de los clientes del entrenador llevan ClientId.
+            var lastByUser = await db.WorkoutSessions.IgnoreQueryFilters()
+                .Where(s => s.ClientId == null)
+                .GroupBy(s => s.UserId)
+                .Select(g => new { UserId = g.Key, Date = g.Max(s => s.Date) })
+                .ToListAsync();
+
+            var lastDays = new Dictionary<int, (DateTime Date, string? Day)>();
+            foreach (var last in lastByUser)
+            {
+                var day = await db.WorkoutSessions.IgnoreQueryFilters()
+                    .Where(s => s.UserId == last.UserId && s.ClientId == null && s.Date == last.Date)
+                    .Select(s => s.RoutineDay!.Name)
+                    .FirstOrDefaultAsync();
+                lastDays[last.UserId] = (last.Date, day);
+            }
+
+            var clients = await db.Clients.IgnoreQueryFilters()
+                .GroupBy(c => c.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.UserId, x => x.Count);
+
+            var today = DateTime.Today;
+            return profiles.ToDictionary(p => p.Id, p =>
+            {
+                var hasLast = lastDays.TryGetValue(p.Id, out var last);
+                return ProfileSummaryText(p, hasLast ? last.Date : null, hasLast ? last.Day : null,
+                    clients.GetValueOrDefault(p.Id), today);
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LauncherViewModel.LoadSummariesAsync: {ex}");
+            return new();
+        }
     }
 
     [RelayCommand]

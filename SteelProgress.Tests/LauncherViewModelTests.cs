@@ -1,5 +1,6 @@
 using SteelProgress.Core.Services;
 using SteelProgress.Core.ViewModels;
+using SteelProgress.Domain.Entities;
 
 namespace SteelProgress.Tests;
 
@@ -31,6 +32,38 @@ public class LauncherViewModelTests
 
         Assert.False(vm.CanShowProfiles);
         Assert.False(vm.IsCreating);
+    }
+
+    // La línea bajo cada perfil en «¿Quién entrena hoy?»
+    private static readonly DateTime Hoy = new(2026, 10, 30);
+
+    [Fact]
+    public void Resumen_VistaSimple_DiceCuandoYQueDiaFueElUltimoEntreno()
+    {
+        var perfil = new UserProfile { Name = "Álex" };
+
+        Assert.Equal("Último entreno ayer · Pierna",
+            LauncherViewModel.ProfileSummaryText(perfil, Hoy.AddDays(-1).AddHours(18), "Pierna", 0, Hoy));
+        Assert.Equal("Último entreno hace 4 días",
+            LauncherViewModel.ProfileSummaryText(perfil, Hoy.AddDays(-4), null, 0, Hoy));
+    }
+
+    [Fact]
+    public void Resumen_VistaSimple_SinEntrenos()
+    {
+        Assert.Equal("Sin entrenar aún",
+            LauncherViewModel.ProfileSummaryText(new UserProfile(), null, null, 0, Hoy));
+    }
+
+    [Theory]
+    [InlineData(0, "Vista entrenador · sin clientes aún")]
+    [InlineData(1, "Vista entrenador · 1 cliente")]
+    [InlineData(6, "Vista entrenador · 6 clientes")]
+    public void Resumen_VistaEntrenador_CuentaLosClientes(int clientes, string esperado)
+    {
+        var perfil = new UserProfile { ViewMode = ProfileViewMode.Trainer };
+
+        Assert.Equal(esperado, LauncherViewModel.ProfileSummaryText(perfil, Hoy, "Pierna", clientes, Hoy));
     }
 
     private static LauncherViewModel NuevoViewModel() =>

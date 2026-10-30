@@ -10,84 +10,48 @@
     Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
-        <conv:InitialLetterConverter x:Key="InitialConverter" />
-        <conv:StringNotNullOrEmptyConverter x:Key="StringNotEmptyConverter" />
+        <ResourceDictionary>
+            <!-- Esta página se crea antes que los recursos de App (App la recibe en su
+                 constructor): los tokens se cargan aquí o los StaticResource revientan al arrancar. -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Styles/Tokens.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <conv:InitialLetterConverter x:Key="InitialConverter" />
+            <conv:StringNotNullOrEmptyConverter x:Key="StringNotEmptyConverter" />
+        </ResourceDictionary>
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,Auto,*">
 
-        <!-- Animated background orbs -->
-        <Ellipse
-            x:Name="Orb1"
-            Grid.RowSpan="3"
-            Fill="#A6E3A1"
-            HeightRequest="320"
-            WidthRequest="320"
-            HorizontalOptions="End"
-            VerticalOptions="Start"
-            Opacity="0.07"
-            Margin="0,-100,-100,0" />
-        <Ellipse
-            x:Name="Orb2"
-            Grid.RowSpan="3"
-            Fill="#9DB4E6"
-            HeightRequest="220"
-            WidthRequest="220"
-            HorizontalOptions="Start"
-            VerticalOptions="End"
-            Opacity="0.06"
-            Margin="-60,0,0,-60" />
-        <Ellipse
-            x:Name="Orb3"
-            Grid.RowSpan="3"
-            Fill="#C9B9F2"
-            HeightRequest="180"
-            WidthRequest="180"
-            HorizontalOptions="End"
-            VerticalOptions="Center"
-            Opacity="0.05"
-            Margin="0,60,-50,0" />
-
-        <!-- Row 0: Logo (Grid para poder superponer el aura) -->
-        <Grid
+        <!-- Row 0: el logo (el dibujo del icono) y el nombre -->
+        <HorizontalStackLayout
             x:Name="HeaderSection"
             Grid.Row="0"
             Opacity="0"
-            TranslationY="-30"
-            Margin="0,56,0,0"
-            HeightRequest="128"
-            HorizontalOptions="Center"
-            WidthRequest="300">
-            <!-- Aura: elipse verde que se expande y desvanece en bucle -->
-            <Ellipse
-                x:Name="LogoAura"
-                Fill="#A6E3A1"
-                WidthRequest="128"
-                HeightRequest="128"
-                Opacity="0"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
-            <!-- Logo con spring bounce en la entrada (el ancho del Grid manda: 500x165 → ~300x99) -->
+            Spacing="10"
+            Margin="20,40,20,0">
             <Image
-                x:Name="LogoImage"
-                Source="logo_icon.png"
-                HeightRequest="128"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                Aspect="AspectFit" />
-        </Grid>
+                Source="logo_marca.png"
+                WidthRequest="34"
+                HeightRequest="34"
+                Aspect="AspectFit"
+                VerticalOptions="Center" />
+            <Label
+                Text="SteelProgress"
+                FontFamily="SpaceGroteskMedium"
+                FontSize="17"
+                TextColor="{StaticResource SpText}"
+                VerticalOptions="Center" />
+        </HorizontalStackLayout>
 
-        <!-- Row 1: Subtitle -->
+        <!-- Row 1: «¿Quién entrena hoy?» es el título de la pantalla -->
         <Label
             x:Name="SubtitleLabel"
             Grid.Row="1"
             Opacity="0"
             Text="{Binding SubtitleText}"
-            FontSize="15"
-            FontAttributes="Bold"
-            TextColor="#C6CBDA"
-            HorizontalTextAlignment="Center"
-            Margin="0,14,0,0" />
+            Style="{StaticResource SpTitle}"
+            Margin="20,32,20,0" />
 
         <!-- Row 2: Content -->
         <Grid Grid.Row="2">
@@ -121,35 +85,55 @@
                     HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
-            <!-- Profile list (shown when loaded, not creating and no error) -->
-            <VerticalStackLayout
+            <!-- Lista de perfiles (cargada, sin error y sin estar creando uno) -->
+            <Grid
+                x:Name="ProfilesSection"
                 IsVisible="{Binding CanShowProfiles}"
-                VerticalOptions="Start"
-                Spacing="28"
-                Margin="0,24,0,24">
+                RowDefinitions="*,Auto"
+                Opacity="0">
 
-                <!-- Carousel (built programmatically in code-behind) -->
-                <Grid
-                    x:Name="CarouselContainer"
-                    IsVisible="{Binding HasProfiles}"
-                    HeightRequest="162"
-                    IsClippedToBounds="False"
-                    Margin="0,-20,0,0" />
+                <ScrollView Grid.Row="0" VerticalScrollBarVisibility="Never">
+                    <VerticalStackLayout Spacing="8" Padding="20,20,20,8">
 
-                <!-- Add profile -->
+                        <!-- Filas de perfil (se construyen en el code-behind): tocar = entrar; ⋯ = editar o eliminar -->
+                        <VerticalStackLayout
+                            x:Name="ProfileList"
+                            IsVisible="{Binding HasProfiles}"
+                            Spacing="8" />
+
+                        <!-- Añadir perfil: mismo ancho que las filas -->
+                        <Border
+                            IsVisible="{Binding CanAddProfile}"
+                            BackgroundColor="Transparent"
+                            Stroke="{StaticResource SpText4}"
+                            StrokeThickness="1.5"
+                            StrokeDashArray="4,3"
+                            StrokeShape="RoundRectangle 14"
+                            MinimumHeightRequest="56"
+                            Margin="0,4,0,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="＋ Añadir perfil"
+                                FontFamily="SpaceGroteskMedium"
+                                FontSize="15"
+                                TextColor="#C6CBDA"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
                 <Label
-                    IsVisible="{Binding CanAddProfile}"
-                    Text="＋ Añadir perfil"
-                    TextColor="#8A91A8"
-                    FontSize="14"
-                    FontAttributes="Bold"
-                    HorizontalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding StartCreatingCommand}" />
-                    </Label.GestureRecognizers>
-                </Label>
-
-            </VerticalStackLayout>
+                    Grid.Row="1"
+                    Text="Sin cuentas. Tus datos se quedan en este móvil."
+                    Style="{StaticResource SpSecondary}"
+                    FontSize="12"
+                    HorizontalTextAlignment="Center"
+                    Margin="20,8,20,24" />
+            </Grid>
 
             <!-- Creation form (full height) -->
             <Grid
@@ -444,17 +428,8 @@
                             Padding="8,0"
                             Margin="0,-6,0,0" />
 
+                        <!-- Entrar es tocar la fila; aquí solo quedan las opciones del perfil -->
                         <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
-                            <Border
-                                BackgroundColor="#A6E3A1"
-                                StrokeShape="RoundRectangle 12"
-                                StrokeThickness="0"
-                                Padding="0,13">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnOverlayEntrarTapped" />
-                                </Border.GestureRecognizers>
-                                <Label Text="Entrar" TextColor="#14161E" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
-                            </Border>
                             <Border
                                 BackgroundColor="#2A2E3C"
                                 StrokeShape="RoundRectangle 12"

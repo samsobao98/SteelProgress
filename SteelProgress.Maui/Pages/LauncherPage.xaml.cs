@@ -11,7 +11,7 @@ public partial class LauncherPage : ContentPage
 {
     private readonly LauncherViewModel _vm;
     private bool _hasLoaded;
-    private bool _orbsStarted;
+    private bool _isEntering;
 
     // ── Color picker ────────────────────────────────────────────────────
     private readonly Dictionary<string, (Border dot, Border halo)> _colorDots = new();
@@ -23,11 +23,6 @@ public partial class LauncherPage : ContentPage
     // ── Floating labels ────────────────────────────────────────────────
     private bool _floatingLabelSetup;
     private string _lastInitial = "?";
-
-    // ── Carousel ────────────────────────────────────────────────────────
-    private int _carouselIndex;
-    private readonly List<View> _carouselCards = new();
-    private bool _isCarouselAnimating;
 
     // ── Overlay edit ─────────────────────────────────────────────────────
     private readonly Dictionary<string, (Border dot, Border halo)> _overlayColorDots = new();
@@ -52,7 +47,7 @@ public partial class LauncherPage : ContentPage
         ConfirmDeleteCommand = new Command<UserProfile>(async p => await ConfirmAndDeleteAsync(p));
         vm.PropertyChanged += OnViewModelPropertyChanged;
         vm.Profiles.CollectionChanged += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(() => { if (!_vm.IsCreating) BuildCarousel(); });
+            MainThread.BeginInvokeOnMainThread(() => { if (!_vm.IsCreating) BuildProfileList(); });
     }
 
     protected override async void OnAppearing()
@@ -60,15 +55,6 @@ public partial class LauncherPage : ContentPage
         base.OnAppearing();
         if (_hasLoaded) return;
         _hasLoaded = true;
-
-        if (!_orbsStarted)
-        {
-            _orbsStarted = true;
-            StartOrbAnimations();
-        }
-
-        // Logo starts small for spring bounce
-        LogoImage.Scale = 0.5;
 
         var app = (App)Application.Current!;
         await _vm.LoadAsync(app.MigrationTask);
@@ -78,68 +64,27 @@ public partial class LauncherPage : ContentPage
         try
         {
             if (!_vm.IsCreating && _vm.HasProfiles)
-                BuildCarousel();
+                BuildProfileList();
 
-            // Header section fades + slides in
+            // Entrada tranquila: cabecera, título y lista aparecen uno tras otro
+            ProfilesSection.TranslationY = 12;
+            await HeaderSection.FadeToAsync(1, 220, Easing.CubicOut);
+            await SubtitleLabel.FadeToAsync(1, 220, Easing.CubicOut);
             await Task.WhenAll(
-                HeaderSection.FadeToAsync(1, 400, Easing.CubicOut),
-                HeaderSection.TranslateToAsync(0, 0, 500, Easing.CubicOut)
+                ProfilesSection.FadeToAsync(1, 260, Easing.CubicOut),
+                ProfilesSection.TranslateToAsync(0, 0, 260, Easing.CubicOut)
             );
-
-            // Logo spring bounce
-            await LogoImage.ScaleToAsync(1.18, 320, Easing.CubicOut);
-            await LogoImage.ScaleToAsync(0.94, 120, Easing.CubicIn);
-            await LogoImage.ScaleToAsync(1.0, 100, Easing.CubicOut);
-
-            // Start aura loop after bounce settles
-            _ = LogoAuraLoop();
-
-            await SubtitleLabel.FadeToAsync(1, 400, Easing.CubicOut);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"LauncherPage.OnAppearing: {ex}");
 
-            // La cabecera se anima desde Opacity=0; si el fallo llega antes de que
-            // termine, hay que dejarla visible o la pantalla se queda en blanco.
+            // Todo se anima desde Opacity=0; si el fallo llega antes de que
+            // termine, hay que dejarlo visible o la pantalla se queda en blanco.
             HeaderSection.Opacity = 1;
-            HeaderSection.TranslationY = 0;
-            LogoImage.Scale = 1.0;
             SubtitleLabel.Opacity = 1;
-        }
-    }
-
-    // ── Logo aura ────────────────────────────────────────────────────────
-
-    private async Task LogoAuraLoop()
-    {
-        while (true)
-        {
-            LogoAura.Scale = 1.0;
-            LogoAura.Opacity = 0.15;
-            await Task.WhenAll(
-                LogoAura.ScaleToAsync(2.8, 2500, Easing.CubicOut),
-                LogoAura.FadeToAsync(0, 2500, Easing.CubicOut)
-            );
-            await Task.Delay(1200);
-        }
-    }
-
-    // ── Background orbs ──────────────────────────────────────────────────
-
-    private void StartOrbAnimations()
-    {
-        _ = AnimateOrb(Orb1,  25,  35, 9000);
-        _ = AnimateOrb(Orb2, -20, -28, 11500);
-        _ = AnimateOrb(Orb3,  40, -20, 7800);
-    }
-
-    private static async Task AnimateOrb(View orb, double dx, double dy, int durationMs)
-    {
-        while (true)
-        {
-            await orb.TranslateToAsync(dx, dy, (uint)durationMs, Easing.SinInOut);
-            await orb.TranslateToAsync(0, 0, (uint)durationMs, Easing.SinInOut);
+            ProfilesSection.Opacity = 1;
+            ProfilesSection.TranslationY = 0;
         }
     }
 
@@ -405,7 +350,7 @@ public partial class LauncherPage : ContentPage
         }
         else if (e.PropertyName == nameof(LauncherViewModel.IsCreating) && !_vm.IsCreating && _vm.HasProfiles)
         {
-            MainThread.BeginInvokeOnMainThread(() => BuildCarousel());
+            MainThread.BeginInvokeOnMainThread(() => BuildProfileList());
         }
         else if (e.PropertyName == nameof(LauncherViewModel.SelectedColor)
                  && _vm.SelectedColor != _currentSelectedColor)
@@ -438,139 +383,136 @@ public partial class LauncherPage : ContentPage
         AvatarInitialLabel.Scale = 1.0;
     }
 
-    // ── Carousel ──────────────────────────────────────────────────────────
+    // ── Lista de perfiles ─────────────────────────────────────────────────
 
-    private void BuildCarousel()
+    private void BuildProfileList()
     {
-        CarouselContainer.Children.Clear();
-        _carouselCards.Clear();
-        _isCarouselAnimating = false;
-        _carouselIndex = Math.Clamp(_carouselIndex, 0, Math.Max(0, _vm.Profiles.Count - 1));
-
-        for (int i = 0; i < _vm.Profiles.Count; i++)
-        {
-            int idx = i;
-            var card = BuildProfileCard(_vm.Profiles[i], () => OnCarouselCardTapped(idx));
-            _carouselCards.Add(card);
-            CarouselContainer.Children.Add(card);
-        }
-
-        SyncCarouselPositions();
+        ProfileList.Children.Clear();
+        foreach (var profile in _vm.Profiles)
+            ProfileList.Children.Add(BuildProfileRow(profile));
     }
 
-    private View BuildProfileCard(UserProfile profile, Action onTap)
+    // Fila: avatar, nombre, una línea de contexto y ⋯. Tocar la fila entra; ⋯ abre editar/eliminar.
+    private View BuildProfileRow(UserProfile profile)
     {
-        var tap = new TapGestureRecognizer();
-        tap.Tapped += (_, _) => onTap();
-
-        var initial = new Label
-        {
-            Text = profile.Name.Length > 0
-                ? profile.Name.TrimStart()[0].ToString().ToUpperInvariant()
-                : "?",
-            TextColor = Color.FromArgb("#14161E"),
-            FontSize = 40,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center
-        };
-
         var avatar = new Border
         {
             BackgroundColor = Color.FromArgb(profile.AvatarColor),
-            WidthRequest = 110,
-            HeightRequest = 110,
+            WidthRequest = 44,
+            HeightRequest = 44,
             StrokeThickness = 0,
-            StrokeShape = new RoundRectangle { CornerRadius = 55 },
-            Content = initial,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var avatarGrid = new Grid
-        {
-            WidthRequest = 110,
-            HeightRequest = 110,
-            HorizontalOptions = LayoutOptions.Center
-        };
-        avatarGrid.Add(avatar);
-
-        var name = new Label
-        {
-            Text = profile.Name,
-            TextColor = Color.FromArgb("#E8EAF2"),
-            FontSize = 15,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalTextAlignment = TextAlignment.Center,
-            MaxLines = 1,
-            LineBreakMode = LineBreakMode.TailTruncation,
-            Margin = new Thickness(0, 10, 0, 0)
-        };
-
-        var card = new VerticalStackLayout
-        {
-            HorizontalOptions = LayoutOptions.Center,
+            StrokeShape = new RoundRectangle { CornerRadius = 22 },
             VerticalOptions = LayoutOptions.Center,
-            WidthRequest = 130,
-            Spacing = 0,
-            Children = { avatarGrid, name }
+            Content = new Label
+            {
+                Text = InitialOf(profile.Name),
+                TextColor = (Color)Resources["SpOnAccent"],
+                FontFamily = "SpaceGroteskBold",
+                FontSize = 18,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            }
         };
-        card.GestureRecognizers.Add(tap);
-        return card;
-    }
 
-    private void SyncCarouselPositions()
-    {
-        for (int i = 0; i < _carouselCards.Count; i++)
+        var text = new VerticalStackLayout
         {
-            var (tx, scale, opacity) = GetCardTransform(i - _carouselIndex);
-            var card = _carouselCards[i];
-            card.TranslationX = tx;
-            card.Scale = scale;
-            card.Opacity = opacity;
-            card.ZIndex = i == _carouselIndex ? 10 : 10 - Math.Abs(i - _carouselIndex);
-        }
-    }
-
-    private async Task AnimateCarouselTo(int newIndex)
-    {
-        if (_isCarouselAnimating) return;
-        _isCarouselAnimating = true;
-        _carouselIndex = newIndex;
-
-        // Update ZIndex before animation so center card renders on top
-        for (int i = 0; i < _carouselCards.Count; i++)
-            _carouselCards[i].ZIndex = i == _carouselIndex ? 10 : 10 - Math.Abs(i - _carouselIndex);
-
-        var tasks = new List<Task>();
-        for (int i = 0; i < _carouselCards.Count; i++)
-        {
-            var (tx, scale, opacity) = GetCardTransform(i - _carouselIndex);
-            var card = _carouselCards[i];
-            tasks.Add(card.TranslateToAsync(tx, 0, 300, Easing.CubicOut));
-            tasks.Add(card.ScaleToAsync(scale, 300, Easing.CubicOut));
-            tasks.Add(card.FadeToAsync(opacity, 300, Easing.CubicOut));
-        }
-        await Task.WhenAll(tasks);
-
-        _isCarouselAnimating = false;
-    }
-
-    private static (double tx, double scale, double opacity) GetCardTransform(int distance)
-    {
-        return Math.Abs(distance) switch
-        {
-            0 => (0,    1.00, 1.0),
-            1 => (Math.Sign(distance) * 118.0, 0.75, 0.60),
-            _ => (Math.Sign(distance) * 230.0, 0.55, 0.0)
+            Spacing = 2,
+            VerticalOptions = LayoutOptions.Center,
+            Children =
+            {
+                new Label
+                {
+                    Text = profile.Name,
+                    Style = (Style)Resources["SpHeading"],
+                    MaxLines = 1,
+                    LineBreakMode = LineBreakMode.TailTruncation
+                },
+                new Label
+                {
+                    Text = _vm.SummaryOf(profile),
+                    Style = (Style)Resources["SpSecondary"],
+                    MaxLines = 1,
+                    LineBreakMode = LineBreakMode.TailTruncation
+                }
+            }
         };
+
+        // ⋯ con su propia zona táctil de 48 dp: no debe disparar el toque de la fila
+        var more = new Grid
+        {
+            WidthRequest = 48,
+            HeightRequest = 48,
+            VerticalOptions = LayoutOptions.Center,
+            Children =
+            {
+                new Label
+                {
+                    Text = "⋯",
+                    FontSize = 22,
+                    TextColor = (Color)Resources["SpText3"],
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                }
+            }
+        };
+        SemanticProperties.SetDescription(more, $"Opciones de {profile.Name}");
+        var moreTap = new TapGestureRecognizer();
+        moreTap.Tapped += (_, _) => _ = ShowProfileOverlay(profile);
+        more.GestureRecognizers.Add(moreTap);
+
+        // Zona de «entrar»: avatar y textos, hermana de ⋯ y no madre (en Android un toque
+        // en un hijo también puede llegar a un reconocedor del padre). El fondo transparente
+        // hace que reciba toques también en el hueco entre avatar y textos.
+        var enter = new Grid
+        {
+            ColumnDefinitions = { new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Star) },
+            ColumnSpacing = 14,
+            BackgroundColor = Colors.Transparent
+        };
+        enter.Add(avatar, 0);
+        enter.Add(text, 1);
+
+        var content = new Grid
+        {
+            ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
+            ColumnSpacing = 4
+        };
+        content.Add(enter, 0);
+        content.Add(more, 1);
+
+        var row = new Border
+        {
+            Style = (Style)Resources["SpCardStyle"],
+            Padding = new Thickness(14, 10, 4, 10),
+            MinimumHeightRequest = 68,
+            Content = content
+        };
+
+        SemanticProperties.SetDescription(enter, $"Entrar como {profile.Name}");
+        var enterTap = new TapGestureRecognizer();
+        enterTap.Tapped += async (_, _) => await EnterProfileAsync(row, profile);
+        enter.GestureRecognizers.Add(enterTap);
+        return row;
     }
 
-    private void OnCarouselCardTapped(int index)
+    private static string InitialOf(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name.TrimStart()[0].ToString().ToUpperInvariant();
+
+    // Un toque corto en la fila y se entra; la app aparece con su propio fundido (ProfileChosen).
+    private async Task EnterProfileAsync(View row, UserProfile profile)
     {
-        if (index == _carouselIndex)
-            _ = ShowProfileOverlay(_vm.Profiles[index]);
-        else
-            _ = AnimateCarouselTo(index);
+        if (_isEntering) return;
+        _isEntering = true;
+        try
+        {
+            await row.ScaleToAsync(0.97, 90, Easing.CubicOut);
+            await row.ScaleToAsync(1.0, 120, Easing.CubicOut);
+            _vm.SelectProfileCommand.Execute(profile);
+        }
+        finally
+        {
+            _isEntering = false;
+        }
     }
 
     // ── Profile overlay ───────────────────────────────────────────────────
@@ -631,23 +573,6 @@ public partial class LauncherPage : ContentPage
         => _ = HideProfileOverlay();
 
     private void OnOverlayPanelTapped(object? sender, TappedEventArgs e) { }
-
-    private async void OnOverlayEntrarTapped(object? sender, TappedEventArgs e)
-    {
-        if (_overlayProfile is null) return;
-        var profile = _overlayProfile;
-        _overlayProfile = null;
-
-        // Panel zooms out and dissolves while backdrop seals to solid dark
-        await Task.WhenAll(
-            OverlayBackdrop.FadeToAsync(1.0, 340, Easing.CubicIn),
-            OverlayPanel.ScaleToAsync(1.10, 380, Easing.CubicOut),
-            OverlayPanel.FadeToAsync(0, 300, Easing.CubicIn)
-        );
-        ProfileOverlay.IsVisible = false;
-
-        _vm.SelectProfileCommand.Execute(profile);
-    }
 
     private async void OnOverlayEliminarTapped(object? sender, TappedEventArgs e)
     {
@@ -799,7 +724,7 @@ public partial class LauncherPage : ContentPage
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            BuildCarousel();
+            BuildProfileList();
 
             if (_overlayProfile is not null)
             {

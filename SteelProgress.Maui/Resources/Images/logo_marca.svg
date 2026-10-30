@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- El dibujo del icono («Palotes · barra») para usar dentro de la app, sin fondo.
+     Mismo dibujo que Resources/AppIcon/appiconfg.svg, recortado a su contorno. -->
+<svg width="64" height="64" viewBox="14 14 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(54 54) scale(0.8) translate(-54 -54)">
+        <rect x="36" y="34" width="6" height="40" rx="3" fill="#AEB5C8" />
+        <rect x="46" y="34" width="6" height="40" rx="3" fill="#AEB5C8" />
+        <rect x="56" y="34" width="6" height="40" rx="3" fill="#AEB5C8" />
+        <rect x="66" y="34" width="6" height="40" rx="3" fill="#AEB5C8" />
+        <path d="M24 73 L86 35" stroke="#A6E3A1" stroke-width="4" stroke-linecap="round" />
+        <rect x="23" y="62" width="6" height="20" rx="2" fill="#A6E3A1" transform="rotate(-31.5 26 72)" />
+        <rect x="81" y="26" width="6" height="20" rx="2" fill="#A6E3A1" transform="rotate(-31.5 84 36)" />
+    </g>
+</svg>
