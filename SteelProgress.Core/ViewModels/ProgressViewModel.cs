@@ -107,6 +107,10 @@ public partial class ProgressViewModel : ObservableObject
     public bool HasMonthDelta => MonthDeltaText.Length > 0;
     partial void OnMonthDeltaTextChanged(string value) => OnPropertyChanged(nameof(HasMonthDelta));
 
+    /// <summary>Series por grupo muscular esta semana (y la media de las anteriores).</summary>
+    public ObservableCollection<MuscleVolumeItem> MuscleVolumes { get; } = new();
+    public bool HasMuscleVolumes => MuscleVolumes.Count > 0;
+
     public ObservableCollection<RecordItem> RecentRecords { get; } = new();
     public bool HasRecords => RecentRecords.Count > 0;
 
@@ -128,6 +132,12 @@ public partial class ProgressViewModel : ObservableObject
         Calendar = TrainingStats.Calendar(_log.Sets, today, CalendarWeeks);
         var trainedDays = Calendar.Count(d => d.Level > 0);
         CalendarCaption = trainedDays == 1 ? "1 día entrenado" : $"{trainedDays} días entrenados";
+
+        MuscleVolumes.Clear();
+        var volumes = TrainingStats.SetsByMuscle(_log.Sets, today);
+        var top = volumes.Count == 0 ? 0 : volumes.Max(v => Math.Max(v.ThisWeek, v.PreviousAverage));
+        foreach (var v in volumes) MuscleVolumes.Add(new MuscleVolumeItem(v, top));
+        OnPropertyChanged(nameof(HasMuscleVolumes));
 
         RecentRecords.Clear();
         foreach (var r in _records.Take(5))
@@ -393,6 +403,26 @@ public class RecordItem
         RecordKind.Reps => "★ Récord de reps",
         _ => ""
     };
+}
+
+/// <summary>Una fila de «Series por músculo»: «Pecho · 12 · media 9,5» y la barra (respecto al mayor).</summary>
+public sealed class MuscleVolumeItem
+{
+    private static readonly System.Globalization.CultureInfo Es = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
+
+    public MuscleVolumeItem(MuscleVolume v, double top)
+    {
+        Muscle = v.Muscle;
+        ThisWeek = v.ThisWeek.ToString(Es);
+        AverageText = $"media {Math.Round(v.PreviousAverage, 1).ToString("0.#", Es)}";
+        Fill = top <= 0 ? 0 : v.ThisWeek / top;
+    }
+
+    public string Muscle { get; }
+    public string ThisWeek { get; }
+    public string AverageText { get; }
+    /// <summary>De 0 a 1, para la barra.</summary>
+    public double Fill { get; }
 }
 
 /// <summary>Un mes del historial: «Octubre 2026 · 14 sesiones» y sus sesiones.</summary>

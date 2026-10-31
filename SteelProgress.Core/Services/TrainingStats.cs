@@ -13,6 +13,9 @@ public sealed record WeekDayCell(string Letter, DateTime Date, bool Done, bool I
 /// <summary>Un día del calendario de constancia (nivel 0 = sin entreno, 4 = el día con más volumen).</summary>
 public sealed record CalendarDay(DateTime Date, int Level, bool IsToday, bool IsFuture);
 
+/// <summary>Series de trabajo de un grupo muscular: esta semana y la media de las anteriores.</summary>
+public sealed record MuscleVolume(string Muscle, int ThisWeek, double PreviousAverage);
+
 /// <summary>Una sesión en la gráfica de un ejercicio: el peso máximo y el mejor 1RM estimado.</summary>
 public sealed record ExercisePoint(DateTime Date, double MaxWeight, double BestE1rm);
 
@@ -98,6 +101,34 @@ public static class TrainingStats
             .Select(i => start.AddDays(i))
             .Select((d, i) => new WeekDayCell(Letters[i], d, trained.Contains(d), d == today.Date, d > today.Date))
             .ToList();
+    }
+
+    /// <summary>Semanas anteriores con las que se compara el volumen por músculo.</summary>
+    public const int MuscleCompareWeeks = 4;
+
+    // Grupos que no son un músculo: no se cuentan
+    private static readonly HashSet<string> NotAMuscle = new(StringComparer.CurrentCultureIgnoreCase) { "Cardio", "Cuerpo completo" };
+
+    /// <summary>
+    /// Series de trabajo por grupo muscular esta semana (lunes a domingo) y la media de las
+    /// <see cref="MuscleCompareWeeks"/> anteriores. Cada serie cuenta 1 para el músculo principal del
+    /// ejercicio; los secundarios no suman. Dato contado, sin recomendaciones.
+    /// </summary>
+    public static List<MuscleVolume> SetsByMuscle(IEnumerable<LoggedSet> sets, DateTime today)
+    {
+        var weekStart = RoutineSchedule.WeekStart(today);
+        var from = weekStart.AddDays(-7 * MuscleCompareWeeks);
+        var counted = sets.Where(s => s.Date >= from && !string.IsNullOrWhiteSpace(s.MuscleGroup) && !NotAMuscle.Contains(s.MuscleGroup!))
+            .GroupBy(s => s.MuscleGroup!.Trim())
+            .Select(g => new MuscleVolume(g.Key,
+                g.Count(s => s.Date >= weekStart),
+                g.Count(s => s.Date < weekStart) / (double)MuscleCompareWeeks))
+            .Where(m => m.ThisWeek > 0 || m.PreviousAverage > 0)
+            .OrderByDescending(m => m.ThisWeek)
+            .ThenByDescending(m => m.PreviousAverage)
+            .ThenBy(m => m.Muscle, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        return counted;
     }
 
     /// <summary>Sesiones de esta semana (desde el lunes).</summary>

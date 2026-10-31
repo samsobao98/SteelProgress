@@ -451,3 +451,7 @@ Prueba de carga (30 clientes, 3 días por semana, 2 años: 9.360 sesiones): 10,8
 - **Compactar** la base de datos (VACUUM) tras borrar un cliente o un perfil: SQLite no encoge el archivo solo.
 
 Datos de prueba: Álex tiene ahora 8 clientes activos (Raúl, Sara y Tomás nuevos), uno archivado (Pablo) y dos entrenos de esta semana enviados por Felipe.
+
+## Series por músculo (2026-10-31)
+
+Tarjeta en Progreso › Resumen (de uno mismo o del cliente activo): series de trabajo de esta semana por grupo muscular y la media de las 4 semanas anteriores (`TrainingStats.SetsByMuscle`). Cada serie cuenta 1 para el músculo principal del ejercicio; los secundarios no suman y «Cardio» y «Cuerpo completo» no cuentan. Es dato contado, sin recomendaciones: la referencia del ACSM (unas 10 series por músculo y semana para hipertrofia) queda pendiente de confirmar en el artículo original.

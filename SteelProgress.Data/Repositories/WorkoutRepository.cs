@@ -210,8 +210,8 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
     public async Task<TrainingLog> GetTrainingLogAsync()
     {
         var sets = await _context.WorkoutSessions
-            .SelectMany(ws => ws.Exercises, (ws, we) => new { SessionId = ws.Id, ws.Date, we.ExerciseId, we.Exercise!.Name, we.Sets })
-            .SelectMany(x => x.Sets, (x, set) => new { x.SessionId, x.Date, x.ExerciseId, x.Name, set.Id, set.Weight, set.Reps, set.IsWarmup, set.Notes })
+            .SelectMany(ws => ws.Exercises, (ws, we) => new { SessionId = ws.Id, ws.Date, we.ExerciseId, we.Exercise!.Name, we.Exercise.MuscleGroup, we.Sets })
+            .SelectMany(x => x.Sets, (x, set) => new { x.SessionId, x.Date, x.ExerciseId, x.Name, x.MuscleGroup, set.Id, set.Weight, set.Reps, set.IsWarmup, set.Notes })
             .Where(x => !x.IsWarmup)
             .ToListAsync();
 
@@ -233,7 +233,7 @@ public class WorkoutRepository //Busca RoutineDay, crea una WorkoutSession, copi
                     s.IsReceived ? $"Enviado por {s.ClientName}" : s.IsInPerson && s.ClientName is not null ? "Contigo" : null))
                 .ToList(),
             sets.OrderBy(x => x.Date).ThenBy(x => x.Id)
-                .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps, x.Notes))
+                .Select(x => new LoggedSet(x.SessionId, x.Date, x.ExerciseId, x.Name ?? "Ejercicio", x.Id, x.Weight, x.Reps, x.Notes, x.MuscleGroup))
                 .ToList());
     }
 
@@ -269,7 +269,7 @@ public sealed record LoggedSession(int Id, DateTime Date, int? DurationMinutes, 
     int RoutineDayId, string DayName, string RoutineName, string? Origin = null);
 
 public sealed record LoggedSet(int SessionId, DateTime Date, int ExerciseId, string ExerciseName, int SetId, double Weight, int Reps,
-    string? Notes = null);
+    string? Notes = null, string? MuscleGroup = null);
 
 // Lo que se sabe de un ejercicio antes de la sesión actual: las series de la última vez
 // y, para los récords, el máximo de repeticiones que se ha hecho con cada peso

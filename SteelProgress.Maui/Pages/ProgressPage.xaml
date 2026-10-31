@@ -251,6 +251,31 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- Series por grupo muscular: esta semana frente a la media de las 4 anteriores -->
+                    <Border Style="{StaticResource SpCardStyle}" Padding="16" Margin="0,12,0,0" IsVisible="{Binding HasMuscleVolumes}">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Series por músculo" Style="{StaticResource SpHeading}" FontSize="15" />
+                                <Label Grid.Column="1" Text="esta semana" Style="{StaticResource StatCaption}" VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MuscleVolumes}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="96,*,32,72" ColumnSpacing="10">
+                                            <Label Text="{Binding Muscle}" FontSize="13" TextColor="{StaticResource SpText}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                            <ProgressBar Grid.Column="1" Progress="{Binding Fill}" ProgressColor="{StaticResource SpSteel1}" VerticalOptions="Center" />
+                                            <Label Grid.Column="2" Text="{Binding ThisWeek}" FontFamily="SpaceGroteskBold" FontSize="14" TextColor="{StaticResource SpText}"
+                                                   HorizontalTextAlignment="End" VerticalOptions="Center" />
+                                            <Label Grid.Column="3" Text="{Binding AverageText}" Style="{StaticResource StatCaption}" FontSize="11" VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label Text="Series de trabajo de esta semana para el músculo principal de cada ejercicio (sin calentamientos; los secundarios no suman). «Media»: las 4 semanas anteriores."
+                                   Style="{StaticResource StatCaption}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+
                     <!-- Récords recientes -->
                     <Label Text="Récords recientes" Style="{StaticResource SpOverline}" Margin="0,22,0,8" />
                     <Label Text="Aún no hay récords: llegarán cuando superes lo que ya has hecho en un ejercicio."
