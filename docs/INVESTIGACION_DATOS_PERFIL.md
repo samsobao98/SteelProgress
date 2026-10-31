@@ -72,7 +72,13 @@ Cada dato nuevo tiene que pasar además el filtro de comodidad: si apuntarlo cue
   - **Potencia:** 30–70 % del 1RM, moviendo rápido.
   - **Para todos:** cada grupo muscular al menos 2 veces por semana. La constancia importa más que la programación perfecta.
 - La app ya sabe calcular **series por grupo muscular y semana** a partir de lo entrenado (nivel 2). Ponerlo al lado de «referencia ACSM: ~10» es información con fuente, no una orden. **El entrenador decide.**
-- Esas cifras las he sacado de la nota de prensa del ACSM y de la cobertura en medios. **Antes de enseñarlas en la app hay que comprobarlas en el artículo original** (*Medicine & Science in Sports & Exercise*, 2026).
+- **Comprobado en el artículo original (31/10/2026)**, texto completo en [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823) (Currier et al., *Med Sci Sports Exerc* 2026;58(4):851–872):
+  - Masa muscular: «higher volume (≥10 sets/muscle group/wk)»; tabla 6: «Volume: ≥10 sets/wk (dose-response)»; y «diminishing returns beyond … ~18–20 weekly sets for hypertrophy».
+  - Fuerza: «≥80% 1RM» y «2–3 sets/session»; frecuencia «≥2 sessions/wk».
+  - Potencia: «30%–70% 1RM».
+  - Recomendación principal: «at least twice weekly, with all major muscle groups being engaged».
+  - Cerca del fallo: ir hasta el fallo no mejora más; «a target of 2–3 repetitions in reserve (RIR)», aunque «there is insufficient evidence to quantify exact RIR».
+- En la app (Progreso › «Series por músculo») se enseña la de masa muscular, como información y con su fuente.
 - Las guías son para adultos sanos en general. El propio ACSM dice que deportistas y personas muy entrenadas necesitan programas específicos. Así tiene que constar junto a la referencia.
 
 ### Días disponibles por semana → **Sí, en la ficha de cliente**
@@ -139,13 +145,13 @@ Cada dato nuevo tiene que pasar además el filtro de comodidad: si apuntarlo cue
 | 3 | Limitaciones del cliente (zona, texto, pautas de quién, fecha) + aviso al entrenar + casilla de consentimiento | 1 | Medio | Lo más valioso para un entrenador; hecho con cuidado |
 | 4 | Apto (PAR-Q+ / informe) con fecha y aviso a los 12 meses en «Pendiente» | 1 | Pequeño | Buena práctica profesional, casi gratis |
 | 5 | Peso corporal con media semanal o tendencia, y fuerza relativa de la persona | 1–2 | Medio | Útil en personal y en clientes |
-| 6 | Objetivo como lista + series por grupo muscular y semana, con la referencia ACSM 2026 | 2 | Medio | Comprobar antes las cifras en el artículo original |
+| 6 | Objetivo como lista + series por grupo muscular y semana, con la referencia ACSM 2026 | 2 | Medio | Hecho: series por músculo con la referencia (cifras comprobadas). El objetivo como lista, pendiente |
 | 7 | Mediciones (perímetros, % de grasa) con método | 1 | Medio | Solo si se pide; poco uso diario |
 | — | Altura, IMC, rankings entre clientes, tablas de nivel, consejos automáticos | — | — | **No**: poco fiables o fuera de lo que debe hacer la app |
 
 ## Lo que no he podido confirmar
 
-- Las cifras exactas de la guía ACSM 2026: las he visto en la nota de prensa y en medios, no en el artículo.
+- ~~Las cifras exactas de la guía ACSM 2026~~: comprobadas en el artículo original el 31/10/2026 (ver arriba).
 - Los detalles de la revisión 1 de MDCG 2019-11, solo resumida por terceros.
 - Qué campos exactos guardan Trainerize, TrueCoach o Everfit en la ficha de cliente: su documentación no salió en las búsquedas. Las plantillas de alta de cliente habituales piden peso, altura, % de grasa, perímetros, lesiones y cirugías, medicación y PAR-Q+.
 - El RGPD aplicado a entrenadores en concreto: solo he encontrado fuentes generales sobre apps de fitness.
@@ -161,7 +167,7 @@ Cada dato nuevo tiene que pasar además el filtro de comodidad: si apuntarlo cue
 - DOTS / Wilks / IPF GL (divulgación, no revisado) — [comparativa](https://fitnessvolt.com/rpe-training/compare/wilks-vs-dots/)
 
 **Guías de entrenamiento**
-- ACSM (2026). *Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults* — [ACSM](https://acsm.org/resistance-training-guidelines-update-2026/), [nota de prensa](https://www.newswise.com/articles/acsm-unveils-landmark-2026-resistance-training-guidelines-first-update-in-17-years), [ScienceDaily](https://www.sciencedaily.com/releases/2026/03/260319074552.htm)
+- ACSM (2026). *Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults* — [ACSM](https://acsm.org/resistance-training-guidelines-update-2026/), [nota de prensa](https://www.newswise.com/articles/acsm-unveils-landmark-2026-resistance-training-guidelines-first-update-in-17-years), [ScienceDaily](https://www.sciencedaily.com/releases/2026/03/260319074552.htm), [texto completo en PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823)
 
 **Peso y composición corporal**
 - *The Hacker's Diet*, media móvil exponencial — [fourmilab](https://fourmilab.ch/hackdiet/www/subsubsection1_2_4_0_4_4.html)

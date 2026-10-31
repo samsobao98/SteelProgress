@@ -273,6 +273,14 @@
                             </VerticalStackLayout>
                             <Label Text="Series de trabajo de esta semana para el músculo principal de cada ejercicio (sin calentamientos; los secundarios no suman). «Media»: las 4 semanas anteriores."
                                    Style="{StaticResource StatCaption}" FontSize="12" />
+                            <!-- Referencia oficial, como información: comprobada en el artículo original (docs/INVESTIGACION_DATOS_PERFIL.md) -->
+                            <Border BackgroundColor="{StaticResource SpBg}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="12,10">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Referencia para adultos sanos que buscan ganar masa muscular: 10 series o más por músculo a la semana; a partir de unas 18–20, cada serie extra aporta cada vez menos."
+                                           FontSize="12" TextColor="{StaticResource SpText2}" />
+                                    <Label Text="ACSM, posicionamiento oficial 2026 (Med Sci Sports Exerc 58:851–872)" Style="{StaticResource StatCaption}" FontSize="11" />
+                                </VerticalStackLayout>
+                            </Border>
                         </VerticalStackLayout>
                     </Border>
 
